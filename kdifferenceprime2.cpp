@@ -3,7 +3,6 @@
    Orientador: Said Sadique Adi
    Ano: 2015
    FACOM: Mestrado em Ciência da Computação
-   versão: 0.1
 */
 #include <iostream>
 #include <string>
@@ -15,7 +14,7 @@ using namespace std;
 class KdifferenceInexactMatch2{
 
   private:
-    int L[M + 1][M + 1]; //melhorar depois, fazer alocamento dinâmico
+    int L[M][M];
     string a;
     string t;
     int k;
@@ -56,6 +55,14 @@ class KdifferenceInexactMatch2{
       return L[dToMatriz(d)][eToMatriz(e)];
     }
 
+    int getDimensaoD(){
+      return k + n + 3; //k+1, n+1, 1
+    }
+
+    int getDimensaoE(){
+      return k + 3; // k + 1, 2
+    }
+
   public:
     KdifferenceInexactMatch2(string a, string t, int k){
        this->a = a;
@@ -64,6 +71,18 @@ class KdifferenceInexactMatch2{
 
        this->m = a.length();
        this->n = t.length();
+
+/*
+       this->L = new int*[getDimensaoD()];
+       for (int j = 0; j = getDimensaoD(); ++j)
+          this->L[j] = new int[getDimensaoE()];
+          */
+    }
+
+    ~KdifferenceInexactMatch2(){
+       for (int i = 0; i < getDimensaoD(); ++i)
+         delete [] L[i];
+       delete [] L;
     }
     int executar();
     void escreverMatrizTela();
@@ -192,13 +211,16 @@ void KdifferenceInexactMatch2::acharResultado(){
 
 int KdifferenceInexactMatch2::executar(){
     int d,e, row;
-/*
+
+/* Esse algoritmo mais enchuto ainda não funcionou corretamente
 	for(d = -(k+1); d <= k+1; d++){
        setL(d, abs(d) - 2, abs(d) - 2);
        if(d < 0) setL(d, abs(d) - 1, abs(d) - 1);
        else      setL(d, abs(d) - 1, -1);
 	}
 */
+
+
 	for(d = 0; d <= n; d++)
         setL(d, - 1, -1);
 
@@ -227,19 +249,9 @@ int KdifferenceInexactMatch2::executar(){
 }
 
 int main(int argc, char** argv) {
-    string alpha, beta;
-    int k;
-
-    cout<<"**************************** K-DIFFERENCE PRIME 2 ******************************";
-
-	cout<<"Entre com o padrao (a)....: ";
- 	cin>>alpha;
-
- 	cout<<"Entre com o texto (t).....: ";
- 	cin>>beta;
-
- 	cout<<"Entre qtd mín. erros (k)..: ";
- 	cin>>k;
+    string alpha = argv[1];
+    string beta = argv[2];
+    int k = atoi(argv[3]);
 
 	int m = alpha.size();
     int linha;
@@ -247,15 +259,18 @@ int main(int argc, char** argv) {
 
     KdifferenceInexactMatch2* c;
 
-    for(int j = 0; j < (m - k) + 1; j++){ //aki o j está varrendo todo o padrão alpha
-       c = new KdifferenceInexactMatch2(alpha.substr(j), beta, k); //melhorar aki, diminuir o uso de memória
+  //  for(int j = 0; j < (m - k) + 1; j++){ //aki o j está varrendo todo o padrão alpha
+      // c = new KdifferenceInexactMatch2(alpha.substr(j), beta, k); //melhorar aki, diminuir o uso de memória
+       c = new KdifferenceInexactMatch2(alpha, beta, k);
        linha = c->executar();
        c->escreverMatrizTela();
-       if(linha > -1) //NO c++ a substr (indice, tamanho)
-           cout<<"\n Ocorrencia "<< ++ocr <<" em: "<< j <<", "<<j + linha<<", "<<alpha.substr(j, linha);
-   }
-   if(ocr == 0)
-      cout<<"\n Não foi encontrado nenhuma ocorrencia com pelo menos "<<k<<" diferenças";
+      // delete(c);
+   //    if(linha > -1) //NO c++ a substr (indice, tamanho)
+//           cout<<"\n Ocorrencia "<< ++ocr <<" em: "<< j <<", "<<j + linha<<", "<<alpha.substr(j, linha);
+  // }
+  // if(ocr == 0)
+  //    cout<<"\n Não foi encontrado nenhuma ocorrencia com pelo menos "<<k<<" diferenças";
+
 
 	return 0;
 }
