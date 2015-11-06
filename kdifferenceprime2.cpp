@@ -9,12 +9,11 @@
 #include <stdlib.h>
 using namespace std;
 
-#define M 100
 
 class KdifferenceInexactMatch2{
 
   private:
-    int L[M][M];
+    int **L;
     string a;
     string t;
     int k;
@@ -72,11 +71,11 @@ class KdifferenceInexactMatch2{
        this->m = a.length();
        this->n = t.length();
 
-/*
+
        this->L = new int*[getDimensaoD()];
-       for (int j = 0; j = getDimensaoD(); ++j)
+       for (int j = 0; j < getDimensaoD(); ++j)
           this->L[j] = new int[getDimensaoE()];
-          */
+
     }
 
     ~KdifferenceInexactMatch2(){
@@ -264,7 +263,7 @@ int main(int argc, char** argv) {
        c = new KdifferenceInexactMatch2(alpha, beta, k);
        linha = c->executar();
        c->escreverMatrizTela();
-      // delete(c);
+       delete(c);
    //    if(linha > -1) //NO c++ a substr (indice, tamanho)
 //           cout<<"\n Ocorrencia "<< ++ocr <<" em: "<< j <<", "<<j + linha<<", "<<alpha.substr(j, linha);
   // }
