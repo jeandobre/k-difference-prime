@@ -26,14 +26,17 @@ struct Prime{
 
 class KdifferenceInexactMatch1{
 
-  private:
+  protected:
     int **D;
     string a;
     string t;
     int k;
     int m, n;
+    int rowPrint;
+  public:
+    int linha; //linha que contém o menor valor >= k
 
-  private:
+  protected:
     int minimo(int, int);
 
   public:
@@ -48,6 +51,8 @@ class KdifferenceInexactMatch1{
        this->D = new int*[m + 1];
        for (int j = 0; j < m + 1; ++j)
           this->D[j] = new int[n];
+
+       this->rowPrint = m; //linha máxima de impressão
     }
     ~KdifferenceInexactMatch1(){
        for (int i = 0; i < m + 1; ++i)
@@ -56,7 +61,26 @@ class KdifferenceInexactMatch1{
     }
     void executar();
     void escreverMatrizTela();
-    int getLinhaMenorK();
+};
+
+class KdifferenceInexactMatch1Optizado: public KdifferenceInexactMatch1{
+
+   public:
+       KdifferenceInexactMatch1Optizado(string a, string t, int k):KdifferenceInexactMatch1(a,t,k){
+           this->a = a;
+           this->t = t;
+           this->k = k;
+
+           this->m = a.length();
+           this->n = t.length();
+
+           this->D = new int*[m + 1];
+           for (int j = 0; j < m + 1; ++j)
+              this->D[j] = new int[2];
+
+           this->rowPrint = 1;
+       }
+       void executar();
 };
 
 int KdifferenceInexactMatch1::minimo(int i, int l){
@@ -84,7 +108,7 @@ void KdifferenceInexactMatch1::escreverMatrizTela(){
 
 	cout<<"\n";
 
-	for(int i = 0; i <= m; i++){
+	for(int i = 0; i <= rowPrint; i++){
 
 		if(i == 0 ) cout<<"  ";
 		else cout<<a[i - 1]<<" ";
@@ -99,27 +123,50 @@ void KdifferenceInexactMatch1::escreverMatrizTela(){
 void KdifferenceInexactMatch1::executar(){
    for(int l = 0; l <= n; l++)
 	  D[0][l] = 0;
+   for(int i = 1; i <= m; i++)
+	  D[i][0] = i;
 
-	for(int i = 1; i <= m; i++)
-	   D[i][0] = i;
-
+    bool passou = true;
+    linha = -1;
 	for(int i = 1; i <= m; i++){
+        passou = true;
+        //aqui vai verificar se a linha que contem todos valores >= k já foi alcançada
 		for(int l = 1; l <= n; l++){
 			D[i][l] = minimo(i, l);
+			if(D[i][l] < k) passou = false;
 		}
+        if(passou){
+            linha = i;
+            break;
+        }
 	}
 }
 
-int KdifferenceInexactMatch1::getLinhaMenorK(){
-    int linha = -1;
-    for(int z = m; z >= 0; z--){
-        bool passou = true;
-        for(int x = 0; x < n; x++){
-           if(D[z][x] < k) passou = false;
-        }
-        if(passou) linha = z;
-    }
-    return linha;
+void KdifferenceInexactMatch1Optizado::executar(){
+   int l;
+   for(l = 0; l <= n; l++)
+	  D[0][l] = 0;
+
+   D[1][0] = 1;
+   bool passou = true;
+   linha = -1;
+
+   for(int i = 1; i <= m; i++){
+	 for(l = 1; l <= n; l++)
+        D[1][l] = minimo(i, l);
+
+     //aqui vai verificar se a linha que contem todos valores >= k já foi alcançada
+     //transporta os valores da linha 1 para 0
+     passou = true;
+	 for(l = 0; l <= n; l++){
+        if(D[1][l] < k) passou = false;
+        D[0][l] = D[1][l];
+     }
+     if(passou){
+        linha = i;
+        break;
+     }
+   }
 }
 
 int validarParametros(int argc, char** argv, Prime *prime){
@@ -168,7 +215,6 @@ int validarParametros(int argc, char** argv, Prime *prime){
    return cc;
 }
 
-
 int main(int argc, char** argv) {
 
    if (argc != 7 && argc != 8) {
@@ -187,18 +233,17 @@ int main(int argc, char** argv) {
      return 0;
    }
 
-   int linha;
    int ocr = 0;
 
    KdifferenceInexactMatch1* c;
 
-   for(int j = 0; j < (prime.m - prime.k) + 1; j++){ //aki o j está varrendo todo o padrão alpha
-       c = new KdifferenceInexactMatch1(prime.alpha.substr(j), prime.beta, prime.k); //melhorar aki, diminuir o uso de memória
+   for(int j = 0; j < (prime.m - prime.k) + 1; j++){
+       //TODO melhorar aki, diminuir o uso de memória
+       c = new KdifferenceInexactMatch1(prime.alpha.substr(j), prime.beta, prime.k);
        c->executar();
-       linha = c->getLinhaMenorK(); //retorna -1 se não encontrou
 
-       if(linha > -1){
-           cerr<<MSG_N_OCCR<<++ocr<<" em: "<<j<<", "<<j + linha<<" "<<prime.alpha.substr(j, linha)<<endl;
+       if(c->linha > -1){
+           cerr<<MSG_N_OCCR<<++ocr<<" em: "<<j<<", "<<j + c->linha<<" "<<prime.alpha.substr(j, c->linha)<<endl;
            if(prime.mostrarMatriz) c->escreverMatrizTela();
        }
        delete(c);
