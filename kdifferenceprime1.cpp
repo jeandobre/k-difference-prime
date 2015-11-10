@@ -16,22 +16,27 @@ using namespace std;
 #define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
 #define MSG_N_OCCR "\nOcorrencia "
 
-class Prime{
+class KdifferenceInexactMatch1;
+
+class KdifferencePrime{
 
     public:
-      string alpha,beta;
+      string alpha, beta;
       int k;
       int m;
       int n;
       int mostrarMatriz;
       int otimizado;
+      KdifferenceInexactMatch1 *c;
 
     public:
-       Prime(){
+      KdifferencePrime(){
          this->mostrarMatriz=0;
          this->otimizado=0;
       }
-};
+
+      void processar();
+} prime;
 
 //funções auxiliares
 int maior(int x, int b, int c){
@@ -40,7 +45,7 @@ int maior(int x, int b, int c){
   else return c;
 }
 
-int validarParametros(int argc, char** argv, Prime *prime){
+int validarParametros(int argc, char** argv){
    string argA[6] = {"-a", "-alpha", "-pattern", "-padrao", "-p", "-P"};
    string argB[6] = {"-b", "-beta", "-text", "-texto", "-t", "-T"};
    string argK[2] = {"-k", "-K"};
@@ -51,31 +56,31 @@ int validarParametros(int argc, char** argv, Prime *prime){
    for(int z = 1; z < argc; z++){
       if(strcmp(argv[z], "-sm") == 0){
         if(argc == 7) return 0;
-        prime->mostrarMatriz=1;
+        prime.mostrarMatriz=1;
         continue;
       }
 
       if(strcmp(argv[z], "-opt") == 0){
         if(argc == 7) return 0;
-        prime->otimizado=1;
+        prime.otimizado=1;
         continue;
       }
 
       for(int w = 0; w < 6; w++){
         if(!temA && argA[w].compare(argv[z]) == 0){
-            prime->alpha = argv[z + 1];
+            prime.alpha = argv[z + 1];
             temA = 1;
             continue;
         }
         else if(!temB && argB[w].compare(argv[z]) == 0){
-            prime->beta = argv[z + 1];
+            prime.beta = argv[z + 1];
             temB = 1;
             continue;
         }
         else if(w < 2 && !temK && argK[w].compare(argv[z]) == 0){
             try{
-              prime->k = atoi(argv[z + 1]);
-              if(prime->k > 0) temK = 1;
+              prime.k = atoi(argv[z + 1]);
+              if(prime.k > 0) temK = 1;
               continue;
             }catch(int e){
               return 0;
@@ -84,21 +89,16 @@ int validarParametros(int argc, char** argv, Prime *prime){
       }
    }
    int cc = temA + temB + temK;
-   if(cc == 3){
-     prime->m = prime->alpha.size();
-     prime->n = prime->beta.size();
-   }
 
    return cc;
 }
-
 
 class KdifferenceInexactMatch1{
 
   protected:
     int **D;
-    string a;
     string t;
+    string a;
     int k;
     int m, n;
     int rowPrint;
@@ -118,6 +118,7 @@ class KdifferenceInexactMatch1{
 
     virtual void executar(){};
     void escreverMatrizTela() const;
+    virtual void setA(string){};
 };
 
 class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
@@ -136,6 +137,17 @@ class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
     }
 
     void executar();
+
+    void setA(string a){
+       int mm = this->a.size();
+       int mmm = a.size();
+
+       while(mm > mmm)
+          delete [] D[mm--];
+
+      this->a = a;
+      this->m = mmm;
+    }
 };
 
 class KdifferenceInexactMatch1Optimizado: public KdifferenceInexactMatch1{
@@ -156,6 +168,11 @@ class KdifferenceInexactMatch1Optimizado: public KdifferenceInexactMatch1{
     }
 
    void executar();
+
+   void setA(string a){
+      this->a = a;
+      this->m = a.size();
+    }
 };
 
 void KdifferenceInexactMatch1::escreverMatrizTela() const{
@@ -187,8 +204,8 @@ void KdifferenceInexactMatch1Original::executar(){
    for(i = 1; i <= m; i++)
 	  D[i][0] = i;
 
-    bool passou;
-    linha = -1;
+   bool passou;
+   linha = -1;
 	for(i = 1; i <= m && linha == -1; i++){
         passou = true;
 		for(l = 1; l <= n; l++){
@@ -229,6 +246,26 @@ void KdifferenceInexactMatch1Optimizado::executar(){
    }
 }
 
+void KdifferencePrime::processar(){
+   int ocr = 0;
+
+   if(otimizado)
+      c = new KdifferenceInexactMatch1Optimizado(alpha, beta, k);
+   else
+      c = new KdifferenceInexactMatch1Original(alpha, beta, k);
+
+   for(int j = 0; j < (m - k) + 1; j++){
+       c->setA(alpha.substr(j));
+       c->executar();
+
+       if(c->linha > -1){
+           cout<<MSG_N_OCCR<<++ocr<<" em: "<<j<<", "<<j + c->linha<<" "<<alpha.substr(j, c->linha)<<endl;
+           if(mostrarMatriz) c->escreverMatrizTela();
+       }
+   }
+   if(ocr == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
+}
+
 int main(int argc, char** argv) {
 
    if (argc < 7 || argc > 9) {
@@ -236,38 +273,20 @@ int main(int argc, char** argv) {
 	  return 0;
    }
 
-   Prime* prime = new Prime();
-   if(validarParametros(argc, argv, prime) != 3){
+   if(validarParametros(argc, argv) != 3){
       cout<<endl<<ERR_ARGS<<endl;
 	  return 0;
    }
 
-   if(prime->k > prime->m){
+   prime.m = prime.alpha.size();
+   prime.n = prime.beta.size();
+
+   if(prime.k > prime.m){
      cout<<endl<<ERR_KMAIOR<<endl;
      return 0;
    }
 
-   int ocr = 0;
+   prime.processar();
 
-   KdifferenceInexactMatch1* c;
-
-   for(int j = 0; j < (prime->m - prime->k) + 1; j++){
-       //TODO melhorar aki, diminuir o uso de memória
-       if(prime->otimizado)
-         c = new KdifferenceInexactMatch1Optimizado(prime->alpha.substr(j), prime->beta, prime->k);
-       else
-         c = new KdifferenceInexactMatch1Original(prime->alpha.substr(j), prime->beta, prime->k);
-       c->executar();
-
-       if(c->linha > -1){
-           cout<<MSG_N_OCCR<<++ocr<<" em: "<<j<<", "<<j + c->linha<<" "<<prime->alpha.substr(j, c->linha)<<endl;
-           if(prime->mostrarMatriz) c->escreverMatrizTela();
-       }
-       delete(c);
-   }
-   if(ocr == 0)
-      cout<<MSG_0_OCCR<<prime->k<<" diferenca(s)"<<endl;
-
-   delete prime;
    return 1;
 }
