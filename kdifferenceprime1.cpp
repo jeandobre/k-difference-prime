@@ -176,6 +176,8 @@ class KdifferenceInexactMatch1Optimizado: public KdifferenceInexactMatch1{
 };
 
 void KdifferenceInexactMatch1::escreverMatrizTela() const{
+
+
     cout << setfill(' ');
 	cout<<"\n     ";
 
@@ -206,7 +208,7 @@ void KdifferenceInexactMatch1Original::executar(){
 
    bool passou;
    linha = -1;
-	for(i = 1; i <= m && linha == -1; i++){
+	for(i = 1; i <= m; i++){
         passou = true;
 		for(l = 1; l <= n; l++){
 			D[i][l] = maior(D[i-1][l] + 1,
@@ -215,7 +217,7 @@ void KdifferenceInexactMatch1Original::executar(){
 
 			if(D[i][l] < k) passou = false;
 		}
-        if(passou) linha = i;
+        if(passou && linha == -1) linha = i;
 	}
 }
 
