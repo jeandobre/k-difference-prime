@@ -9,16 +9,20 @@
 #include <stdlib.h>
 #include <iomanip>
 
-#ifndef WINDOWS_KEY_WORD
+#ifndef  defined(_WIN32) || defined(WIN32) || defined(_WIN64) || defined(WIN64)
+
+#define _OSWINDOWS 1
+
 #include<windows.h>
 
-void setcolor(unsigned short color)                 //The function that you'll use to
-{                                                   //set the colour
+void setcolor(unsigned short color){
     HANDLE hcon = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hcon,color);
 }
 
-#elif  LINUX_KEY_WORD
+#elif __unix__
+
+#define _OSWINDOWS 0
 
 #endif
 
@@ -197,18 +201,17 @@ void KdifferenceInexactMatch2::escreverMatrizTela(){
 	int vr;
     cout<<endl;
     for(int i = getMinD(), x = 0; i <= getMaxD(); i++, x++){
-        #ifndef _INC_WINDOWS
-           setcolor(7);
-        #endif // _INC_WINDOWS
+        if(_OSWINDOWS) setcolor(7);
+
 
         cout<<setw(3)<<i<<" ";
         for(int l = getMinE(), y = 0; l <= getMaxE(); l++, y++){
             vr = getL(i,l);
 
-            #ifndef _INC_WINDOWS
+            if(_OSWINDOWS){
               if(vr == linha-1 && l < k) setcolor(3);
               else setcolor(7);
-            #endif // _INC_WINDOWS
+            }
 
             if ((x <= k || y <= k) && (x+y) <= k)cout<<"   ";
 			else cout<<setw(2)<<vr<<" ";
