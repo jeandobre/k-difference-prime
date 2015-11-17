@@ -127,7 +127,7 @@ class KdifferenceInexactMatch2{
     }
 
     int eToMatriz(int e){
-      return e - 1;
+      return e + 1;
     }
 
     void setL(int d, int e, int valor){
@@ -139,11 +139,11 @@ class KdifferenceInexactMatch2{
     }
 
     int getDimensaoD(){
-      return k + n + 3; //k+1, n+1, 1
+      return k + n + 3; //k+1, n+1, 1 da posição 0
     }
 
     int getDimensaoE(){
-      return k + 2; // k + 1, 2
+      return k + 2; // k + 1, 1 da posição 0
     }
 
   public:
@@ -178,7 +178,7 @@ class KdifferenceInexactMatch2{
 void KdifferenceInexactMatch2::escreverMatrizTela(){
     cout << setfill(' ');
 
-    cout<<endl<<"    ";
+    cout<<endl<<setw(4)<<" ";
 	for(int i = getMinE(); i <= getMaxE(); i++) cout<<setw(2)<<i<< " ";
 
 	int vr;
@@ -189,7 +189,7 @@ void KdifferenceInexactMatch2::escreverMatrizTela(){
         for(int l = getMinE(), y = 0; l <= getMaxE(); l++, y++){
             vr = getL(i,l);
 
-            if ((x <= k || y <= k) && (x+y) <= k)cout<<"   ";
+            if ((x <= k || y <= k) && (x+y) <= k)cout<<setw(3)<<" ";
 			else cout<<setw(2)<<vr<<" ";
 		}
 		cout<<"\n";
