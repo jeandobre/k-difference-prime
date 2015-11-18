@@ -8,10 +8,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <iomanip>
+#include <time.h>
 
 using namespace std;
 
-#define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-opt] \tversão otimizada"
+#define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-st] \tmostrar o tempo de execucao"
 #define ERR_KMAIOR "O parametro k deve estar em um intervalo entre 0 e m. "
 #define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
 #define MSG_N_OCCR "\nOcorrencia "
@@ -27,12 +28,14 @@ class KdifferencePrime{
       int n;
       int mostrarMatriz;
       int otimizado;
+      bool tempo;
       KdifferenceInexactMatch2 *c;
 
     public:
       KdifferencePrime(){
          this->mostrarMatriz=0;
          this->otimizado=0;
+         this->tempo=false;
       }
 
       void processar();
@@ -56,6 +59,12 @@ int validarParametros(int argc, char** argv){
       if(strcmp(argv[z], "-opt") == 0){
         if(argc == 7) return 0;
         prime.otimizado=1;
+        continue;
+      }
+
+      if(strcmp(argv[z], "-st") == 0){
+        if(argc == 7) return 0;
+        prime.tempo=true;
         continue;
       }
 
@@ -272,7 +281,14 @@ int main(int argc, char** argv) {
      return 0;
    }
 
+   time_t inicio, fim;
+
+   inicio = clock();
    prime.processar();
+   fim = clock();
+
+   if(prime.tempo)
+     cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos";
 
    return 1;
 }
