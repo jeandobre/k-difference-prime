@@ -1,19 +1,23 @@
-/**
-   Autor: Jean Alexandre Dobre
-   Orientador: Said Sadique Adi
-   Ano: 2015
-   FACOM: Mestrado em Ciência da Computação
-
-   Este projeto implementa a versão original do k-difference inexact match por meio da
-   matriz D [m x n], algoritmo serial, proposto por Landau Gad M. e Vishkin Uzi no artigo
-   INTRODUCING EFFICIENT PARALLELISM INTO APROXIMATE STRING MATCHING AND A NEW SERIAL ALGORITHM
-   página 222.
-
-   A versão do k-difference primer foi idealizada pelo Prof. Dr. Said Sadique Adi cuja idéia é
-   verificar toda linha da matriz D tem valor >= k.
-   A versão otimizada traz a i´deia de implementar a matriz D com apenas 2 linhas [2 x n] que é o mínimo
-   necessário para que a recorrência aconteça. Essa versão diminui muito o uso de memória mas não de processamento.
-*/
+/* *******************************************************************
+ *  Autor: Jean Alexandre Dobre                                      *
+ *  Orientador: Said Sadique Adi                                     *
+ *  Ano: 2015                                                        *
+ *  FACOM: Mestrado em Ciência da Computação                         *
+ *                                                                   *
+ * Este projeto implementa a versão original do k-difference inexact *
+ * match por meio da matriz D [m x n], algoritmo serial, proposto    *
+ * por Landau Gad M. e Vishkin Uzi no artigo INTRODUCING EFFICIENT   *
+ * PARALLELISM INTO APROXIMATE STRING MATCHING AND A NEW SERIAL      *
+ * ALGORITHM, página 222.                                            *
+ *                                                                   *
+ * A versão do k-difference primer foi idealizada pelo               *
+ * Prof. Dr. Said Sadique Adi cuja idéia é verificar toda linha da   *
+ * matriz D tem valor >= k.                                          *
+ * A versão otimizada traz a i´deia de implementar a matriz D com    *
+ * apenas 2 linhas [2 x n] que é o mínimo necessário para que a      *
+ * recorrência aconteça. Essa versão diminui muito o uso de memória  *
+ * mas não de processamento.                                         *
+ * *******************************************************************/
 #include <iostream>
 #include <string.h>
 #include <stdlib.h>
