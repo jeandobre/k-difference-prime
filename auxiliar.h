@@ -1,6 +1,7 @@
 #include <fstream>
 #include <sstream>
 #include <string.h>
+#include <iomanip>
 
 //constantes definidas para uso de mensagens na tela
 #define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao"
@@ -27,7 +28,7 @@ public:
    };
 
    void escreverTela(){
-      cout<< setfill('0');
+      cout<<setfill('0');
       cout<<MSG_N_OCCR<<setw(3)<<ocr<<" em ";
 
       cout<< setfill(' ');
@@ -67,7 +68,38 @@ unsigned long long int menorDeTres(unsigned long long int x,
   else return c;
 }
 
-//função para abrir arquivo FASTA
+long long int menorDeDois(long long int a,
+                          long long int b){
+   return a <= b ? a : b;
+}
+
+//não pode ser unsigned pois compara valores -1
+//retorna o menor entre três valores
+long long int maiorDeTres(long long int a,
+                          long long int b,
+                          long long int c){
+  if(a >= b && a >= c) return a;
+  else if(b >= a && b >= c) return b;
+  else return c;
+}
+
+//LCE entre s[i] e t[j]
+unsigned long long int LCEiterativo(unsigned long long int _i,
+                                    unsigned long long int _j,
+                                    string &a, string &t){
+    //deve ser passsado os índices reais e aqui será decido
+    if(_i == 0 || _j == 0) return 0;
+    int _m = a.size();
+    int _n = t.size();
+    _i--;
+    _j--; //apenas por conta das strings
+    unsigned int o = 0;
+    while(o+_i < _m && o+_j < _n && a.compare(o+_i, 1, t, o+_j, 1) == 0)
+      o++;
+
+    return o;
+}
+
 //TODO devemos abrir o arquivo em tempo de execução, ou seja, processar enquanto abre o arquivo,
  string lerArquivo(const char *local){
 

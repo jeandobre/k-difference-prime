@@ -1,7 +1,7 @@
 /* *******************************************************************
  *  Autor: Jean Alexandre Dobre                                      *
  *  Orientador: Said Sadique Adi                                     *
- *  Ano: 2015                                                        *
+ *  Ano: 2015/2016                                                   *
  *  FACOM: Mestrado em Ciência da Computação                         *
  *                                                                   *
  * Este projeto implementa a versão original do k-difference inexact *
@@ -53,7 +53,8 @@ class KdifferencePrime{
       KdifferencePrime(){
           //construtor seta os valores default se o usuário não escolher nada
          this->mostrarMatriz=false;
-         this->versao=3; //começa com a melhor versão
+         this->versao=1; //começa com a melhor versão
+         primers.clear();
       }
       void processar();
 } prime; // é necessário apenas uma instancia de prime, já declarada aqui
@@ -279,8 +280,9 @@ void KdifferenceInexactMatch1Optimizado2::executar(){
                              pivo + 1,
                              a.compare(i-1, 1, t, l-1, 1) == 0 ? D[0][l-1] : D[0][l-1] + 1);
 	    D[0][l-1] = pivo;
-	    if(passou && pivo < k) passou = false;
+	    if(l == n) D[0][l] = aux;
 	    pivo = aux;
+	    if(passou && pivo < k) passou = false;
 	 }
      if(passou) linha = i; //se a linha não foi descartada ela é a primeira
    }
@@ -291,7 +293,7 @@ void KdifferenceInexactMatch1Optimizado2::executar(){
 void KdifferencePrime::processar(){
    int ocr = 0; //flag que guarda a quantidade de ocorrências
 
-   if(versao == 3) //se o usuário escolheu a versão otimizada 2
+   if(versao == 1) //se o usuário escolheu a versão otimizada 2
       c = new KdifferenceInexactMatch1Optimizado2(alpha, beta, k); //instancia a classe Otimizada
    else if(versao == 2) //se o usuário escolheu a versão otimizada
       c = new KdifferenceInexactMatch1Optimizado1(alpha, beta, k); //instancia a classe Otimizada
@@ -303,15 +305,14 @@ void KdifferencePrime::processar(){
      pois é necessário k caracteres para existir comparação
    */
    for(int j = 0; j < (m - k) + 1; j++){
-       cout<<j<<",";
+       //cout<<j<<","; apenas para ver se o laço estava sendo executado
        c->setA(alpha.substr(j));
        c->executar();
 
        if(c->linha > -1){ //se a linha foi obtida, significa que existe uma ocorrência
            Primer *pr = new Primer(++ocr,j,c->linha,alpha.substr(j, c->linha));
-          // pr->escreverTela();
            primers.insert(primers.end(), pr);
-          // if(mostrarMatriz) c->imprimirMatrizTela();
+           if(mostrarMatriz) c->imprimirMatrizTela();
        }
    }
 }
@@ -352,7 +353,12 @@ int main(int argc, char** argv) {
    fim = clock();
 
    if(prime.primers.size() == 0) cout<<MSG_0_OCCR<<prime.k<<" diferenca(s)"<<endl;
-   else cout<<"Encontrado "<<prime.primers.size()<<" ocorrencia(s) r de primers"<<endl;
+   else {
+        cout<<"Encontrado "<<prime.primers.size()<<" ocorrencia(s) r de primers"<<endl;
+        for(Primer *p : prime.primers){
+          p->escreverTela();
+        }
+   }
 
    if(p->mostrarTempo)
      cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos";
