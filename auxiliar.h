@@ -5,7 +5,7 @@
 
 //constantes definidas para uso de mensagens na tela
 #define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao"
-#define ERR_KMAIOR "O parametro k deve estar em um intervalo entre 0 e m. "
+#define ERR_KMAIOR "O parametro k deve estar em um intervalo entre 1 e "
 #define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
 #define MSG_N_OCCR "\nOcr "
 

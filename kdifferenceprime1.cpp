@@ -339,7 +339,7 @@ int main(int argc, char** argv) {
    prime.n = prime.beta.size();
 
    if(prime.k > prime.m){
-     cout<<endl<<ERR_KMAIOR<<endl;
+     cout<<endl<<ERR_KMAIOR<<prime.m<<endl;
      return 0;
    }
 

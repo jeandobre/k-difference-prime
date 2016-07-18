@@ -26,8 +26,8 @@ void gerar(string arquivo, int tamanho){
 }
 
 int main(){
-    gerar("alpha_1000.txt", 1000);
-    gerar("beta_2000.txt",  2000);
+    gerar("alpha_15000.txt", 15000);
+    gerar("beta_15000.txt",  15000);
     return 0;
 
 }
