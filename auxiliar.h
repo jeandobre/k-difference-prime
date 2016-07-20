@@ -23,7 +23,7 @@ public:
    Primer(int ocr, int j, int r, string sequencia){
       this->ocr = ocr;
       this->j = ++j;
-      this->r = r;
+      this->r = --r;
       this->sequencia = sequencia;
    };
 

@@ -96,15 +96,17 @@ class KdifferenceInexactMatch2{
 
        //alocação dinâmica de inteiros
        this->L = new int*[getDimensaoD()];
-       for (int j = 0; j < getDimensaoD(); ++j)
-          this->L[j] = new int[getDimensaoE()];
+       if(getDimensaoE() > 0)
+           for (int j = 0; j < getDimensaoD(); ++j)
+              this->L[j] = new int[getDimensaoE()];
 
     }
 
     ~KdifferenceInexactMatch2(){
        //Ao destruir a classe desaloca toda memória que foi usada
-       for (int i = 0; i < getDimensaoD(); ++i)
-         delete [] L[i];
+       if(getDimensaoE() > 0)
+           for (int i = 0; i < getDimensaoD(); ++i)
+             delete [] L[i];
        delete [] L;
     }
     virtual void executar(){};
@@ -178,7 +180,7 @@ void KdifferenceInexactMatch2Original::executar(){
     */
 }
 
-class KdifferenceInexactMatch2Optimizado: public KdifferenceInexactMatch2{
+class KdifferenceInexactMatch2Optimizado1: public KdifferenceInexactMatch2{
 
    private:
       int dToMatriz(int d){
@@ -205,13 +207,44 @@ class KdifferenceInexactMatch2Optimizado: public KdifferenceInexactMatch2{
     int getDimensaoE(){
       return k; // k + 1, 1 da posição 0
     }
-    KdifferenceInexactMatch2Optimizado(string a, string t, int k): KdifferenceInexactMatch2(a,t,k){};
+    KdifferenceInexactMatch2Optimizado1(string a, string t, int k): KdifferenceInexactMatch2(a,t,k){};
     void imprimirMatrizTela();
     void executar();
 };
 
+class KdifferenceInexactMatch2Optimizado2: public KdifferenceInexactMatch2{
+
+   private:
+      int dToMatriz(int d){
+      return d + k; //converte índice d para índices reais
+    }
+
+    int eToMatriz(int e){
+      return 0; //converte sempre p coluna 0
+    }
+
+  public:
+    void setL(int d, int e, int valor){
+      L[dToMatriz(d)][eToMatriz(e)] = valor; //L[d,e] = valor
+    }
+
+    int getL(int d, int e){
+      return L[dToMatriz(d)][eToMatriz(e)]; // L[d,e]
+    }
+
+    int getDimensaoD(){
+      return k + n + 1; //k, n+1, 1 da posição 0
+    }
+
+    int getDimensaoE(){
+      return 0; //não tem tamanho
+    }
+    KdifferenceInexactMatch2Optimizado2(string a, string t, int k): KdifferenceInexactMatch2(a,t,k){};
+    void imprimirMatrizTela();
+    void executar();
+};
 //método que imprimi a matriz na tela
-void KdifferenceInexactMatch2Optimizado::imprimirMatrizTela(){
+void KdifferenceInexactMatch2Optimizado1::imprimirMatrizTela(){
     cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
 
     cout<<endl<<setw(4)<<" "; //espaçamento necessário para o cabeçalho
@@ -233,7 +266,7 @@ void KdifferenceInexactMatch2Optimizado::imprimirMatrizTela(){
 }
 
 //método que executa o comportamento original do algoritmo
-void KdifferenceInexactMatch2Optimizado::executar(){
+void KdifferenceInexactMatch2Optimizado1::executar(){
     int d,e, row;
 
     //inicialização das bordas limites
@@ -299,15 +332,76 @@ void KdifferenceInexactMatch2Original::imprimirMatrizTela(){
 		cout<<"\n";
 	}
 }
+
+//método que executa o comportamento original do algoritmo
+void KdifferenceInexactMatch2Optimizado2::executar(){
+    int d,e, row;
+
+    //inicialização da coluna e = 0
+    bool passou = true;
+    linha = -1;
+    for(d = -k; d <= n && passou; d++){
+        if(d < 0 || d == n) setL(d, 0, -1);
+        else {
+            row = LCEiterativo(1,d+1,a,t);
+            setL(d, 0, row);
+            if(row == m) passou = false;
+            if (passou && row > linha) linha = row;
+        }
+    }
+    //int long long aux;
+    int long long pivo;
+
+    for(e = 1; e < k; e++){
+        pivo = -1;
+        for(d = -e; d < n && passou; d++){
+           row = maiorDeTres(getL(d-1, e-1),
+                             getL(d,   e-1) + 1,
+                             getL(d+1, e-1) + 1);
+
+           row = menorDeDois(row, m);
+           //LCE
+           row += LCEiterativo(row+1, row+d+1, a, t);
+
+           setL(d-1, e, pivo); //guarda o anterior
+           if(row + d > n) row = -1;
+           if(d == n-1)setL(d, e, row); //se for o último guarda o atual
+           else pivo = row;
+
+           //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
+           if(row == m) passou = false;
+           if (passou && row > linha) linha = row;
+        }
+        //if (e >= 1) imprimirMatrizTela();
+    }
+    if(passou) linha++;
+    else linha = -1;
+}
+
+//método que imprimi a matriz na tela
+void KdifferenceInexactMatch2Optimizado2::imprimirMatrizTela(){
+    cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
+	int vr;
+    cout<<endl;
+    for(int d = -k; d <= n; d++){
+        vr = getL(d,0);
+
+        cout<<setw(2)<<vr<<endl;
+    }
+    cout<<endl;
+}
+
 //método que processa o algoritmo principal chamado a partir do procedimento MAIN
 //IMPORTANTE: não há execução sem a invocação deste método
 void KdifferencePrime::processar(){
    int ocr = 0; //flag que guarda a quantidade de ocorrências
 
    if(versao == 1)
-      c = new KdifferenceInexactMatch2Original(alpha, beta, k); //instancia a versão original
+       c = new KdifferenceInexactMatch2Optimizado2(alpha, beta, k); //instancia a versão original
+   else if(versao == 2)
+       c = new KdifferenceInexactMatch2Optimizado1(alpha, beta, k);
    else
-      c = new KdifferenceInexactMatch2Optimizado(alpha, beta, k);
+       c = new KdifferenceInexactMatch2Original(alpha, beta, k); //instancia a versão original
 
    for(int j = 0; j < (m - k) + 1; j++){
        //cout<<j<<","; //TODO retirar depois, apenas para
