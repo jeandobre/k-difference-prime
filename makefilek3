@@ -1,0 +1,23 @@
+CC = g++
+CPPFLAGS =  -Wall -ansi -pedantic -O3
+LIB_DIR=cst_v_1_1
+
+objects = kdifferenceprime3.o $(LIB_DIR)/SSTree.o $(LIB_DIR)/Tools.o $(LIB_DIR)/CSA.o $(LIB_DIR)/BitRank.o \
+  $(LIB_DIR)/ReplacePattern.o $(LIB_DIR)/wtreebwt.o $(LIB_DIR)/bittree.o $(LIB_DIR)/rbtree.o $(LIB_DIR)/CHgtArray.o $(LIB_DIR)/CRMQ.o \
+  $(LIB_DIR)/SubblockRMQ.o $(LIB_DIR)/Parentheses.o $(LIB_DIR)/Hash.o $(LIB_DIR)/LcpToParentheses.o
+
+all: clean k3 default
+
+k3:
+	$(CC)  -Wfatal-errors -Wall  -O3  -Wextra -std=c++11 -c kdifferenceprime3.cpp -o kdifferenceprime3.o 
+
+default: $(objects)
+	$(CC) -o kdifferenceprime3 $(objects) 
+
+clean:
+	-rm -f core *.o  *~ kdifferenceprime3 
+
+#depend:
+#	g++ -MM *.cpp > dependencies.mk
+
+#include $(LIB_DIR)/dependencies.mk

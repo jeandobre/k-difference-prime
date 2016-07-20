@@ -1,4 +1,4 @@
-CC = g++
+CC = gcc
 CPPFLAGS = -Wall -ansi -pedantic -O3
 
 objects = TestLCSS.o SSTree.o Tools.o CSA.o BitRank.o \
@@ -12,6 +12,6 @@ clean:
 	rm -f core *.o *~ TestLCSS 
 
 depend:
-	g++ -MM *.cpp > dependencies.mk
+	gcc -MM *.cpp > dependencies.mk
 
 include dependencies.mk

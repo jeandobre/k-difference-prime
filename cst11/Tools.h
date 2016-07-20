@@ -1,7 +1,7 @@
 /*
  * Collection of basic tools and defines
  */
-#define __WORDSIZE 32
+#define __WORDSIZE 64
 
 #ifndef _TOOLS_H_
 #define _TOOLS_H_

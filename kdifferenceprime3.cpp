@@ -51,6 +51,10 @@ class KdifferencePrime{
          //construtor seta os valores default se o usuário não escolher nada
          this->mostrarMatriz=false;
       }
+      ~KdifferencePrime(){
+         delete c;
+         delete sst;
+      }
       void processar();
 } prime;
 
@@ -217,18 +221,23 @@ int main(int argc, char** argv) {
    }
 
    //pré-processamento da árvore de sufixo
-   cout<<"K-difference-primer-3 pre-processando arvore de sufixo..."<<endl;
+   cout<<"K-difference-primer-3 pre-processando arvore de sufixo...";
    string texto;
    uchar *text = (uchar*) texto.append(prime.alpha).append("#").append(prime.beta).c_str();
    ulong n = strlen((char*)text);
    n++;
 
-   prime.sst = new SSTree(text, n, true);
+   time_t inicio, fim;
+
+   inicio = clock();
+   prime.sst = new SSTree(text, n);
+   cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")"<<endl;
+   fim = clock();
 
    cout<<"K-difference-primer-3 executando..."<<endl;
-   cout<<"Versao: arvore de sufixo generalizada compressada";
+   cout<<"Versao: arvore de sufixo generalizada compressada"<<endl;
 
-   time_t inicio, fim;
+
 
    inicio = clock();
    prime.processar();
@@ -243,7 +252,7 @@ int main(int argc, char** argv) {
    }
 
    if(p->mostrarTempo)
-     cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos";
+     cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos"<<endl;
 
-   return 1;
+   return 0;
 }
