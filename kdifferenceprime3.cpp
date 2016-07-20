@@ -22,7 +22,7 @@
 #include <list>
 #include "auxiliar.h"
 
-#include "cst11/SSTree.h" //biblioteca arvore sufixo
+#include "cst11/SSTree.h" //biblioteca arvore sufixo compressada
 #include "cst11/Tools.h"
 
 using namespace std;
