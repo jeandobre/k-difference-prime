@@ -84,23 +84,24 @@ long long int maiorDeTres(long long int a,
 }
 
 //LCE entre s[i] e t[j]
-unsigned long long int LCEiterativo(unsigned long long int _i,
+unsigned long long int directCompLCE(unsigned long long int _i,
                                     unsigned long long int _j,
-                                    string &a, string &t){
+                                    string *a, string *t){
     //deve ser passsado os índices reais e aqui será decido
     if(_i == 0 || _j == 0) return 0;
-    int _m = a.size();
-    int _n = t.size();
+    int _m = a->size();
+    int _n = t->size();
     _i--;
     _j--; //apenas por conta das strings
     unsigned int o = 0;
-    while(o+_i < _m && o+_j < _n && a.compare(o+_i, 1, t, o+_j, 1) == 0)
+    //while(o+_i < _m && o+_j < _n && a->compare(o +_i, 1, *t, o +_j, 1) == 0)
+    while(o+_i < _m && o+_j < _n && strcmp(&a->at(o +_i), &t->at(o +_j)) == 0)
       o++;
 
     return o;
 }
 
-//TODO devemos abrir o arquivo em tempo de execução, ou seja, processar enquanto abre o arquivo,
+//devemos abrir o arquivo em tempo de execução, ou seja, processar enquanto abre o arquivo,
  string lerArquivo(const char *local){
 
   ifstream arquivo(local, std::ifstream::in);
@@ -133,7 +134,6 @@ Parametro *parseParametros(int argc, char** argv){
 
    for(int z = 1; z < argc; z++){
       if(strcmp(argv[z], "-sm") == 0){
-        //if(argc == 7) return 0;
         p->mostrarMatriz = true;
         continue;
       }
