@@ -189,3 +189,50 @@ Parametro *parseParametros(int argc, char** argv){
 
    return p;
 }
+
+void formataTempo(long long int valor){
+  int mili = 0, sec = 0, minu = 0, dia = 0, hor = 0;
+  long long int _tempo = valor;
+  if(valor > 1000){//segundos
+      mili = valor % 1000;
+      valor = (valor - mili)/1000;
+  } else{
+    mili = valor;
+    valor = 0;
+  }
+
+  if(valor > 60){//minutos
+   sec = valor % 60;
+   valor = (valor - sec)/60;
+  } else{
+    sec = valor;
+    valor = 0;
+  }
+
+  if(valor > 60){//horas
+   minu = valor % 60;
+   valor = (valor - minu)/60;
+  } else{
+    minu = valor;
+    valor = 0;
+  }
+
+  if(valor > 24){//dias
+    hor = valor % 24;
+    valor = (valor - hor)/24;
+  } else{
+    hor = valor;
+    valor = 0;
+  }
+  if(valor > 0) dia = valor;
+
+  string tempo = "(" + to_string(_tempo) + " milisegundo(s)) - ";
+
+  if(dia > 0)  tempo += to_string(dia)  + " dia(s) ";
+  if(hor > 0)  tempo += to_string(hor)  + " hora(s) ";
+  if(minu > 0) tempo += to_string(minu) + " minuto(s) ";
+  if(sec > 0)  tempo += to_string(sec)  + " segundo(s) ";
+  if(mili > 0) tempo += to_string(mili) + " milesimos(s)";
+
+  cout<<"Tempo de execucao: "<< tempo <<endl;
+}

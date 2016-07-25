@@ -51,9 +51,13 @@ class KdifferencePrime{
       void mostrarOcorrencias(){
          if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
          else{
-              cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) r de primers"<<endl;
-              for(Primer *p : primers){
-                  p->escreverTela();
+              cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
+              if(primers.size() > 10) cout<<"(Arquivo: saida.txt)"<<endl;
+              else {
+                 for(Primer *p : primers){
+                     p->escreverTela();
+                     //p->escrever
+                 }
               }
          }
       }
@@ -370,9 +374,8 @@ int main(int argc, char** argv) {
    fim = clock();
 
    prime.mostrarOcorrencias();
-
-   if(tempo)
-     cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos"<<endl;
+   long long int tempo_execucao = (fim - inicio) / (CLOCKS_PER_SEC / 1000);
+   if(tempo) formataTempo(tempo_execucao);
 
    return 1;
 }
