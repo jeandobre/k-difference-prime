@@ -43,6 +43,7 @@ class KdifferencePrime{
       KdifferenceInexactMatch3 *c;
       int j;             //índice de alpha necessário p/ posicionar corretamente na árvore de sufixo
       SSTree *sst;
+      int **LCE;
 
       list<Primer *> primers;
 
@@ -56,6 +57,26 @@ class KdifferencePrime{
          delete sst;
       }
       void processar();
+      void imprimirLCE(){
+         for(int i = 0; i < m; i++){
+           cout<<endl;
+           for(int j = 0; j < n; j++)
+              cout<<LCE[i][j]<<" ";
+         }
+      };
+      void mostrarOcorrencias(){
+         if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
+         else{
+              cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
+              if(primers.size() > 10) cout<<"(Arquivo: saida.txt)"<<endl;
+              else {
+                 for(Primer *p : primers){
+                     p->escreverTela();
+                     //p->escrever
+                 }
+              }
+         }
+      }
 } prime;
 
 //O algoritmo foi adaptado para entregar o resultado do primer que é o inverso da programação original
@@ -66,6 +87,10 @@ class KdifferenceInexactMatch3{
     int *L;   //Matriz L[-(k+1)..d]
     string a;  //padrão
     string t;  //texto
+
+    const char* _a;
+    const char* _t;
+
     int k;     //quantidade de diferênças
     int m, n;  //tamanho de a e t respectivamente
   public:
@@ -111,6 +136,7 @@ class KdifferenceInexactMatch3{
 
     void setA(string a){
       this->a = a;
+      this->_a = a.c_str();
       this->m = a.size(); //atualiza o valor de 'm' com o novo tamanho de 'a'
     }
 };
@@ -137,7 +163,8 @@ void KdifferenceInexactMatch3::executar(){
     for(d = -k; d <= n && passou; d++){
         if(d < 0 || d == n) setL(d, -1);
         else {
-            row = prime.sst->lce(prime.j, prime.m + 1 + d);
+            //row = prime.sst->lce(prime.j, prime.m + 1 + d);
+            row = prime.LCE[prime.j][d];
             setL(d, row);
 
             if(row == m) passou = false;
@@ -156,8 +183,10 @@ void KdifferenceInexactMatch3::executar(){
 
            row = menorDeDois(row, m);
            //LCE
-           if(row < m && row + d < n)
-             row += prime.sst->lce(prime.j + row , prime.m + 1 + row + d);//LCE(0,m+1);
+         //  if(row < m && row + d < n)
+          //   row += prime.sst->lce(prime.j + row , prime.m + 1 + row + d);//LCE(0,m+1);
+          if(row < m && row + d < n)
+            row += prime.LCE[prime.j + row][row + d];
 
            setL(d-1, pivo); //guarda o anterior
            if(row + d > n) row = -1;
@@ -220,36 +249,52 @@ int main(int argc, char** argv) {
      return 0;
    }
 
-   //pré-processamento da árvore de sufixo
-   cout<<"K-difference-primer-3 pre-processando arvore de sufixo...";
-   string texto;
-   uchar *text = (uchar*) texto.append(prime.alpha).append("#").append(prime.beta).c_str();
-   ulong n = strlen((char*)text);
-   n++;
+   prime.LCE = new int*[prime.m];
+   for (int j = 0; j < prime.m; ++j)
+     prime.LCE[j] = new int[prime.n];
 
    time_t inicio, fim;
 
-   inicio = clock();
-   prime.sst = new SSTree(text, n);
+   if(prime.versao == 1){
+      //pré-processamento da árvore de sufixo
+      cout<<"Pre-processando arvore de sufixo...";
+      string texto;
+      uchar *text = (uchar*) texto.append(prime.alpha).append("#").append(prime.beta).c_str();
+      ulong n = strlen((char*)text);
+      n++;
+
+
+      inicio = clock();
+      //armazena todas as consultas LCE
+      prime.sst = new SSTree(text, n);
+      for(int i = 0; i < prime.m; i++){
+         for(int j = 0; j < prime.n; j++)
+           prime.LCE[i][j] = prime.sst->lce(i, prime.m + 1 + j);
+       }
+
+      fim = clock();
+   } else {
+      cout<<"Pre-processando LCE computado diretamente...";
+      inicio = clock();
+      //armazena todas as consultas LCE
+      for(int i = 0; i < prime.m; i++){
+         for(int j = 0; j < prime.n; j++)
+         prime.LCE[i][j] = directCompLCE(i+1, j+1, &prime.alpha, &prime.beta);
+       }
+      fim = clock();
+   }
    cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")"<<endl;
-   fim = clock();
 
    cout<<"K-difference-primer-3 executando..."<<endl;
-   cout<<"Versao: arvore de sufixo generalizada compressada"<<endl;
+   cout<<"Versao: "<<prime.versao<<endl;
 
-
+   //prime.imprimirLCE();
 
    inicio = clock();
    prime.processar();
    fim = clock();
 
-   if(prime.primers.size() == 0) cout<<MSG_0_OCCR<<prime.k<<" diferenca(s)"<<endl;
-   else{
-        cout<<"Encontrado "<<prime.primers.size()<<" ocorrencia(s) r de primers"<<endl;
-        for(Primer *p : prime.primers){
-            p->escreverTela();
-        }
-   }
+   prime.mostrarOcorrencias();
 
    if(p->mostrarTempo)
      cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos"<<endl;

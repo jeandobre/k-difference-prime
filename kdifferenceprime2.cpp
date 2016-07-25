@@ -2,14 +2,14 @@
    Autor: Jean Alexandre Dobre
    Orientador: Said Sadique Adi
    Ano: 2015
-   FACOM: Mestrado em CiÍncia da ComputaÁ„o
-   Este projeto implementa a vers„o modificada do k-difference inexact match por meio da
+   FACOM: Mestrado em Ci√™ncia da Computa√ß√£o
+   Este projeto implementa a vers√£o modificada do k-difference inexact match por meio da
    matriz L [d x e], algoritmo serial, proposto por Landau Gad M. e Vishkin Uzi no artigo
    FAST PARALLEL AND SERIAL APPROXIMATE STRING MATCHING
-   p·gina 5.
-   A vers„o do k-difference primer È a abordagem do livro ALGORITHMS ON STRINGS, TREES, AND SEQUENCES de Gusfiel
-   que avalia a coluna k-1 procurando se 'm' foi alcanÁado, se n„o foi alcanÁado existe um prime com pelo menos k diferenÁas
-   e ele est· no maior valor da coluna k-1.
+   p√°gina 5.
+   A vers√£o do k-difference primer √© a abordagem do livro ALGORITHMS ON STRINGS, TREES, AND SEQUENCES de Gusfiel
+   que avalia a coluna k-1 procurando se 'm' foi alcan√ßado, se n√£o foi alcan√ßado existe um prime com pelo menos k diferen√ßas
+   e ele est√° no maior valor da coluna k-1.
 */
 #include <iostream>
 #include <string.h>
@@ -21,52 +21,64 @@
 
 using namespace std;
 
-//declaraÁ„o da classe que È utilizada no KdifferencePrime
+//declara√ß√£o da classe que √© utilizada no KdifferencePrime
 class KdifferenceInexactMatch2;
 
 class KdifferencePrime{
 
     public:
-      string alpha, beta;//seguindo o modelo proposto por GUSFIELD, nomes de vari·veis que representam o padr„o e o texto respectivamente
-      int k;             //quantidade de diferÍnÁas
+      char *alpha, *beta;//seguindo o modelo proposto por GUSFIELD, nomes de vari√°veis que representam o padr√£o e o texto respectivamente
+      int k;             //quantidade de difer√™n√ßas
       int m;             //tamanho de alpha
       int n;             //tamanho de beta
       bool mostrarMatriz; //booleano 0,1 usado para imprime a matriz na tela
-      int versao;     //booleano 0, 1 usado para executar a vers„o otimizada do algoritmo
+      int versao;     //booleano 0, 1 usado para executar a vers√£o otimizada do algoritmo
+      string ocorrencia;
+      int j;
 
       KdifferenceInexactMatch2 *c;
       list<Primer *> primers;
 
     public:
       KdifferencePrime(){
-         //construtor seta os valores default se o usu·rio n„o escolher nada
+         //construtor seta os valores default se o usu√°rio n√£o escolher nada
          this->mostrarMatriz=false;
-         this->versao=1; //apenas uma vers„o
+         this->versao=1; //apenas uma vers√£o
          primers.clear();
       }
       void processar();
+
+      void mostrarOcorrencias(){
+         if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
+         else{
+              cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) r de primers"<<endl;
+              for(Primer *p : primers){
+                  p->escreverTela();
+              }
+         }
+      }
 } prime;
 
-//O algoritmo foi adaptado para entregar o resultado do primer que È o inverso da programaÁ„o original
+//O algoritmo foi adaptado para entregar o resultado do primer que √© o inverso da programa√ß√£o original
 //Classe que resolve o problema k-mismatches problems em tempo O(nk)
 class KdifferenceInexactMatch2{
 
   protected:
     int **L;   //Matriz L[-(k+1)..d, -1..e]
-    string a;  //padr„o
-    string t;  //texto
-    int k;     //quantidade de diferÍnÁas
+    char *a;  //padr√£o
+    char *t;  //texto
+    int k;     //quantidade de difer√™n√ßas
     int m, n;  //tamanho de a e t respectivamente
   public:
-    int linha; //linha que contÈm o menor valor >= k
+    int linha; //linha que cont√©m o menor valor >= k
 
   private:
     int dToMatriz(int d){
-      return d + (k + 1); //converte Ìndice d para Ìndices reais
+      return d + (k + 1); //converte √≠ndice d para √≠ndices reais
     }
 
     int eToMatriz(int e){
-      return e + 1; //converte Ìndice e para Ìndices reais
+      return e + 1; //converte √≠ndice e para √≠ndices reais
     }
 
   public:
@@ -79,22 +91,22 @@ class KdifferenceInexactMatch2{
     }
 
     int getDimensaoD(){
-      return k + n + 3; //k, n+1, 1 da posiÁ„o 0
+      return k + n + 3; //k, n+1, 1 da posi√ß√£o 0
     }
 
     int getDimensaoE(){
-      return k + 2; // k + 1, n+1, 1 da posiÁ„o 0
+      return k + 2; // k + 1, n+1, 1 da posi√ß√£o 0
     }
   public:
-    KdifferenceInexactMatch2(string &a, string &t, int &k){
+    KdifferenceInexactMatch2(char *a, char *t, int *k){
        this->a = a;
        this->t = t;
-       this->k = k;
+       this->k = *k;
 
-       this->m = a.length();
-       this->n = t.length();
+       this->m = strlen(a);
+       this->n = strlen(t);
 
-       //alocaÁ„o din‚mica de inteiros
+       //aloca√ß√£o din√¢mica de inteiros
        this->L = new int*[getDimensaoD()];
        if(getDimensaoE() > 0)
            for (int j = 0; j < getDimensaoD(); ++j)
@@ -103,7 +115,7 @@ class KdifferenceInexactMatch2{
     }
 
     ~KdifferenceInexactMatch2(){
-       //Ao destruir a classe desaloca toda memÛria que foi usada
+       //Ao destruir a classe desaloca toda mem√≥ria que foi usada
        if(getDimensaoE() > 0)
            for (int i = 0; i < getDimensaoD(); ++i)
              delete [] L[i];
@@ -112,21 +124,20 @@ class KdifferenceInexactMatch2{
     virtual void executar(){};
     virtual void imprimirMatrizTela(){};
 
-    void setA(string a){
-      this->a = a;
-      this->m = a.size(); //atualiza o valor de 'm' com o novo tamanho de 'a'
-    }
+    void setaTamanhoM(){
+       this->m = prime.m - prime.j;
+    };
 };
 
 class KdifferenceInexactMatch2Original: public KdifferenceInexactMatch2{
 
 public:
-    KdifferenceInexactMatch2Original(string a, string t, int k): KdifferenceInexactMatch2(a,t,k){};
+    KdifferenceInexactMatch2Original(char *a, char *t, int *k): KdifferenceInexactMatch2(a,t,k){};
     void executar();
     void imprimirMatrizTela();
 };
 
-//mÈtodo que executa o comportamento original do algoritmo
+//m√©todo que executa o comportamento original do algoritmo
 void KdifferenceInexactMatch2Original::executar(){
 
     int d,e, row;
@@ -151,19 +162,19 @@ void KdifferenceInexactMatch2Original::executar(){
                         getL(d+1, e-1) + 1);
            row = menorDeDois(row, m);
            //LCE
-           while(row < m && row+d < n && a.compare(row, 1, t, row+d, 1) == 0)
+           while(row < m && row+d < n && a[row + prime.j] == t[row+d])
              row++;
 
            setL(d, e, row);
-           //se j· alcancou 'm' e o erro È menor que 'k' pode parar e ir para o prÛximo 'j'
+           //se j√° alcancou 'm' e o erro √© menor que 'k' pode parar e ir para o pr√≥ximo 'j'
            if(row == m && e < k) passou = false;
         }
     }
 
     /*
-       se passou ent„o existe uma coluna 'e' = k-1 com a maior Ìndice
-       basta localizar na linha qual È o maior valor e incrementar 1
-       isso ocorre pois a matriz guarda o Ìndice final do LCE, logo o inicio do LCE(k) È LCE(k-1)+1.
+       se passou ent√£o existe uma coluna 'e' = k-1 com a maior √≠ndice
+       basta localizar na linha qual √© o maior valor e incrementar 1
+       isso ocorre pois a matriz guarda o √≠ndice final do LCE, logo o inicio do LCE(k) √© LCE(k-1)+1.
     */
     if(passou){
         row = -1;
@@ -174,9 +185,9 @@ void KdifferenceInexactMatch2Original::executar(){
         linha++;
     }
     /*
-       (a) Para todo i, l, D[i,l] - D[i-1,l-1] È ou Zero ou 1
-       (b) d > n - m + k + 1 ou d < -k s„o descart·veis para soluÁ„o deste problema
-       (c) a inicializaÁ„o apenas atualiza a matriz com os limites
+       (a) Para todo i, l, D[i,l] - D[i-1,l-1] √© ou Zero ou 1
+       (b) d > n - m + k + 1 ou d < -k s√£o descart√°veis para solu√ß√£o deste problema
+       (c) a inicializa√ß√£o apenas atualiza a matriz com os limites
     */
 }
 
@@ -184,39 +195,7 @@ class KdifferenceInexactMatch2Optimizado1: public KdifferenceInexactMatch2{
 
    private:
       int dToMatriz(int d){
-      return d + k; //converte Ìndice d para Ìndices reais
-    }
-
-    int eToMatriz(int e){
-      return e; //converte Ìndice e para Ìndices reais
-    }
-
-  public:
-    void setL(int d, int e, int valor){
-      L[dToMatriz(d)][eToMatriz(e)] = valor; //L[d,e] = valor
-    }
-
-    int getL(int d, int e){
-      return L[dToMatriz(d)][eToMatriz(e)]; // L[d,e]
-    }
-
-    int getDimensaoD(){
-      return k + n + 1; //k, n+1, 1 da posiÁ„o 0
-    }
-
-    int getDimensaoE(){
-      return k; // k + 1, 1 da posiÁ„o 0
-    }
-    KdifferenceInexactMatch2Optimizado1(string a, string t, int k): KdifferenceInexactMatch2(a,t,k){};
-    void imprimirMatrizTela();
-    void executar();
-};
-
-class KdifferenceInexactMatch2Optimizado2: public KdifferenceInexactMatch2{
-
-   private:
-      int dToMatriz(int d){
-      return d + k; //converte Ìndice d para Ìndices reais
+      return d + k; //converte √≠ndice d para √≠ndices reais
     }
 
     int eToMatriz(int e){
@@ -233,89 +212,23 @@ class KdifferenceInexactMatch2Optimizado2: public KdifferenceInexactMatch2{
     }
 
     int getDimensaoD(){
-      return k + n + 1; //k, n+1, 1 da posiÁ„o 0
+      return k + n + 1; //k, n+1, 1 da posi√ß√£o 0
     }
 
     int getDimensaoE(){
-      return 0; //n„o tem tamanho
+      return 0; //n√£o tem tamanho
     }
-    KdifferenceInexactMatch2Optimizado2(string a, string t, int k): KdifferenceInexactMatch2(a,t,k){};
+    KdifferenceInexactMatch2Optimizado1(char *a, char *t, int *k): KdifferenceInexactMatch2(a,t,k){};
     void imprimirMatrizTela();
     void executar();
 };
-//mÈtodo que imprimi a matriz na tela
-void KdifferenceInexactMatch2Optimizado1::imprimirMatrizTela(){
-    cout << setfill(' ');     //setar o tamanho de espaÁamento de elementos na tela
 
-    cout<<endl<<setw(4)<<" "; //espaÁamento necess·rio para o cabeÁalho
-	for(int i = 0; i < k; i++) cout<<setw(2)<<i<< " "; //imprimi o cabeÁalho da matriz com 2 espaÁos
-
-	int vr;
-    cout<<endl;
-    for(int i = -k, x = 0; i <= n; i++, x++){
-
-        cout<<setw(3)<<i<<" ";
-        for(int l = 0, y = 0; l < k; l++, y++){
-            vr = getL(i,l);
-
-			if(vr > m || vr < 0) cout<<setw(3)<<" ";
-			else cout<<setw(2)<<vr<<" ";
-		}
-		cout<<"\n";
-	}
-}
-
-//mÈtodo que executa o comportamento original do algoritmo
-void KdifferenceInexactMatch2Optimizado1::executar(){
-    int d,e, row;
-
-    //inicializaÁ„o das bordas limites
-    for(e = 1; e < k; e++){
-       setL(-k, e, -1);
-       setL( n, e, -1);
-    }
-
-    //inicializaÁ„o da coluna e = 0
-    bool passou = true;
-    linha = -1;
-    for(d = -k; d <= n && passou; d++){
-        if(d < 0 || d == n) setL(d, 0, -1);
-        else {
-            row = LCEiterativo(1,d+1,a,t);
-            setL(d, 0, row);
-            if(row == m) passou = false;
-            if (passou && row > linha) linha = row;
-        }
-    }
-
-    for(e = 1; e < k; e++){
-        for(d = -k+1; d < n && passou; d++){
-           row = maiorDeTres(getL(d-1, e-1),
-                             getL(d,   e-1) + 1,
-                             getL(d+1, e-1) + 1);
-
-           row = menorDeDois(row, m);
-           //LCE
-           row += LCEiterativo(row+1, row+d+1, a, t);
-
-           if (row + d <= n) setL(d, e, row);
-           else setL(d, e, -1);
-
-           //se j· alcancou 'm' e o erro È menor que 'k' pode parar e ir para o prÛximo 'j'
-           if(row == m) passou = false;
-           if (passou && row > linha) linha = row;
-        }
-    }
-    if(passou) linha++;
-    else linha = -1;
-}
-
-//mÈtodo que imprimi a matriz na tela
+//m√©todo que imprimi a matriz na tela
 void KdifferenceInexactMatch2Original::imprimirMatrizTela(){
-    cout << setfill(' ');     //setar o tamanho de espaÁamento de elementos na tela
+    cout << setfill(' ');     //setar o tamanho de espa√ßamento de elementos na tela
 
-    cout<<endl<<setw(4)<<" "; //espaÁamento necess·rio para o cabeÁalho
-	for(int i = -1; i <= k; i++) cout<<setw(2)<<i<< " "; //imprimi o cabeÁalho da matriz com 2 espaÁos
+    cout<<endl<<setw(4)<<" "; //espa√ßamento necess√°rio para o cabe√ßalho
+	for(int i = -1; i <= k; i++) cout<<setw(2)<<i<< " "; //imprimi o cabe√ßalho da matriz com 2 espa√ßos
 
 	int vr;
     cout<<endl;
@@ -333,23 +246,23 @@ void KdifferenceInexactMatch2Original::imprimirMatrizTela(){
 	}
 }
 
-//mÈtodo que executa o comportamento original do algoritmo
-void KdifferenceInexactMatch2Optimizado2::executar(){
+//m√©todo que executa o comportamento original do algoritmo
+void KdifferenceInexactMatch2Optimizado1::executar(){
     int d,e, row;
 
-    //inicializaÁ„o da coluna e = 0
+    //inicializa√ß√£o da coluna e = 0
     bool passou = true;
     linha = -1;
     for(d = -k; d <= n && passou; d++){
         if(d < 0 || d == n) setL(d, 0, -1);
         else {
-            row = LCEiterativo(1,d+1,a,t);
+            row = directCompLCE(prime.j + 1,d+1, a,t, prime.m,n);
             setL(d, 0, row);
             if(row == m) passou = false;
             if (passou && row > linha) linha = row;
         }
     }
-    //int long long aux;
+
     int long long pivo;
 
     for(e = 1; e < k; e++){
@@ -361,26 +274,25 @@ void KdifferenceInexactMatch2Optimizado2::executar(){
 
            row = menorDeDois(row, m);
            //LCE
-           row += LCEiterativo(row+1, row+d+1, a, t);
+           row += directCompLCE(prime.j + row+1, row+d+1, a, t, prime.m, n);
 
            setL(d-1, e, pivo); //guarda o anterior
            if(row + d > n) row = -1;
-           if(d == n-1)setL(d, e, row); //se for o ˙ltimo guarda o atual
+           if(d == n-1) setL(d, e, row); //se for o √∫ltimo guarda o atual
            else pivo = row;
 
-           //se j· alcancou 'm' e o erro È menor que 'k' pode parar e ir para o prÛximo 'j'
+           //se j√° alcancou 'm' e o erro √© menor que 'k' pode parar e ir para o pr√≥ximo 'j'
            if(row == m) passou = false;
            if (passou && row > linha) linha = row;
         }
-        //if (e >= 1) imprimirMatrizTela();
     }
     if(passou) linha++;
     else linha = -1;
 }
 
-//mÈtodo que imprimi a matriz na tela
-void KdifferenceInexactMatch2Optimizado2::imprimirMatrizTela(){
-    cout << setfill(' ');     //setar o tamanho de espaÁamento de elementos na tela
+//m√©todo que imprimi a matriz na tela
+void KdifferenceInexactMatch2Optimizado1::imprimirMatrizTela(){
+    cout << setfill(' ');     //setar o tamanho de espa√ßamento de elementos na tela
 	int vr;
     cout<<endl;
     for(int d = -k; d <= n; d++){
@@ -391,35 +303,32 @@ void KdifferenceInexactMatch2Optimizado2::imprimirMatrizTela(){
     cout<<endl;
 }
 
-//mÈtodo que processa o algoritmo principal chamado a partir do procedimento MAIN
-//IMPORTANTE: n„o h· execuÁ„o sem a invocaÁ„o deste mÈtodo
+//m√©todo que processa o algoritmo principal chamado a partir do procedimento MAIN
+//IMPORTANTE: n√£o h√° execu√ß√£o sem a invoca√ß√£o deste m√©todo
 void KdifferencePrime::processar(){
-   int ocr = 0; //flag que guarda a quantidade de ocorrÍncias
+   int ocr = 0; //flag que guarda a quantidade de ocorr√™ncias
 
    if(versao == 1)
-       c = new KdifferenceInexactMatch2Optimizado2(alpha, beta, k); //instancia a vers„o original
-   else if(versao == 2)
-       c = new KdifferenceInexactMatch2Optimizado1(alpha, beta, k);
+       c = new KdifferenceInexactMatch2Optimizado1(alpha, beta, &k);
    else
-       c = new KdifferenceInexactMatch2Original(alpha, beta, k); //instancia a vers„o original
+       c = new KdifferenceInexactMatch2Original(alpha, beta, &k); //instancia a vers√£o original
 
-   for(int j = 0; j < (m - k) + 1; j++){
-       //cout<<j<<","; //TODO retirar depois, apenas para
-       c->setA(alpha.substr(j));
+   for(j = 0; j < (m - k) + 1; j++){
+       c->setaTamanhoM();
        c->executar();
        //if(j == 0) c->imprimirMatrizTela();
 
-       if(c->linha > -1){ //se a linha foi obtida, significa que existe uma ocorrÍncia
-           Primer *pr = new Primer(++ocr, j, c->linha, alpha.substr(j, c->linha));
+       if(c->linha > -1){ //se a linha foi obtida, significa que existe uma ocorr√™ncia
+           Primer *pr = new Primer(++ocr, j, c->linha, ocorrencia.substr(j, c->linha));
            primers.insert(primers.end(), pr);
-//           if(mostrarMatriz) c->escreverMatrizTela();
+           if(prime.mostrarMatriz) c->imprimirMatrizTela();
        }
    }
 }
 
 int main(int argc, char** argv) {
 
-   if (argc < 7 || argc > 9) {
+   if (argc < 7 || argc > 10) {
 	  cout<<endl<<ERR_ARGS<<endl;
 	  return 0;
    }
@@ -430,14 +339,21 @@ int main(int argc, char** argv) {
 	  return 0;
    }
 
-   prime.alpha = p->alpha;
-   prime.beta = p->beta;
+   prime.alpha = new char [p->alpha.length() + 1];
+   strcpy(prime.alpha, p->alpha.c_str());
+   prime.beta = new char [p->beta.length() + 1];
+   strcpy(prime.beta, p->beta.c_str());
    prime.k = p->k;
    prime.mostrarMatriz = p->mostrarMatriz;
    prime.versao = p->versao;
 
-   prime.m = prime.alpha.size();
-   prime.n = prime.beta.size();
+   prime.m = p->alpha.size();
+   prime.n = p->beta.size();
+   prime.ocorrencia = p->alpha;
+
+   bool tempo = p->mostrarTempo;
+
+   delete p;
 
    if(prime.k > prime.m){
      cout<<endl<<ERR_KMAIOR<<endl;
@@ -453,16 +369,10 @@ int main(int argc, char** argv) {
    prime.processar();
    fim = clock();
 
-   if(prime.primers.size() == 0) cout<<MSG_0_OCCR<<prime.k<<" diferenca(s)"<<endl;
-   else{
-        cout<<"Encontrado "<<prime.primers.size()<<" ocorrencia(s) r de primers"<<endl;
-        for(Primer *p : prime.primers){
-            p->escreverTela();
-        }
-   }
+   prime.mostrarOcorrencias();
 
-   if(p->mostrarTempo)
-     cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos";
+   if(tempo)
+     cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos"<<endl;
 
    return 1;
 }

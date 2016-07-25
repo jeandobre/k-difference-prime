@@ -59,7 +59,7 @@ public:
 
 };
 
-//função auxiliar compara três inteiros e devolve o maior
+//funÃ§Ã£o auxiliar compara trÃªs inteiros e devolve o maior
 unsigned long long int menorDeTres(unsigned long long int x,
                                    unsigned long long int b,
                                    unsigned long long int c){
@@ -73,8 +73,8 @@ long long int menorDeDois(long long int a,
    return a <= b ? a : b;
 }
 
-//não pode ser unsigned pois compara valores -1
-//retorna o menor entre três valores
+//nÃ£o pode ser unsigned pois compara valores -1
+//retorna o menor entre trÃªs valores
 long long int maiorDeTres(long long int a,
                           long long int b,
                           long long int c){
@@ -86,22 +86,20 @@ long long int maiorDeTres(long long int a,
 //LCE entre s[i] e t[j]
 unsigned long long int directCompLCE(unsigned long long int _i,
                                     unsigned long long int _j,
-                                    string *a, string *t){
-    //deve ser passsado os índices reais e aqui será decido
+                                    char *a, char *t, int _m, int _n){
+    //deve ser passsado os Ã­ndices reais e aqui serÃ¡ decido
     if(_i == 0 || _j == 0) return 0;
-    int _m = a->size();
-    int _n = t->size();
     _i--;
     _j--; //apenas por conta das strings
     unsigned int o = 0;
     //while(o+_i < _m && o+_j < _n && a->compare(o +_i, 1, *t, o +_j, 1) == 0)
-    while(o+_i < _m && o+_j < _n && strcmp(&a->at(o +_i), &t->at(o +_j)) == 0)
+    while(o+_i < _m && o+_j < _n && a[o +_i] == t[o +_j])
       o++;
 
     return o;
 }
 
-//devemos abrir o arquivo em tempo de execução, ou seja, processar enquanto abre o arquivo,
+//devemos abrir o arquivo em tempo de execuÃ§Ã£o, ou seja, processar enquanto abre o arquivo,
  string lerArquivo(const char *local){
 
   ifstream arquivo(local, std::ifstream::in);
@@ -121,7 +119,7 @@ unsigned long long int directCompLCE(unsigned long long int _i,
   return(contents.str());
 }
 
-//função auxiliar recebe os parâmetros que o usuário digitou, valida e transforma os valores
+//funÃ§Ã£o auxiliar recebe os parÃ¢metros que o usuÃ¡rio digitou, valida e transforma os valores
 Parametro *parseParametros(int argc, char** argv){
    string argA[6] = {"-a", "-alpha", "-pattern", "-padrao", "-p", "-P"};
    string argB[6] = {"-b", "-beta", "-text", "-texto", "-t", "-T"};
@@ -138,7 +136,7 @@ Parametro *parseParametros(int argc, char** argv){
         continue;
       }
 
-      //versão vs1 = Matriz Completa, vs2 = Melhorada 1 e vs3 Molhorada 2
+      //versÃ£o vs1 = Matriz Completa, vs2 = Melhorada 1 e vs3 Molhorada 2
       if(strcmp(argv[z], "-vs1") == 0){
         //if(argc == 7) return 0;
         p->versao=1;
