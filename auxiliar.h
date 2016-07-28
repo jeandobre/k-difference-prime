@@ -13,7 +13,7 @@ using namespace std;
 
 class Primer{
 
-private:
+public:
    int ocr;
    int j;
    int r;
@@ -36,6 +36,28 @@ public:
       cout<<"-Tamanho("<<setw(3)<<sequencia.size()<<"): ";
       cout<<sequencia<<endl;
    };
+
+   string escreverArquivoCompleto(){
+     string *retorno = new string(to_string(ocr));
+     retorno->append(";");
+     retorno->append(to_string(j));
+     retorno->append(";");
+     retorno->append(to_string(r));
+     retorno->append(";");
+     retorno->append(sequencia);
+     retorno->append(";");
+     retorno->append(to_string(sequencia.size()));
+     retorno->append("\n");
+     return *retorno;
+   }
+
+   string escreverArquivoReduzido(){
+     string *retorno = new string(to_string(j));
+     retorno->append(";");
+     retorno->append(to_string(j + r));
+     retorno->append("\n");
+     return *retorno;
+   }
 };
 
 class Parametro{

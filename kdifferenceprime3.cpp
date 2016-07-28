@@ -33,15 +33,17 @@ class KdifferenceInexactMatch3;
 class KdifferencePrime{
 
     public:
-      string alpha, beta;//seguindo o modelo proposto por GUSFIELD, nomes de variáveis que representam o padrão e o texto respectivamente
+      char *alpha, *beta;//seguindo o modelo proposto por GUSFIELD, nomes de variáveis que representam o padrão e o texto respectivamente
       int k;             //quantidade de diferênças
       int m;             //tamanho de alpha
       int n;             //tamanho de beta
       bool mostrarMatriz; //booleano 0,1 usado para imprime a matriz na tela
       int versao;     //booleano 0, 1 usado para executar a versão otimizada do algoritmo
+      int j;             //índice de alpha necessário p/ posicionar corretamente na árvore de sufixo
+      string ocorrencia;
 
       KdifferenceInexactMatch3 *c;
-      int j;             //índice de alpha necessário p/ posicionar corretamente na árvore de sufixo
+
       SSTree *sst;
       int **LCE;
 
@@ -64,15 +66,24 @@ class KdifferencePrime{
               cout<<LCE[i][j]<<" ";
          }
       };
+
       void mostrarOcorrencias(){
          if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
          else{
               cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
-              if(primers.size() > 10) cout<<"(Arquivo: saida.txt)"<<endl;
-              else {
+              if(primers.size() > 10){
+                fstream out;
+                string fileName = "dados/saida_a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k);
+                out.open(fileName, ios::out | ios::trunc);
+                for(Primer *p : primers){
+                  //out<<p->escreverArquivoReduzido();
+                  out<<p->escreverArquivoCompleto();
+                }
+                out.close();
+                cout<<"(Arquivo: " + fileName + ")"<<endl;
+              }else {
                  for(Primer *p : primers){
                      p->escreverTela();
-                     //p->escrever
                  }
               }
          }
@@ -115,13 +126,13 @@ class KdifferenceInexactMatch3{
     }
 
   public:
-    KdifferenceInexactMatch3(string a, string t, int k){
+    KdifferenceInexactMatch3(char *a, char *t, int *k){
        this->a = a;
        this->t = t;
-       this->k = k;
+       this->k = *k;
 
-       this->m = a.length();
-       this->n = t.length();
+       this->m = strlen(a);
+       this->n = strlen(t);
 
        //alocação dinâmica de inteiros
        this->L = new int[getDimensaoD()];
@@ -134,10 +145,8 @@ class KdifferenceInexactMatch3{
     void executar();
     void imprimirMatrizTela();
 
-    void setA(string a){
-      this->a = a;
-      this->_a = a.c_str();
-      this->m = a.size(); //atualiza o valor de 'm' com o novo tamanho de 'a'
+    void setaTamanhoM(){
+      this->m = prime.m - prime.j;
     }
 };
 
@@ -207,24 +216,23 @@ void KdifferenceInexactMatch3::executar(){
 void KdifferencePrime::processar(){
    int ocr = 0; //flag que guarda a quantidade de ocorrências
 
-   c = new KdifferenceInexactMatch3(alpha, beta, k); //instancia apenas uma vez
+   c = new KdifferenceInexactMatch3(alpha, beta, &k); //instancia apenas uma vez
 
-   for(int j = 0; j < (m - k) + 1; j++){
-       //cout<<j<<",";
-       c->setA(alpha.substr(j));
-       this->j = j;
+   for(j = 0; j < (m - k) + 1; j++){
+       c->setaTamanhoM();
        c->executar();
 
        if(c->linha > -1){ //se a linha foi obtida, significa que existe uma ocorrência
-           Primer *pr = new Primer(++ocr, j, c->linha, alpha.substr(j, c->linha));
+           Primer *pr = new Primer(++ocr, j, c->linha, ocorrencia.substr(j, c->linha));
            primers.insert(primers.end(), pr);
+           if(prime.mostrarMatriz) c->imprimirMatrizTela();
        }
    }
 }
 
 int main(int argc, char** argv) {
 
-   if (argc < 7 || argc > 9) {
+   if (argc < 7 || argc > 10) {
 	  cout<<endl<<ERR_ARGS<<endl;
 	  return 0;
    }
@@ -235,14 +243,21 @@ int main(int argc, char** argv) {
 	  return 0;
    }
 
-   prime.alpha = p->alpha;
-   prime.beta = p->beta;
+   prime.alpha = new char [p->alpha.length() + 1];
+   strcpy(prime.alpha, p->alpha.c_str());
+   prime.beta = new char [p->beta.length() + 1];
+   strcpy(prime.beta, p->beta.c_str());
    prime.k = p->k;
    prime.mostrarMatriz = p->mostrarMatriz;
    prime.versao = p->versao;
 
-   prime.m = prime.alpha.size();
-   prime.n = prime.beta.size();
+   prime.m = p->alpha.size();
+   prime.n = p->beta.size();
+   prime.ocorrencia = p->alpha;
+
+   bool tempo = p->mostrarTempo;
+
+   delete p;
 
    if(prime.k > prime.m){
      cout<<endl<<ERR_KMAIOR<<endl;
@@ -263,7 +278,6 @@ int main(int argc, char** argv) {
       ulong n = strlen((char*)text);
       n++;
 
-
       inicio = clock();
       //armazena todas as consultas LCE
       prime.sst = new SSTree(text, n);
@@ -279,7 +293,7 @@ int main(int argc, char** argv) {
       //armazena todas as consultas LCE
       for(int i = 0; i < prime.m; i++){
          for(int j = 0; j < prime.n; j++)
-         prime.LCE[i][j] = directCompLCE(i+1, j+1, &prime.alpha, &prime.beta);
+         prime.LCE[i][j] = directCompLCE(i+1, j+1, prime.alpha, prime.beta, prime.m, prime.n);
        }
       fim = clock();
    }
@@ -295,9 +309,8 @@ int main(int argc, char** argv) {
    fim = clock();
 
    prime.mostrarOcorrencias();
-
-   if(p->mostrarTempo)
-     cout<<"Tempo de execucao: "<< ((fim - inicio) / (CLOCKS_PER_SEC / 1000)) << " milisegundos"<<endl;
+   long long int tempo_execucao = ((fim - inicio) / (CLOCKS_PER_SEC / 1000));
+   if(tempo) formataTempo(tempo_execucao);
 
    return 0;
 }

@@ -52,11 +52,20 @@ class KdifferencePrime{
          if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
          else{
               cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
-              if(primers.size() > 10) cout<<"(Arquivo: saida.txt)"<<endl;
-              else {
+              if(primers.size() > 10){
+                fstream out;
+                string fileName = "dados/saida_a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k);
+                out.open(fileName, ios::out | ios::trunc);
+                for(Primer *p : primers){
+                  //out<<p->ocr<<";"<<p->j<<";"<<p->r<<";";
+                  //out<<p->escreverArquivoReduzido();
+                  out<<p->escreverArquivoCompleto();
+                }
+                out.close();
+                cout<<"(Arquivo: " + fileName + ")"<<endl;
+              }else {
                  for(Primer *p : primers){
                      p->escreverTela();
-                     //p->escrever
                  }
               }
          }
