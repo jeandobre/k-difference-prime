@@ -44,10 +44,9 @@ class KdifferencePrime{
 
       KdifferenceInexactMatch3 *c;
 
-      SSTree *sst;
-      int **LCE;
+      SSTree *sst; //Arvore de Sufixo comprimida (CST)
 
-      list<Primer *> primers;
+      list<Primer *> primers; //lista que guarda as ocorrências de primers
 
     public:
       KdifferencePrime(){
@@ -59,13 +58,6 @@ class KdifferencePrime{
          delete sst;
       }
       void processar();
-      void imprimirLCE(){
-         for(int i = 0; i < m; i++){
-           cout<<endl;
-           for(int j = 0; j < n; j++)
-              cout<<LCE[i][j]<<" ";
-         }
-      };
 
       void mostrarOcorrencias(){
          if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
@@ -99,9 +91,6 @@ class KdifferenceInexactMatch3{
     string a;  //padrão
     string t;  //texto
 
-    const char* _a;
-    const char* _t;
-
     int k;     //quantidade de diferênças
     int m, n;  //tamanho de a e t respectivamente
   public:
@@ -109,7 +98,7 @@ class KdifferenceInexactMatch3{
 
   private:
       int dToMatriz(int d){
-      return d + k; //converte índice d para índices reais
+      return d + k + 1; //converte índice d para índices reais
     }
 
   public:
@@ -122,7 +111,7 @@ class KdifferenceInexactMatch3{
     }
 
     int getDimensaoD(){
-      return k + n + 1; //k, n+1, 1 da posição 0
+      return k + n + 3; //k, n+1, 1 da posição 0
     }
 
   public:
@@ -166,40 +155,28 @@ void KdifferenceInexactMatch3::imprimirMatrizTela(){
 void KdifferenceInexactMatch3::executar(){
     int d,e, row;
 
-    //inicialização da coluna e = 0
-    bool passou = true;
-    linha = -1;
-    for(d = -k; d <= n && passou; d++){
-        if(d < 0 || d == n) setL(d, -1);
-        else {
-            //row = prime.sst->lce(prime.j, prime.m + 1 + d);
-            row = prime.LCE[prime.j][d];
-            setL(d, row);
+    //inicialização da matriz
+    for(d = -(k+1); d <= (n+1); d++)
+        setL(d, -1);
 
-            if(row == m) passou = false;
-            if (passou && row > linha) linha = row;
-        }
-    }
-
-    int long long pivo;
-
-    for(e = 1; e < k; e++){
+    int long long pivo; //variável auxiliar para troca de posições
+    bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
+    linha = -1;         //variável qwue guarda a primeira linha de ocorrência de primer
+    for(e = 0; e < k; e++){
         pivo = -1;
-        for(d = -e; d < n && passou; d++){
+        for(d = -e; d <= n && passou; d++){
            row = maiorDeTres(getL(d-1),
                              getL(d) + 1,
                              getL(d+1) + 1);
 
            row = menorDeDois(row, m);
            //LCE
-         //  if(row < m && row + d < n)
-          //   row += prime.sst->lce(prime.j + row , prime.m + 1 + row + d);//LCE(0,m+1);
-          if(row < m && row + d < n)
-            row += prime.LCE[prime.j + row][row + d];
+           if(row < m && row + d < n)
+             row += prime.sst->lce(prime.j + row , prime.m + 1 + row + d);//LCE(0,m+1);
 
            setL(d-1, pivo); //guarda o anterior
-           if(row + d > n) row = -1;
-           if(d == n-1)setL(d, row); //se for o último guarda o atual
+           if(row + d > n+1) row = -1;
+           if(d == n) setL(d, row); //se for o último guarda o atual
            else pivo = row;
 
            //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
@@ -264,13 +241,8 @@ int main(int argc, char** argv) {
      return 0;
    }
 
-   prime.LCE = new int*[prime.m];
-   for (int j = 0; j < prime.m; ++j)
-     prime.LCE[j] = new int[prime.n];
-
    time_t inicio, fim;
 
-   if(prime.versao == 1){
       //pré-processamento da árvore de sufixo
       cout<<"Pre-processando arvore de sufixo...";
       string texto;
@@ -279,30 +251,14 @@ int main(int argc, char** argv) {
       n++;
 
       inicio = clock();
-      //armazena todas as consultas LCE
+      //constroi a árvore de sufixo comprimida para a sequencia generalizada: alpha # beta $
       prime.sst = new SSTree(text, n);
-      for(int i = 0; i < prime.m; i++){
-         for(int j = 0; j < prime.n; j++)
-           prime.LCE[i][j] = prime.sst->lce(i, prime.m + 1 + j);
-       }
 
       fim = clock();
-   } else {
-      cout<<"Pre-processando LCE computado diretamente...";
-      inicio = clock();
-      //armazena todas as consultas LCE
-      for(int i = 0; i < prime.m; i++){
-         for(int j = 0; j < prime.n; j++)
-         prime.LCE[i][j] = directCompLCE(i+1, j+1, prime.alpha, prime.beta, prime.m, prime.n);
-       }
-      fim = clock();
-   }
+
    cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")"<<endl;
-
    cout<<"K-difference-primer-3 executando..."<<endl;
-   cout<<"Versao: "<<prime.versao<<endl;
-
-   //prime.imprimirLCE();
+   cout<<"Versao: CST"<<endl;
 
    inicio = clock();
    prime.processar();

@@ -17,7 +17,7 @@ default: $(objects)
 clean:
 	-rm -f core *.o  *~ kdifferenceprime3 
 
-#depend:
-#	g++ -MM *.cpp > dependencies.mk
+depend:
+	g++ -MM *.cpp > dependencies.mk
 
 #include $(LIB_DIR)/dependencies.mk

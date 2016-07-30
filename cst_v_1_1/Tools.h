@@ -1,7 +1,8 @@
 /*
  * Collection of basic tools and defines
  */
-#define __WORDSIZE 64
+
+#define __WORDSIZE 32
 
 #ifndef _TOOLS_H_
 #define _TOOLS_H_
@@ -57,37 +58,37 @@ public:
     static unsigned* MakeTable();
     static unsigned FastFloorLog2(unsigned);
 
-    static inline void SetField(ulong *A, register unsigned len, register ulong index, register ulong x)
+    static inline void SetField(ulong *A, register unsigned len, register ulong index, register ulong x) 
     {
-        ulong i = index * len / W,
+        ulong i = index * len / W, 
                  j = index * len - i * W;
-        ulong mask = (j+len < W ? ~0lu << j+len : 0)
+        ulong mask = (j+len < W ? ~0lu << j+len : 0) 
                         | (W-j < W ? ~0lu >> (W-j) : 0);
         A[i] = (A[i] & mask) | x << j;
-        if (j + len > W)
+        if (j + len > W) 
         {
-            mask = ((~0lu) << (len + j - W));
+            mask = ((~0lu) << (len + j - W));  
             A[i+1] = (A[i+1] & mask)| x >> (W - j);
-        }
+        }     
     }
-
-    static inline ulong GetField(ulong *A, register unsigned len, register ulong index)
+    
+    static inline ulong GetField(ulong *A, register unsigned len, register ulong index) 
     {
-        register ulong i = index * len / W,
-                       j = index * len - W * i,
+        register ulong i = index * len / W, 
+                       j = index * len - W * i, 
                        result;
         if (j + len <= W)
             result = (A[i] << (W - j - len)) >> (W - len);
-        else
+        else 
         {
             result = A[i] >> j;
             result = result | (A[i+1] << (WW - j - len)) >> (W - len);
         }
         return result;
     }
-
-
-    static inline ulong GetVariableField(ulong *A, register unsigned len, register ulong index)
+       
+    
+    static inline ulong GetVariableField(ulong *A, register unsigned len, register ulong index) 
     {
        register ulong i=index/W, j=index-W*i, result;
        if (j+len <= W)
@@ -100,15 +101,15 @@ public:
     }
 
     static inline void SetVariableField(ulong *A, register unsigned len, register ulong index, register ulong x) {
-        ulong i=index/W,
+        ulong i=index/W, 
                     j=index-i*W;
-        ulong mask = (j+len < W ? ~0lu << j+len : 0)
+        ulong mask = (j+len < W ? ~0lu << j+len : 0) 
                         | (W-j < W ? ~0lu >> (W-j) : 0);
         A[i] = (A[i] & mask) | x << j;
         if (j+len>W) {
-            mask = ((~0lu) << (len+j-W));
+            mask = ((~0lu) << (len+j-W));  
             A[i+1] = (A[i+1] & mask)| x >> (W-j);
-        }
+        } 
     }
 
 

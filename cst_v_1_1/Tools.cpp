@@ -37,9 +37,9 @@ ulong * Tools::bp2bitstream(uchar* bp)
     ulong *A = new ulong[len/W + 1];
     for (ulong i = 0; i < len; i++)
     {
-        if (bp[i] == '(')
+        if (bp[i] == '(') 
             SetField(A, 1, i, 1);
-        else
+        else 
             SetField(A, 1, i, 0);
     }
     return A;
@@ -57,13 +57,13 @@ void Tools::PrintBitSequence(ulong *A, ulong len)
 
 unsigned Tools::FloorLog2(ulong i)
 {
-    int b = 0;
+    uint b = 0;
     if (i == 0)
         return 0;
     while (i)
-    {
-        b++;
-        i >>= 1;
+    { 
+        b++; 
+        i >>= 1; 
     }
     return b - 1;
 }
@@ -76,7 +76,7 @@ unsigned * Tools::MakeTable()
     {
         if (i == 0)
            table[i] = 0;
-        if (i >= 1 && i < (1 << 1 ))
+        if (i >= 1 && i < (1 << 1 )) 
            table[i] = 1;
         if (i >= (1 << 1 ) && i < (1 << 2 ))
            table[i] = 2;
@@ -114,7 +114,7 @@ unsigned Tools::CeilLog2(ulong i)
     unsigned j = FloorLog2(i);
     if ((ulong)(1lu << j) != i)
         return j + 1;
-
+        
     return j;
 }
 
@@ -143,7 +143,7 @@ uchar * Tools::GetFileContents(char *filename, ulong maxSize)
 ulong Tools::ustrlen(uchar *text)
 {
    ulong i=0;
-
+   
    while (text[i]>0u) i++;
    return i;
 }
@@ -151,35 +151,35 @@ ulong Tools::ustrlen(uchar *text)
 char *Tools::uctoc(uchar *text, bool remove)
 {
    ulong i, len = ustrlen(text);
-
+   
    //printf("%d\n",len);
-
+   
    char *result = new char[len+1];
-
+   
    result[len] = '\0';
-
+   
    for(i=0;i<len;i++)
       result[i] = (int)text[i]-128;
-
+    
    if (remove) delete text;
-
-   return result;
+      
+   return result;       
 }
 
 uchar *Tools::ctouc(char *text, bool remove)
 {
    ulong i, len = strlen(text);
-
+   
    uchar *result = new uchar[len+1];
-
+   
    result[len] = 0u;
-
+   
    for(i=0;i<len;i++)
       result[i] = (int)text[i]+128;
-
+      
    if (remove) delete text;
-
-   return result;
+         
+   return result;       
 }
 
 void Tools::RemoveControlCharacters(uchar *data)
@@ -198,7 +198,7 @@ void Tools::RemoveControlCharacters(uchar *data)
 */
 unsigned Tools::bits (ulong n)
 
-   { int b = 0;
+   { uint b = 0;
      while (n)
     { b++; n >>= 1; }
      return b;
