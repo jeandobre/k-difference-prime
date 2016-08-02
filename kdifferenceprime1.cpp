@@ -28,52 +28,21 @@
 #include <iostream>
 #include <string.h>
 #include <stdlib.h>
-#include <iomanip>
 #include <time.h>
 #include <list>
+#include "classes.h"
 #include "auxiliar.h"
 
 //declaração da classe que é utilizada no KdifferencePrime
 class KdifferenceInexactMatch1;
 
-class KdifferencePrime{
+class KdifferencePrime1: public KdifferencePrime{
 
     public:
-      char *alpha, *beta;//seguindo o modelo proposto por GUSFIELD, nomes de variáveis que representam o padrão e o texto respectivamente
-      int k;             //quantidade de diferênças
-      int m;             //tamanho de alpha
-      int n;             //tamanho de beta
-      bool mostrarMatriz; //booleano 0,1 usado para imprime a matriz na tela
-      int versao;        //booleano 0, 1 usado para executar a versão otimizada do algoritmo
-      int j; //índice atual de alpha
-      string ocorrencia;//facilitar encontrar segmento com j e r
-
       KdifferenceInexactMatch1 *c;
-      list<Primer *> primers;
-
-    public:
-      KdifferencePrime(){
-          //construtor seta os valores default se o usuário não escolher nada
-         this->mostrarMatriz=false;
-         this->versao=1; //começa com a melhor versão
-         primers.clear();
-      }
 
       void processar();
 
-      void mostrarOcorrencias(){
-         if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
-         else{
-              cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
-              if(primers.size() > 10) cout<<"(Arquivo: saida.txt)"<<endl;
-              else {
-                 for(Primer *p : primers){
-                     p->escreverTela();
-                     //p->escrever
-                 }
-              }
-         }
-      }
 } prime; // é necessário apenas uma instancia de prime, já declarada aqui
 
 //O algoritmo foi adaptado para entregar o resultado do primer que é o inverso da programação original
@@ -83,8 +52,8 @@ class KdifferenceInexactMatch1{
 
   protected:
     int **D;      //Matriz D[0..m, 0..n] ou D[0..1, 0..n]
-    const char *t;     //texto
-    const char *a;     //padrão
+    char *t;     //texto
+    char *a;     //padrão
     int k;        //quantidade de diferênças
     int m, n;     //tamanho de a e t respectivamente
     int rowPrint; //variável auxiliar que recebe o valor limite da linha de impressão na tela, linha máxima
@@ -93,7 +62,7 @@ class KdifferenceInexactMatch1{
     int linha;    //linha que contém todos os valores >= k
 
   public:
-    KdifferenceInexactMatch1(const char *a, const char *t, int *k){
+    KdifferenceInexactMatch1(char *a, char *t, int *k){
        this->a = a;
        this->t = t;
        this->k = *k;
@@ -111,7 +80,7 @@ class KdifferenceInexactMatch1{
 //implementação original Matriz D[0..m, 0..n]
 class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
  public:
-   KdifferenceInexactMatch1Original(const char *a, const char *t, int *k): KdifferenceInexactMatch1(a,t,k) {
+   KdifferenceInexactMatch1Original(char *a, char *t, int *k): KdifferenceInexactMatch1(a,t,k) {
        //alocação dinâmica de inteiros, necessário mais um que é a posição 0
        this->D = new (nothrow) int*[m + 1];
        for (int j = 0; j <= m; ++j)
@@ -148,7 +117,7 @@ class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
 //implementação Matriz D[0..1, 0..n]
 class KdifferenceInexactMatch1Optimizado1: public KdifferenceInexactMatch1{
   public:
-   KdifferenceInexactMatch1Optimizado1(const char *a, const char *t, int *k):KdifferenceInexactMatch1(a,t,k){
+   KdifferenceInexactMatch1Optimizado1(char *a, char *t, int *k):KdifferenceInexactMatch1(a,t,k){
 
        //alocação de 2 linhas de inteiros por n + 1
        this->D = new (nothrow) int*[2];
@@ -175,7 +144,7 @@ class KdifferenceInexactMatch1Optimizado1: public KdifferenceInexactMatch1{
 //implementação Matriz D[0, 0..n]
 class KdifferenceInexactMatch1Optimizado2: public KdifferenceInexactMatch1{
   public:
-   KdifferenceInexactMatch1Optimizado2(const char *a, const char *t, int *k):KdifferenceInexactMatch1(a,t,k){
+   KdifferenceInexactMatch1Optimizado2(char *a, char *t, int *k):KdifferenceInexactMatch1(a,t,k){
 
        //alocação de 1 linha de inteiros por n + 1
        this->D = new (nothrow) int*[1];
@@ -304,11 +273,12 @@ void KdifferenceInexactMatch1Optimizado2::executar(){
 	 }
      if(passou) linha = i; //se a linha não foi descartada ela é a primeira
    }
+
 }
 
 //método que processa o algoritmo principal chamado a partir do procedimento MAIN
 //IMPORTANTE: não há execução sem a invocação deste método
-void KdifferencePrime::processar(){
+void KdifferencePrime1::processar(){
    int ocr = 0; //flag que guarda a quantidade de ocorrências
 
    if(versao == 1) //se o usuário escolheu a versão otimizada 2

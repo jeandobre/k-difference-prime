@@ -6,59 +6,8 @@
 //constantes definidas para uso de mensagens na tela
 #define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao"
 #define ERR_KMAIOR "O parametro k deve estar em um intervalo entre 1 e "
-#define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
-#define MSG_N_OCCR "\nOcr "
 
 using namespace std;
-
-class Primer{
-
-public:
-   int ocr;
-   int j;
-   int r;
-   string sequencia;
-
-public:
-   Primer(int ocr, int j, int r, string sequencia){
-      this->ocr = ocr;
-      this->j = ++j;
-      this->r = --r;
-      this->sequencia = sequencia;
-   };
-
-   void escreverTela(){
-      cout<<setfill('0');
-      cout<<MSG_N_OCCR<<setw(3)<<ocr<<" em ";
-
-      cout<< setfill(' ');
-      cout<<setw(3)<<j<<".."<<setw(3)<<j + r;
-      cout<<"-Tamanho("<<setw(3)<<sequencia.size()<<"): ";
-      cout<<sequencia<<endl;
-   };
-
-   string escreverArquivoCompleto(){
-     string *retorno = new string(to_string(ocr));
-     retorno->append(";");
-     retorno->append(to_string(j));
-     retorno->append(";");
-     retorno->append(to_string(r));
-     retorno->append(";");
-     retorno->append(sequencia);
-     retorno->append(";");
-     retorno->append(to_string(sequencia.size()));
-     retorno->append("\n");
-     return *retorno;
-   }
-
-   string escreverArquivoReduzido(){
-     string *retorno = new string(to_string(j));
-     retorno->append(";");
-     retorno->append(to_string(j + r));
-     retorno->append("\n");
-     return *retorno;
-   }
-};
 
 class Parametro{
 

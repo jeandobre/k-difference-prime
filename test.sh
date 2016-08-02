@@ -1,6 +1,6 @@
- #!/bin/bash
+﻿ #!/bin/bash
 
-echo -e "\nQual a versão do programa que deseja testar (1,2 ou 3)?"
+echo -e "\nQual a versão do programa que deseja testar (1, 2, 3 ou 4)?"
 read versao
 
 programa="./kdifferenceprime"
