@@ -170,7 +170,8 @@ void KdifferenceInexactMatch3::executar(){
                              getL(d+1) + 1);
 
            row = menorDeDois(row, m);
-           //LCE
+           //LCE (Segundo os autores o tempo é determinado por um valor K que eu não encontrei
+           //para diminuir o tempo
            if(row < m && row + d < n)
              row += prime.sst->lce(prime.j + row , prime.m + 1 + row + d);//LCE(0,m+1);
 
