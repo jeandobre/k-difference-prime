@@ -8,13 +8,7 @@
 
 using namespace std;
 
-namespace std {
-    std::string to_string(size_t n) {
-        std::ostringstream s;
-        s << n;
-        return s.str();
-    }
-}
+class KdifferenceInexactMatch;
 
 class Primer{
 
@@ -78,6 +72,8 @@ class KdifferencePrime{
       int j;             //índice de alpha necessário p/ posicionar corretamente na árvore de sufixo
       string ocorrencia;
 
+      KdifferenceInexactMatch *c;
+
       list<Primer *> primers; //lista que guarda as ocorrências de primers
 
     public:
@@ -109,4 +105,30 @@ class KdifferencePrime{
               }
          }
       }
+};
+
+class KdifferenceInexactMatch{
+
+  protected:
+    char *t;     //texto
+    char *a;     //padrão
+    int k;        //quantidade de diferênças
+    int m, n;     //tamanho de a e t respectivamente
+    int rowPrint; //variável auxiliar que recebe o valor limite da linha de impressão na tela, linha máxima
+
+  public:
+    KdifferenceInexactMatch(char *a, char *t, int *k){
+       this->a = a;
+       this->t = t;
+       this->k = *k;
+
+       this->m = strlen(a);
+       this->n = strlen(t);
+    };
+
+    ~KdifferenceInexactMatch(){};
+
+    virtual int executar(){};//executa o algoritmo kdifference inexact match e retorna a linha da ocorrência de prime
+    virtual void imprimirMatrizTela()const {}; //permite o cacheamento pois não muda o comportamento
+    virtual void setaTamanhoM(){};
 };

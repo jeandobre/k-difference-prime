@@ -47,9 +47,9 @@ Como executar os testes unitários?
 
 Parâmetros:
 
-  -a
-  -b
-  -k
+  -a sequência alfa: Arquivo ou sequência de caracteres
+  -b sequência beta: Arquivo ou sequência de caracteres
+  -k Parâmetro que indica a quantidade de diferenças desejada entre alfa e beta
 
   -vs[%]
   -sm Mostrar a matriz de programação dinâmica na tela
