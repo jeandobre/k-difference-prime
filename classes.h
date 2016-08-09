@@ -31,13 +31,7 @@
 
 using namespace std;
 
-namespace std {
-    std::string to_string(size_t n) {
-        std::ostringstream s;
-        s << n;
-        return s.str();
-    }
-}
+class KdifferenceInexactMatch;
 
 string lerArquivo(const char *local);
 
@@ -152,6 +146,8 @@ class KdifferencePrime{
       int j;             //índice de alpha necessário p/ posicionar corretamente na árvore de sufixo
       string ocorrencia;
       bool tempo; //booleano para mostrar o tempo de execução na tela se o usuário setar o parâmetro
+
+      KdifferenceInexactMatch *c;
 
       list<Primer *> primers; //lista que guarda as ocorrências de primers
 
