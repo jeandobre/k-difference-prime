@@ -183,6 +183,8 @@ int LCE(vector<int> lcp, vector<int>invSuff, int n,
 
     int length = lcp[low];
 
+    //isso aki está tomando muito tempo
+    //tem que substituir por RMQ
     for (int k=low+1; k<high; k++)
     {
         if (lcp[k] < length)

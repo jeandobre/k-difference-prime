@@ -20,7 +20,6 @@ using namespace std;
 // pre-written code {{{
 #define REP(i,n) for(int i=0;i<(int)(n);++i)
 
-
 //{{{ Suffix Array
 //{{{ for DEBUG
 void writeSuffix(char *t,int i){
@@ -104,22 +103,16 @@ struct SuffixArray{
 		}
 	}
 
-	int LCE(int L, int R){
+	int LCE(int i, int j){
+	    //b[i] inverso de sa[i]
 
-        if (L == R) return (n-L);
+        int low  = b[i];
+        int high = b[j];
 
-        int low =  min(sa[b[L]-1], sa[b[R]-1]);
-        int high = min(sa[b[L]-1], sa[b[R]-1]);
+        i = minVal(low, high);
+        j = maxVal(low, high);
 
-        int length = lcp[low];
-
-        for (int k=low+1; k<high; k++)
-        {
-            if (lcp[k] < length)
-                length = lcp[k];
-        }
-
-        return (length);
+        return minimum(i,j);
 	}
 	//}}}
 	//{{{ inner LCP computation with RMQ: O(1)
@@ -168,4 +161,20 @@ struct SuffixArray{
 	}
 	//}}}
 };
+/*
+int main(){
+
+  SuffixArray *sa = new SuffixArray("CCCGGCCC#CCCGTGCCC");
+                                     //012345678901234567
+  sa->builds();
+   //string txt = "CCCGGCCC#CCCGTGCCC";
+
+  cout<<sa->LCE(0,9)<<endl;
+  cout<<sa->LCE(1,9)<<endl;
+  cout<<sa->LCE(4,14)<<endl;
+  cout<<sa->LCE(4,13)<<endl;
+  cout<<sa->LCE(3,13)<<endl;
+
+   return 0;
+}; */
 //}}}

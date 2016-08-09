@@ -1,34 +1,18 @@
+
+#ifndef _auxiliar_H_
+#define _auxiliar_H_
+
 #include <fstream>
 #include <sstream>
-#include <string.h>
+#include <string>
 #include <iomanip>
+#include <iostream>
 
 //constantes definidas para uso de mensagens na tela
 #define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao"
 #define ERR_KMAIOR "O parametro k deve estar em um intervalo entre 1 e "
 
 using namespace std;
-
-class Parametro{
-
-public:
-   string alpha, beta;
-   int k;
-   bool mostrarMatriz;
-   bool mostrarTempo;
-   int versao;
-
-   int total;
-
-   Parametro(){
-     k = 0;
-     mostrarMatriz = false;
-     mostrarTempo = false;
-     versao = 1;
-     total = 0;
-   };
-
-};
 
 //função auxiliar compara três inteiros e devolve o maior
 unsigned long long int menorDeTres(unsigned long long int x,
@@ -90,77 +74,6 @@ unsigned long long int directCompLCE(unsigned long long int _i,
   return(contents.str());
 }
 
-//função auxiliar recebe os parâmetros que o usuário digitou, valida e transforma os valores
-Parametro *parseParametros(int argc, char** argv){
-   string argA[6] = {"-a", "-alpha", "-pattern", "-padrao", "-p", "-P"};
-   string argB[6] = {"-b", "-beta", "-text", "-texto", "-t", "-T"};
-   string argK[2] = {"-k", "-K"};
-
-   Parametro *p = new Parametro();
-
-   int temA, temB, temK;
-   temA = temB = temK = 0;
-
-   for(int z = 1; z < argc; z++){
-      if(strcmp(argv[z], "-sm") == 0){
-        p->mostrarMatriz = true;
-        continue;
-      }
-
-      //versão vs1 = Matriz Completa, vs2 = Melhorada 1 e vs3 Molhorada 2
-      if(strcmp(argv[z], "-vs1") == 0){
-        //if(argc == 7) return 0;
-        p->versao=1;
-        continue;
-      }
-      if(strcmp(argv[z], "-vs2") == 0){
-        //if(argc == 7) return 0;
-        p->versao=2;
-        continue;
-      }
-
-      if(strcmp(argv[z], "-vs3") == 0){
-        //if(argc == 7) return 0;
-        p->versao=3;
-        continue;
-      }
-
-      if(strcmp(argv[z], "-st") == 0){
-        //if(argc == 7) return 0;
-        p->mostrarTempo=true;
-        continue;
-      }
-
-      for(int w = 0; w < 6; w++){
-        if(!temA && argA[w].compare(argv[z]) == 0){
-            p->alpha = argv[z + 1];
-            temA = 1;
-            continue;
-        }
-        else if(!temB && argB[w].compare(argv[z]) == 0){
-            p->beta = argv[z + 1];
-            temB = 1;
-            continue;
-        }
-        else if(w < 2 && !temK && argK[w].compare(argv[z]) == 0){
-            try{
-              p->k = atoi(argv[z + 1]);
-              if(p->k > 0) temK = 1;
-              continue;
-            }catch(int e){
-             // return 0;
-            }
-        }
-      }
-   }
-   p->total = temA + temB + temK;
-
-   p->alpha = lerArquivo(p->alpha.c_str());
-   p->beta  = lerArquivo(p->beta.c_str());
-
-   return p;
-}
-
 void formataTempo(long long int valor){
   int mili = 0, sec = 0, minu = 0, dia = 0, hor = 0;
   long long int _tempo = valor;
@@ -197,13 +110,22 @@ void formataTempo(long long int valor){
   }
   if(valor > 0) dia = valor;
 
-  string tempo = "(" + to_string(_tempo) + " milisegundo(s)) - ";
+  std::stringstream out;
+  out << _tempo;
 
-  if(dia > 0)  tempo += to_string(dia)  + " dia(s) ";
-  if(hor > 0)  tempo += to_string(hor)  + " hora(s) ";
-  if(minu > 0) tempo += to_string(minu) + " minuto(s) ";
-  if(sec > 0)  tempo += to_string(sec)  + " segundo(s) ";
-  if(mili > 0) tempo += to_string(mili) + " milesimos(s)";
+  string tempo = "(" + out.str() + " milisegundo(s)) - ";
+  out << dia;
+  if(dia > 0)  tempo += out.str()  + " dia(s) ";
+  out << hor;
+  if(hor > 0)  tempo += out.str() + " hora(s) ";
+  out << minu;
+  if(minu > 0) tempo += out.str() + " minuto(s) ";
+  out << sec;
+  if(sec > 0)  tempo += out.str()  + " segundo(s) ";
+  out << mili;
+  if(mili > 0) tempo += out.str() + " milesimos(s)";
 
   cout<<"Tempo de execucao: "<< tempo <<endl;
 }
+
+#endif

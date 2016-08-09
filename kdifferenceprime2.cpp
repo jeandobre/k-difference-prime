@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <time.h>
 #include <list>
+#include "classes.h"
 #include "auxiliar.h"
 
 using namespace std;
@@ -24,52 +25,19 @@ using namespace std;
 //declaração da classe que é utilizada no KdifferencePrime
 class KdifferenceInexactMatch2;
 
-class KdifferencePrime{
+class KdifferencePrime2: public KdifferencePrime{
 
     public:
-      char *alpha, *beta;//seguindo o modelo proposto por GUSFIELD, nomes de variáveis que representam o padrão e o texto respectivamente
-      int k;             //quantidade de diferênças
-      int m;             //tamanho de alpha
-      int n;             //tamanho de beta
-      bool mostrarMatriz; //booleano 0,1 usado para imprime a matriz na tela
-      int versao;     //booleano 0, 1 usado para executar a versão otimizada do algoritmo
-      string ocorrencia;
-      int j;
-
       KdifferenceInexactMatch2 *c;
-      list<Primer *> primers;
 
     public:
-      KdifferencePrime(){
+      KdifferencePrime2(){
          //construtor seta os valores default se o usuário não escolher nada
          this->mostrarMatriz=false;
          this->versao=1; //apenas uma versão
          primers.clear();
       }
       void processar();
-
-      void mostrarOcorrencias(){
-         if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
-         else{
-              cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
-              if(primers.size() > 10){
-                fstream out;
-                string fileName = "dados/saida_a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k);
-                out.open(fileName, ios::out | ios::trunc);
-                for(Primer *p : primers){
-                  //out<<p->ocr<<";"<<p->j<<";"<<p->r<<";";
-                  //out<<p->escreverArquivoReduzido();
-                  out<<p->escreverArquivoCompleto();
-                }
-                out.close();
-                cout<<"(Arquivo: " + fileName + ")"<<endl;
-              }else {
-                 for(Primer *p : primers){
-                     p->escreverTela();
-                 }
-              }
-         }
-      }
 } prime;
 
 //O algoritmo foi adaptado para entregar o resultado do primer que é o inverso da programação original
@@ -315,7 +283,7 @@ void KdifferenceInexactMatch2Optimizado::executar(){
 
 //método que processa o algoritmo principal chamado a partir do procedimento MAIN
 //IMPORTANTE: não há execução sem a invocação deste método
-void KdifferencePrime::processar(){
+void KdifferencePrime2::processar(){
    int ocr = 0; //flag que guarda a quantidade de ocorrências
 
    if(versao == 1)

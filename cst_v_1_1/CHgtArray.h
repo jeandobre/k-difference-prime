@@ -31,8 +31,9 @@ private:
     ulong n;
     ulong *HgtBits;
     BitRank *Hgt;
+public:
     CSA *csa;
-    
+
 public:
     CHgtArray(CSA *, const uchar *, ulong);
     CHgtArray(CSA *, const char *);
