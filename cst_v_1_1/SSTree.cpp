@@ -21,9 +21,9 @@
  ***************************************************************************/
 
 // References:
-// 
-// K. Sadakane. Compressed suffix trees with full functionality. Theory of 
-// Computing Systems, 2007. To appear, preliminary version available at 
+//
+// K. Sadakane. Compressed suffix trees with full functionality. Theory of
+// Computing Systems, 2007. To appear, preliminary version available at
 // http://tcslab.csce.kyushu-u.ac.jp/~sada/papers/cst.ps
 
 #include "SSTree.h"
@@ -60,7 +60,7 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
     unsigned rmqSampleRate = floorLog2n / 2;
     if (samplerate != 0)
         floorLog2n = samplerate; // Samplerate override, affects only CSA
-    
+
     #ifdef SSTREE_TIMER
     #ifdef SSTREE_HEAPPROFILE
         std::cout << "--> HeapProfiler: " << HeapProfiler::GetHeapConsumption() << ", " << HeapProfiler::GetMaxHeapConsumption() << std::endl;
@@ -69,25 +69,25 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
 
         printf("Creating CSA with samplerate %u\n", floorLog2n);
         fflush(stdout);
-        Tools::StartTimer();    
+        Tools::StartTimer();
     #endif
     if (IOaction == load_from && filename != 0)
-        sa = new CSA(text, n, floorLog2n, (string(filename)+".csa").c_str()); 
+        sa = new CSA(text, n, floorLog2n, (string(filename)+".csa").c_str());
     else if (IOaction == save_to && filename != 0)
-        sa = new CSA(text, n, floorLog2n, 0, (string(filename)+".csa").c_str()); 
+        sa = new CSA(text, n, floorLog2n, 0, (string(filename)+".csa").c_str());
     else // No IO operation
-        sa = new CSA(text, n, floorLog2n); 
+        sa = new CSA(text, n, floorLog2n);
     #ifdef SSTREE_TIMER
         printf("CSA created in %.0f seconds.\n", Tools::GetTime());
 
     #ifdef SSTREE_HEAPPROFILE
-        std::cout << "--> HeapProfiler: " << HeapProfiler::GetHeapConsumption() - heapCon << ", " << HeapProfiler::GetMaxHeapConsumption() << std::endl; 
-        heapCon = HeapProfiler::GetHeapConsumption();   
+        std::cout << "--> HeapProfiler: " << HeapProfiler::GetHeapConsumption() - heapCon << ", " << HeapProfiler::GetMaxHeapConsumption() << std::endl;
+        heapCon = HeapProfiler::GetHeapConsumption();
     #endif
 
         printf("Creating CHgtArray\n");
         fflush(stdout);
-        Tools::StartTimer();    
+        Tools::StartTimer();
     #endif
     if (IOaction == load_from && filename != 0)
         hgt = new CHgtArray(sa, (string(filename)+".lcp").c_str());
@@ -98,7 +98,7 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
         hgt->SaveToFile((string(filename)+".lcp").c_str());
     #ifdef SSTREE_TIMER
         printf("CHgtArray created in %.0f seconds.\n", Tools::GetTime());
-   
+
     #ifdef SSTREE_HEAPPROFILE
         std::cout << "--> HeapProfiler: " << HeapProfiler::GetHeapConsumption() - heapCon << ", " << HeapProfiler::GetMaxHeapConsumption() << std::endl;
         heapCon = HeapProfiler::GetHeapConsumption();
@@ -110,11 +110,11 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
     #endif
     if (deletetext)
        delete [] text;
-    
+
     #ifdef SSTREE_HEAPPROFILE
-        heapCon = HeapProfiler::GetHeapConsumption(); 
+        heapCon = HeapProfiler::GetHeapConsumption();
     #endif
-    
+
     ulong bitsInP;
     if (IOaction == load_from && filename != 0)
         P = LcpToParentheses::GetBalancedParentheses((string(filename)+".bp").c_str(), bitsInP);
@@ -125,14 +125,14 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
         LcpToParentheses::SaveToFile((string(filename)+".bp").c_str(), P, bitsInP);
     #ifdef SSTREE_TIMER
         printf("Parentheses sequence created in %.0f seconds.\n", Tools::GetTime());
-    
+
     #ifdef SSTREE_HEAPPROFILE
         std::cout << "--> HeapProfiler: " << HeapProfiler::GetHeapConsumption() - heapCon << ", " << HeapProfiler::GetMaxHeapConsumption() << std::endl;
         heapCon = HeapProfiler::GetHeapConsumption();
     #endif
 
         //printf("Creating CSA with sample rate %d\n", floorLog2n);
-        //Tools::StartTimer();    
+        //Tools::StartTimer();
     #endif
     //delete sa;
     //sa = new CSA(text, n, floorLog2n);
@@ -142,7 +142,7 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
 
         printf("Creating BitRank\n");
         fflush(stdout);
-        Tools::StartTimer();    
+        Tools::StartTimer();
     #endif
     br = new BitRank(P, bitsInP, false);
     #ifdef SSTREE_TIMER
@@ -155,7 +155,7 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
 
         printf("Creating Parentheses\n");
         fflush(stdout);
-        Tools::StartTimer();    
+        Tools::StartTimer();
     #endif
     Pr = new Parentheses(P, bitsInP, true, br);
     #ifdef SSTREE_TIMER
@@ -168,7 +168,7 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
 
         printf("Creating ReplacePatterns\n");
         fflush(stdout);
-        Tools::StartTimer();    
+        Tools::StartTimer();
     #endif
     rpLeaf = new ReplacePattern(1, 8);
     rpSibling = new ReplacePattern(0, 8);
@@ -182,11 +182,11 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
 
         printf("Creating BitRanks\n");
         fflush(stdout);
-        Tools::StartTimer();    
+        Tools::StartTimer();
     #endif
     brLeaf = new BitRank(P, bitsInP, false, rpLeaf);       //for ()
     brSibling = new BitRank(P, bitsInP, false, rpSibling); //for )(
-    
+
     if (rmqSampleRate < 4)
         rmqSampleRate = 4;
     #ifdef SSTREE_TIMER
@@ -200,7 +200,7 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
     #endif
 
         printf("Creating CRMQ with sample rates %d, %d and %d\n", rmqSampleRate * rmqSampleRate * rmqSampleRate, rmqSampleRate * rmqSampleRate, rmqSampleRate);
-        Tools::StartTimer();    
+        Tools::StartTimer();
         fflush(stdout);
     #endif
     rmq = new CRMQ(br, P, bitsInP, rmqSampleRate * rmqSampleRate * rmqSampleRate, rmqSampleRate * rmqSampleRate, rmqSampleRate);
@@ -214,7 +214,7 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
 }
 
 /**
- * A destructor. 
+ * A destructor.
  */
 SSTree::~SSTree()
 {
@@ -238,7 +238,7 @@ ulong SSTree::root()
     return 0;
 }
 
-/** 
+/**
  * Check if node v is a leaf node.
  *
  * Method doesn't check for an open parenthesis at position v (because we can assume that v is a node).
@@ -255,11 +255,11 @@ ulong SSTree::child(ulong v, uchar c)
 {
     if (isleaf(v))
         return 0;
-        
+
     v++;   // First child of v
     while (v != 0)
     {
-        if (c == edge(v,1)) 
+        if (c == edge(v,1))
             return v;
         v = sibling(v);
     }
@@ -273,7 +273,7 @@ ulong SSTree::firstChild(ulong v)
 {
     if (isleaf(v))
         return 0;
-        
+
     return v+1;
 }
 
@@ -304,9 +304,9 @@ ulong SSTree::parent(ulong v)
 /**
  * Returns the d-th character of the label of the node v's incoming edge.
  */
-uchar SSTree::edge(ulong v, ulong d) 
+uchar SSTree::edge(ulong v, ulong d)
 {
-    uchar *ss; 
+    uchar *ss;
     if (isleaf(v))
     {
         ulong i = leftrank(v);
@@ -319,7 +319,7 @@ uchar SSTree::edge(ulong v, ulong d)
         delete [] ss;
         return result;
     }
-    
+
     ulong d1 = hgt->GetPos(inorder(parent(v)));
     ulong d2 = hgt->GetPos(inorder(v));
     if (d > d2 - d1)
@@ -327,13 +327,13 @@ uchar SSTree::edge(ulong v, ulong d)
     ss = sa->substring(sa->lookup(inorder(v)) + d1 + d - 1,1);
     uchar result = ss[0];
     delete [] ss;
-    return result;    
+    return result;
 }
 
 /**
  * Returns the edge label of the incoming edge of the node v.
  */
-uchar* SSTree::edge(ulong v) 
+uchar* SSTree::edge(ulong v)
 {
     if (isleaf(v))
     {
@@ -343,17 +343,17 @@ uchar* SSTree::edge(ulong v)
         ulong d1 = sa->lookup(i) + j;
         return sa->substring(d1,k-j);
     }
-    
+
     ulong d1 = hgt->GetPos(inorder(parent(v)));
     ulong d2 = hgt->GetPos(inorder(v));
-   
-    return sa->substring(sa->lookup(inorder(v))+d1, d2-d1);    
+
+    return sa->substring(sa->lookup(inorder(v))+d1, d2-d1);
 }
 
 /**
  * Returns the path label from root to the node v.
  */
-uchar* SSTree::pathlabel(ulong v) 
+uchar* SSTree::pathlabel(ulong v)
 {
     if (isleaf(v))
     {
@@ -390,9 +390,9 @@ ulong SSTree::depth(ulong v)
         ulong i = leftrank(v);
         return n - sa->lookup(i);
     }
-        
+
     v = inorder(v);
-    return hgt->GetPos(v);  
+    return hgt->GetPos(v);
 }
 
 /**
@@ -424,10 +424,10 @@ ulong SSTree::lca(ulong v, ulong w)
         w = v;
         v = temp;
     }
-    
+
     if (Pr->findclose(v) > Pr->findclose(w))
         return v;
-    
+
     return parent(rmq->lookup(v, w) + 1);
 }
 
@@ -442,7 +442,7 @@ ulong SSTree::lceLinear(uchar *text, ulong i, ulong j)
     ulong k = 0;
     while (text[i+k] == text[j+k])
         k++;
-    
+
     return k;
 }
 
@@ -459,13 +459,26 @@ ulong SSTree::lce(ulong i, ulong j)
 }
 
 /**
+ * Returns the Longest common extension of text positions i and j.
+ */
+ulong SSTree::lce_novo(ulong i, ulong j)
+{
+    i = sa->inverse(i);
+    ulong v = brLeaf->select(i + 1);
+    j = sa->inverse(j);
+    ulong w = brLeaf->select(j + 1);
+
+    return nodeDepth(lca(v, w));
+}
+
+/**
  * Suffix link for internal nodes
  */
 ulong SSTree::sl(ulong v)
 {
     if (v == 0 || v == root() || isleaf(v))
         return 0;
-    
+
     ulong x = brLeaf->rank(v - 1) + 1;
     ulong y = brLeaf->rank(Pr->findclose(v));
     x = sa->Psi(x - 1);
@@ -516,20 +529,20 @@ void SSTree::PrintEdge(ulong v)
  */
 ulong SSTree:: lcaParen(ulong v, ulong w)
 {
-      
+
     ulong temp;
     if (v < w) temp = Pr->findclose(w);
     else temp = Pr->findclose(v);
     if (v == w) return w;
     if (v > w)
         v = w;
-    
+
     while (v > 0)
     {
-        if (Pr->findclose(v) > temp) return v; 
-        v = parent(v); 
+        if (Pr->findclose(v) > temp) return v;
+        v = parent(v);
     }
-    
+
     return 0;
 }
 
@@ -545,7 +558,7 @@ void SSTree::CheckLCA(ulong v)
         temp = br->select(w);
         v1 = br->select(w+1);
         while(v1 < len)
-        {   
+        {
             if (lca(temp, v1) != lcaParen(temp, v1))
             {
                 printf("conflict at (%lu, %lu)::lcaParen() = %lu and lca() = %lu\n", temp, v1, lcaParen(temp, v1), lca(temp, v1));
@@ -553,13 +566,13 @@ void SSTree::CheckLCA(ulong v)
             }
             v1 = br->select(br->rank(v1)+1);
         }
-        
+
         // Check for the value v1 == len
         if (lca(temp, v1) != lcaParen(temp, v1))
         {
             printf("conflict at (%lu, %lu)::lcaParen() = %lu and lca() = %lu\n", temp, v1, lcaParen(temp, v1), lca(temp, v1));
             exit(0);
-        }        
+        }
     }
 }
 
@@ -571,8 +584,8 @@ void SSTree::PrintTree(ulong v, int depth)
 {
     for (int i=0;i< depth;i++)
       printf(" ");
-   
-    if (v != 0) 
+
+    if (v != 0)
     {
          PrintEdge(v);
     }
@@ -581,7 +594,7 @@ void SSTree::PrintTree(ulong v, int depth)
         PrintTree(v + 1, depth+1);
     }
     v = sibling(v);
-    if (v != 0) 
+    if (v != 0)
         PrintTree(v, depth);
 }
 
@@ -641,7 +654,7 @@ ulong SSTree::numberofleaves(ulong v)
 ulong SSTree::textpos(ulong v)
 {
     // works correctly if v is a leaf
-    // otherwise returns the textpos of leaf previous to v in preorder  
+    // otherwise returns the textpos of leaf previous to v in preorder
     return sa->lookup(this->leftrank(v));
 }
 
@@ -661,11 +674,11 @@ ulong SSTree::search(uchar *pattern, ulong l)
 {
     if (l == 0)
         return 0;
-        
+
     ulong sp, ep;
     if (!sa->Search(pattern, l, &sp, &ep))
         return root();       // Return empty match
-    
+
     // Fetch leaf nodes
     sp = brLeaf->select(sp+1);
     ep = brLeaf->select(ep+1);
@@ -681,16 +694,16 @@ ulong SSTree::search(uchar *pattern, ulong l)
     // Calculate number of open and closed parentheses on the interval [sp, ep]
     ulong open = r_ep - r_sp + 1,
           close = (ep - r_ep) - (sp - r_sp);
-    
+
     // Correct boundaries
-    if (open < close) 
+    if (open < close)
     {
         sp   -= close - open;
         r_sp -= close - open;  // Rank changes also
     }
     if (open > close)
         ep += open - close;    // Rank (r_ep) doesn't change
-    
+
     // Number of close parentheses on the interval [0, sp]
     close = sp - r_sp + 1;
     // Index of the nearest closed parenthesis to the left from the index sp
@@ -706,7 +719,7 @@ ulong SSTree::search(uchar *pattern, ulong l)
         open = br->select(r_ep + 1);
     else
         open = br->NumberOfBits() - 1; // Safe choice when there is no open parenthesis at right side
-    
+
     // Select the closest of these two limits
     if (sp - close <= open - ep)
         return close + 1;

@@ -75,13 +75,19 @@ public:
    string escreverArquivoReduzido();
 };
 
-classs KdifferenceInexactMatch{
+bool comparar(const Primer* a, const Primer* b){
+   return a->j < b->j;
+}
+
+class KdifferenceInexactMatch{
   protected:
     char *a;  //padrão
     char *t;  //texto
     int m;  //tamanho de a
     int n;  //tamanho de t
     int k;  //quantidade de diferênças
+
+    int rowPrint;//linha máxima de impressao da matriz
 
 public:
     KdifferenceInexactMatch(char *a, char *t, int *k){
@@ -93,11 +99,12 @@ public:
        this->n = strlen(t);
     }
     ~KdifferenceInexactMatch(){};
-    virtual int executar(int m){};//executa o algoritmo kdifference Inexact Match e retorna a linha da ocorrência de prime
+    virtual int executar(int m){return -1;};//executa o algoritmo kdifference Inexact Match e retorna a linha da ocorrência de prime
+    virtual int executar(int m, int j){return -1;};
     virtual void imprimirMatrizTela() const{};//escrever a matriz na tela
 };
 
-class KdifferenceInexactMatch2: public KdifferenceInexactMatch{
+class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
 
   private:
     int *L;   //Matriz L[-(k+1)..d]
@@ -121,16 +128,16 @@ class KdifferenceInexactMatch2: public KdifferenceInexactMatch{
     }
 
   public:
-    KdifferenceInexactMatch2(char *a, char *t, int *k): KdifferenceInexactMatch(a, t, k){
+    KdifferenceInexactMatch234(char *a, char *t, int *k): KdifferenceInexactMatch(a, t, k){
        //alocação dinâmica de inteiros
        this->L = new int[getDimensaoD()];
     }
 
-    ~KdifferenceInexactMatch2(){
+    ~KdifferenceInexactMatch234(){
        //Ao destruir a classe desaloca toda memória que foi usada
        delete [] L;
     }
-    virtual int executar(int m){};
+    virtual int executar(int m){return -1;};
     void imprimirMatrizTela();
 };
 
@@ -151,7 +158,7 @@ class KdifferencePrime{
 
       list<Primer *> primers; //lista que guarda as ocorrências de primers
 
-      KdifferenceInexactMatch2 *c;
+      int *ocr;
 
     public:
       KdifferencePrime(){
@@ -238,32 +245,39 @@ Parametro *parseParametros(int argc, char** argv){
    return p;
 }
 
-//função auxiliar compara três inteiros e devolve o maior
-unsigned long long int menorDeTres(unsigned long long int x,
-                                   unsigned long long int b,
-                                   unsigned long long int c){
-  if((x <= b) && (x <= c)) return x;
-  else if((b <= x) && (b <= c)) return b;
-  else return c;
-}
-
 long long int menorDeDois(long long int a,
                           long long int b){
-   return a <= b ? a : b;
+   return a < b ? a : b;
+}
+static long long int maiorDeDois(long long int a,
+                          long long int b){
+   return a > b ? a : b;
+}
+
+//função auxiliar compara três inteiros e devolve o menor
+static long long int menorDeTres(unsigned long long int x,
+                                   unsigned long long int b,
+                                   unsigned long long int c){
+/*  if((x <= b) && (x <= c)) return x;
+  else if((b <= x) && (b <= c)) return b;
+  else return c; */
+  return menorDeDois(menorDeDois(x,b),c);
 }
 
 //não pode ser unsigned pois compara valores -1
-//retorna o menor entre três valores
-long long int maiorDeTres(long long int a,
+//retorna o maior entre três valores
+static long long int maiorDeTres(long long int a,
                           long long int b,
                           long long int c){
-  if(a >= b && a >= c) return a;
+ /* if(a >= b && a >= c) return a;
   else if(b >= a && b >= c) return b;
-  else return c;
+  else return c; */
+
+  return maiorDeDois(maiorDeDois(a,b), c);
 }
 
 //LCE entre s[i] e t[j]
-int directCompLCE(int _i,int _j,
+static int directCompLCE(int _i,int _j,
                                     char *a, char *t, int _m, int _n){
     //deve ser passsado os índices reais e aqui será decido
     if(_i == 0 || _j == 0) return 0;
@@ -342,7 +356,7 @@ void formataTempo(long long int valor){
 
   cout<<"Tempo de execucao: "<< tempo <<endl;
 }
-
+/*
 void KdifferencePrime::mostrarOcorrencias(){
     if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
     else{
@@ -358,6 +372,39 @@ void KdifferencePrime::mostrarOcorrencias(){
             out.close();
             cout<<"(Arquivo: " + fileName + ")"<<endl;
         }else{
+            primers.sort(comparar);
+            for(Primer *p : primers){
+                p->escreverTela();
+            }
+        }
+    }
+} */
+
+void KdifferencePrime::mostrarOcorrencias(){
+  int nOcr = 0; int r;
+  for(int v = 0; v < m-k+1; v++){
+     r = ocr[v];
+     if(r > -1){
+         Primer *pr = new Primer(++nOcr, v, r, ocorrencia.substr(v, r));
+         primers.insert(primers.end(), pr);
+      }
+  }
+
+  if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
+  else{
+        cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
+        if(primers.size() > 10){
+            fstream out;
+            string fileName = "dados/saida_a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k);
+            out.open(fileName, ios::out | ios::trunc);
+            for(Primer *p : primers){
+                //out<<p->escreverArquivoReduzido();
+                out<<p->escreverArquivoCompleto();
+            }
+            out.close();
+            cout<<"(Arquivo: " + fileName + ")"<<endl;
+        }else{
+            primers.sort(comparar);
             for(Primer *p : primers){
                 p->escreverTela();
             }
@@ -377,6 +424,7 @@ void KdifferencePrime::setaParametros(Parametro *p){
     m = p->alpha.size();
     n = p->beta.size();
     ocorrencia = p->alpha;
+    ocr = new int[m-k+1];
 
     tempo = p->mostrarTempo;
 
@@ -386,19 +434,11 @@ void KdifferencePrime::setaParametros(Parametro *p){
 //método que processa o algoritmo principal chamado a partir do procedimento MAIN
 //IMPORTANTE: não há execução sem a invocação deste método
 void KdifferencePrime::processar(){
-   int ocr = 0; //flag que guarda a quantidade de ocorrências
-   int r;
-
    instanciar(); //essa chamada depende diretamente da implementação do kdifferenceInexactMatch que será utilizado
-
+   //O(m), onde m é o tamanho de alpha
    for(j = 0; j < (m - k) + 1; j++){
-       r = c->executar(m - j);
-
-       if(r > -1){ //se a linha foi obtida, significa que existe uma ocorrência
-           Primer *pr = new Primer(++ocr, j, r, ocorrencia.substr(j, r));
-           primers.insert(primers.end(), pr);
-           if(mostrarMatriz) c->imprimirMatrizTela();
-       }
+       //guardo em um array todos as ocorrências r de primer para cada j
+       ocr[j] = c->executar(m - j);
    }
 }
 
@@ -435,7 +475,7 @@ string Primer::escreverArquivoReduzido(){
 }
 
 //método que imprimi a matriz na tela
-void KdifferenceInexactMatch2::imprimirMatrizTela(){
+void KdifferenceInexactMatch234::imprimirMatrizTela(){
     cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
 	int vr;
     cout<<endl;

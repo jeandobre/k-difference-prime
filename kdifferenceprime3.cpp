@@ -20,7 +20,6 @@
 #include <time.h>
 #include <fstream>
 #include <list>
-#include "auxiliar.h"
 #include "classes.h"
 
 #include "cst_v_1_1/SSTree.h" //biblioteca arvore sufixo compressada
@@ -29,30 +28,30 @@
 using namespace std;
 
 //declaração da classe que é utilizada no KdifferencePrime
-class KdifferenceInexactMatch3CST: public KdifferenceInexactMatch2{
+class KdifferenceInexactMatch3CST: public KdifferenceInexactMatch234{
   public:
-    KdifferenceInexactMatch3CST(char *a, char *t, int *k): KdifferenceInexactMatch2(a,t,k){};
+    KdifferenceInexactMatch3CST(int *k): KdifferenceInexactMatch234(a,t,k){};
     int executar(int m);
 };
 
 
-class KdifferencePrime{
+class KdifferencePrime3: public KdifferencePrime{
 
     public:
       SSTree *sst; //Arvore de Sufixo comprimida (CST)
 
     public:
-      KdifferencePrime(){
+      KdifferencePrime3(){
          //construtor seta os valores default se o usuário não escolher nada
          this->mostrarMatriz=false;
       }
-      ~KdifferencePrime(){
+      ~KdifferencePrime3(){
          delete c;
          delete sst;
       }
       void instanciar(){
         //implementação da arvore de sufixo compressada
-        c = new KdifferenceInexactMatch3CST(alpha, beta, &k);
+        c = new KdifferenceInexactMatch3CST(&k);
       };
 } prime;
 
@@ -67,32 +66,26 @@ int KdifferenceInexactMatch3CST::executar(int m){
 
     int long long pivo; //variável auxiliar para troca de posições
     bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
-    linha = -1;         //variável qwue guarda a primeira linha de ocorrência de primer
-    for(e = 0; e < k; e++){
-        pivo = -1;
+    int linha = -1;         //variável qwue guarda a primeira linha de ocorrência de primer
+    for(e = 0; e < k && passou; e++){
+        pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
         for(d = -e; d <= n && passou; d++){
            row = maiorDeTres(getL(d-1),
                              getL(d)   + 1,
                              getL(d+1) + 1);
-
            row = menorDeDois(row, m);
-           //LCE (Segundo os autores o tempo é determinado por um valor K que eu não encontrei
-           //para diminuir o tempo
-           if(row < m && row + d < n)
+
+           if(row + d < n)
              row += prime.sst->lce(prime.j + row , prime.m + 1 + row + d);//LCE(0,m+1);
 
-           setL(d-1, pivo); //guarda o anterior
-           if(row + d > n+1) row = -1;
-           if(d == n) setL(d, row); //se for o último guarda o atual
-           else pivo = row;
-
-           //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
-           if(row == m) passou = false;
-           if (passou && row > linha) linha = row;
+           if(row == m){passou = false; continue;} //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
+           setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaço anterior
+           if (row > linha) linha = row;
+           pivo = row;
         }
+        setL(n, row);
     }
-    if(passou) linha++;
-    else linha = -1;
+    return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
 }
 
 int main(int argc, char** argv) {
@@ -145,7 +138,7 @@ int main(int argc, char** argv) {
 
    prime.mostrarOcorrencias();
    long long int tempo_execucao = ((fim - inicio) / (CLOCKS_PER_SEC / 1000));
-   if(tempo) formataTempo(tempo_execucao);
+   if(prime.tempo) formataTempo(tempo_execucao);
 
    return 0;
 }

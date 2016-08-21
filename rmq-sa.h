@@ -20,6 +20,12 @@ using namespace std;
 // pre-written code {{{
 #define REP(i,n) for(int i=0;i<(int)(n);++i)
 
+// A utility function to get minimum of two numbers
+int minVal(int x, int y) { return (x < y)? x: y; }
+
+// A utility function to get minimum of two numbers
+int maxVal(int x, int y) { return (x > y)? x: y; }
+
 //{{{ Suffix Array
 //{{{ for DEBUG
 void writeSuffix(char *t,int i){
@@ -103,7 +109,9 @@ struct SuffixArray{
 		}
 	}
 
-	int LCE(int i, int j){
+   //compute LCE via RMQ
+   //implementação feita por
+	int LCEviaRMQ(int i, int j){
 	    //b[i] inverso de sa[i]
 
         int low  = b[i];
@@ -114,6 +122,26 @@ struct SuffixArray{
 
         return minimum(i,j);
 	}
+
+	//compute LCE via directMin
+   //implementação feita por Jean usando como base o artigo: TODO xxxxxxx
+   int LCEdirectMin(int i, int j){
+      int low  = b[i];
+      int high = b[j];
+
+      i = minVal(low, high);
+      j = maxVal(low, high);
+
+      //low + 1 na versão original, mas aki o índice 1 é representado por 0
+      int t = lcp[i+1]; //por causa do índice inicial
+      int s;
+
+      for(int k = i + 2; k <= j; k++){
+         s = lcp[k]; //mesma coisa aki, índice começa em zero
+         if(s < t) t = s;
+      }
+      return t;
+   }
 	//}}}
 	//{{{ inner LCP computation with RMQ: O(1)
 	int minimum(int x, int y) {
@@ -159,7 +187,8 @@ struct SuffixArray{
 		}
 		return rh == m ? sa[r] : -1;
 	}
-	//}}}
+
+
 };
 /*
 int main(){
