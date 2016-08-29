@@ -34,13 +34,17 @@ class KdifferenceInexactMatch4;
 class KdifferenceInexactMatch4SA: public KdifferenceInexactMatch234{
   public:
     KdifferenceInexactMatch4SA(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
-    int executar(int m);
+   // int executar(int m);
+    string name() const {return "K4dmin";};
+    long int LCE(int x, int y);
 };
 
 class KdifferenceInexactMatch4RMQ: public KdifferenceInexactMatch234{
   public:
     KdifferenceInexactMatch4RMQ(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
-    int executar(int m);
+   // int executar(int m);
+    string name() const {return "K4rmq";};
+    long int LCE(int x, int y);
 };
 
 class KdifferencePrime4: public KdifferencePrime{
@@ -61,62 +65,13 @@ class KdifferencePrime4: public KdifferencePrime{
 
 } prime;
 
-int KdifferenceInexactMatch4SA::executar(int m){
-    this->m = m;
-    int d,e, row;
+long int KdifferenceInexactMatch4SA::LCE(int x, int y){
+    return prime.sa->LCEdirectMin(x, y);
+};
 
-    //inicialização da matriz
-    for(d = -(k+1); d <= (n+1); d++)
-        setL(d, -1);
-
-    int long long pivo; //variável auxiliar para troca de posições
-    bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
-    int linha = -1;     //variável que guarda sempre o maior valor da coluna e
-    for(e = 0; e < k && passou; e++){
-        pivo = linha = -1;  //a cada nova coluna a variável linha é reiniciada
-        for(d = -e; d <= n && passou; d++){
-           row = maiorDeTres(getL(d-1), getL(d) + 1, getL(d+1) + 1);
-           row = menorDeDois(row, m);
-           if(row + d < n)
-             row += prime.sa->LCEdirectMin(prime.j + row, prime.m + 1 + row + d); //LCE
-           //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
-           if(row == m){passou = false; continue;}
-           setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaço anterior
-           if (row > linha) linha = row;
-           pivo = row;
-        }
-        setL(n, row);
-    }
-    return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não correência
-}
-
-int KdifferenceInexactMatch4RMQ::executar(int m){
-    this->m = m;
-    int d,e, row;
-
-    //inicialização da matriz
-    for(d = -(k+1); d <= (n+1); d++)
-        setL(d, -1);
-
-    int long long pivo; //variável auxiliar para troca de posições
-    bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
-    int linha=-1;       //variável qwue guarda a primeira linha de ocorrência de primer
-    for(e = 0; e < k && passou; e++){
-        pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
-        for(d = -e; d <= n && passou; d++){
-           row = maiorDeTres(getL(d-1), getL(d) + 1, getL(d+1) + 1);
-           row = menorDeDois(row, m);
-           if(row + d < n)
-              row += prime.sa->LCEviaRMQ(prime.j + row, prime.m + 1 + row + d);//LCE(row, row + d)
-           if(row == m){passou = false; continue;} //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
-           setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaço anterior
-           if (row > linha) linha = row;
-           pivo = row;
-        }
-        setL(n, row);
-    }
-    return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
-}
+long int KdifferenceInexactMatch4RMQ::LCE(int x, int y){
+    return prime.sa->LCEviaRMQ(x, y);
+};
 
 int main(int argc, char** argv) {
 
@@ -155,6 +110,7 @@ int main(int argc, char** argv) {
 
    char *cstr = new char[texto.length() + 1];
    strcpy(cstr, texto.c_str());
+
    prime.sa = new SuffixArray(cstr);
    prime.sa->builds();
 
@@ -164,13 +120,18 @@ int main(int argc, char** argv) {
    cout<<"K-difference-primer-4 executando..."<<endl;
    cout<<"Versao:"<<prime.versao<<endl;
 
-   inicio = clock();
+   time(&inicio);
+   if(prime.tempo) formataTempo(inicio, true);
    prime.processar();
-   fim = clock();
+   time(&fim);
+   if(prime.tempo) formataTempo(fim, false);
 
-   prime.mostrarOcorrencias();
-   long long int tempo_execucao = ((fim - inicio) / (CLOCKS_PER_SEC / 1000));
-   if(prime.tempo) formataTempo(tempo_execucao);
+   if(!prime.mostrarMatriz) prime.mostrarOcorrencias();
+
+   if(prime.tempo){
+     double seconds = difftime(fim, inicio);
+     formataSegundos(seconds);
+   }
 
    return 0;
 }

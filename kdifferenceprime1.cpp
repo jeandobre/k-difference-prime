@@ -46,7 +46,7 @@ class KdifferenceInexactMatch1: public KdifferenceInexactMatch{
     ~KdifferenceInexactMatch1(){}
 
     virtual void executar(){};
-    void imprimirMatrizTela() const; //permite o cacheamento pois não muda o comportamento
+    void imprimirMatrizTela(); //permite o cacheamento pois não muda o comportamento
 };
 
 //implementação original Matriz D[0..m, 0..n]
@@ -67,6 +67,7 @@ class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
        delete [] D;
     }
 
+    string name() const {return "K1v2";};
     int executar(int m);
 };
 
@@ -89,6 +90,7 @@ class KdifferenceInexactMatch1Optimizado1: public KdifferenceInexactMatch1{
        delete [] D;
     }
 
+    string name() const {return "K1v1";};
     int executar(int m);
 };
 
@@ -109,6 +111,7 @@ class KdifferenceInexactMatch1Optimizado2: public KdifferenceInexactMatch1{
        delete [] D;
     }
 
+   string name() const {return "K1v1";};
    int executar(int m);
 };
 
@@ -127,7 +130,7 @@ class KdifferencePrime1: public KdifferencePrime{
 } prime; // é necessário apenas uma instancia de prime, já declarada aqui
 
 //método que imprimi a matriz na tela
-void KdifferenceInexactMatch1::imprimirMatrizTela() const{
+void KdifferenceInexactMatch1::imprimirMatrizTela(){
 
    cout << setfill(' ');          //setar o tamanho de espaçamento de elementos na tela
 	cout<<endl<<"     ";               //espaçamento necessário para o cabeçalho
@@ -281,15 +284,22 @@ int main(int argc, char** argv) {
    cout<<"K-difference-primer-1 processando..."<<endl;
    cout<<"Versao do algoritmo: "<<prime.versao<<endl;
 
+
    time_t inicio, fim;
 
-   inicio = clock();
+   time(&inicio);
+   if(prime.tempo) formataTempo(inicio, "Inicio");
    prime.processar();
-   fim = clock();
+
+   time(&fim);
+   if(prime.tempo) formataTempo(fim, "Fim   ");
 
    prime.mostrarOcorrencias();
-   long long int tempo_execucao = ((fim - inicio) / (CLOCKS_PER_SEC / 1000));
-   if(prime.tempo) formataTempo(tempo_execucao);
+
+   if(prime.tempo){
+     double seconds = difftime(fim, inicio);
+     formataSegundos(seconds);
+   }
 
    return 1;
 }

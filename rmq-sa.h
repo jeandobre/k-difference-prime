@@ -21,10 +21,10 @@ using namespace std;
 #define REP(i,n) for(int i=0;i<(int)(n);++i)
 
 // A utility function to get minimum of two numbers
-int minVal(int x, int y) { return (x < y)? x: y; }
+static int minVal(int x, int y) { return (x < y)? x: y; }
 
 // A utility function to get minimum of two numbers
-int maxVal(int x, int y) { return (x > y)? x: y; }
+static int maxVal(int x, int y) { return (x > y)? x: y; }
 
 //{{{ Suffix Array
 //{{{ for DEBUG
@@ -32,10 +32,14 @@ void writeSuffix(char *t,int i){
 	cout<<(t+i)<<"$"<<endl;
 }
 //}}}
-struct SuffixArray{
+class SuffixArray{
+
+ protected:
 	char *t;
 	int n,N;
-	int *sa,*b,*lcp,*rmq;
+	int *sa,*rmq, *b,*lcp;
+
+ public:
 	SuffixArray(char *t):t(t){
 		n=strlen(t);N=n+1;
 	}
@@ -44,6 +48,9 @@ struct SuffixArray{
 		if(b)delete(b);
 		if(lcp)delete(lcp);
 		if(rmq)delete(rmq);
+	}
+	void setT(char *t){
+	  this->t = t;
 	}
 	void builds(){
 		buildSA();
@@ -124,7 +131,9 @@ struct SuffixArray{
 	}
 
 	//compute LCE via directMin
-   //implementação feita por Jean usando como base o artigo: TODO xxxxxxx
+   //implementação feita por Jean usando como base o artigo:
+   //Tempo de execução: O(j - i) em que a diferença entre j e i pode ser n, ou seja, o tamanho da sequencia
+   //logo, O(n)
    int LCEdirectMin(int i, int j){
       int low  = b[i];
       int high = b[j];
@@ -156,7 +165,7 @@ struct SuffixArray{
 	}
 	//}}}
 	//{{{ outer LCP computation: O(m - o)
-	int computeLCP(char *t, int n, char *p, int m, int o, int k) {
+	static int computeLCP(char *t, int n, char *p, int m, int o, int k) {
 		int i = o;
 		for (; i < m && k+i < n && p[i] == t[k+i]; ++i);
 		return i;

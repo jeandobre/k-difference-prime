@@ -11,6 +11,7 @@
 #include <list>
 #include <cstdlib>
 #include <iostream>
+#include <new>
 
 //constantes definidas para uso de mensagens na tela
 #define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao"
@@ -32,8 +33,36 @@
 using namespace std;
 
 class KdifferenceInexactMatch;
+class KdifferencePrime;
 
 string lerArquivo(const char *local);
+
+
+long long int menorDeDois(long long int a,
+                          long long int b){
+   return a < b ? a : b;
+}
+static long long int maiorDeDois(long long int a,
+                          long long int b){
+   return a > b ? a : b;
+}
+
+//função auxiliar compara três inteiros e devolve o menor
+static long long int menorDeTres(unsigned long long int x,
+                                   unsigned long long int b,
+                                   unsigned long long int c){
+
+  return menorDeDois(menorDeDois(x,b),c);
+}
+
+//não pode ser unsigned pois compara valores -1
+//retorna o maior entre três valores
+static long long int maiorDeTres(long long int a,
+                          long long int b,
+                          long long int c){
+
+  return maiorDeDois(maiorDeDois(a,b), c);
+}
 
 class Parametro{
 
@@ -66,8 +95,8 @@ public:
 public:
    Primer(int ocr, int j, int r, string sequencia){
       this->ocr = ocr;
-      this->j = ++j;
-      this->r = --r;
+      this->j = j;
+      this->r = r;
       this->sequencia = sequencia;
    };
    void escreverTela() const;
@@ -89,6 +118,10 @@ class KdifferenceInexactMatch{
 
     int rowPrint;//linha máxima de impressao da matriz
 
+  public:
+    int primerM; //tamanho original de alfa, extremamente necessário p/ computar corretamente o LCE
+    int primerJ; //índice atual j de alfa
+
 public:
     KdifferenceInexactMatch(char *a, char *t, int *k){
        this->a = a;
@@ -99,9 +132,10 @@ public:
        this->n = strlen(t);
     }
     ~KdifferenceInexactMatch(){};
+    virtual string name() const {return "K";};
     virtual int executar(int m){return -1;};//executa o algoritmo kdifference Inexact Match e retorna a linha da ocorrência de prime
     virtual int executar(int m, int j){return -1;};
-    virtual void imprimirMatrizTela() const{};//escrever a matriz na tela
+    virtual void imprimirMatrizTela(){};//escrever a matriz na tela
 };
 
 class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
@@ -130,21 +164,59 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
   public:
     KdifferenceInexactMatch234(char *a, char *t, int *k): KdifferenceInexactMatch(a, t, k){
        //alocação dinâmica de inteiros
-       this->L = new int[getDimensaoD()];
+       try{
+         this->L = new int[getDimensaoD()];
+
+       }catch(bad_alloc& ba){
+          cout<<"Erro ao alocar memória: " << ba.what()<<endl;
+       }
+
     }
 
     ~KdifferenceInexactMatch234(){
        //Ao destruir a classe desaloca toda memória que foi usada
        delete [] L;
     }
-    virtual int executar(int m){return -1;};
+
+    int executar(int m){
+       this->m = m;
+       int d,e, row;
+
+       //inicialização da matriz
+       for(d = -(k+1); d <= (n+1); d++)
+           setL(d, -1);
+
+       int long long pivo; //variável auxiliar para troca de posições
+       bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
+       int linha = -1;     //variável que guarda sempre o maior valor da coluna e
+       for(e = 0; e < k && passou; e++){
+           pivo = linha = -1;  //a cada nova coluna a variável linha é reiniciada
+           for(d = -e; d <= n && passou; d++){
+              row = maiorDeTres(getL(d-1), getL(d) + 1, getL(d+1) + 1);
+              row = menorDeDois(row, m);
+              if(row + d < n)
+                row += LCE(primerJ + row, primerM + 1 + row + d); //LCE
+              //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
+              if(row == m){passou = false; continue;}
+              setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaço anterior
+              if (row > linha) linha = row;
+              pivo = row;
+           }
+           setL(n, row);
+       }
+       return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
+   }
     void imprimirMatrizTela();
+
+    virtual long int LCE(int x, int y){
+      return 0;
+    };
 };
 
 class KdifferencePrime{
 
     public:
-      char *alpha, *beta;//seguindo o modelo proposto por GUSFIELD, nomes de variáveis que representam o padrão e o texto respectivamente
+      char *alpha, *beta;//seguindo o modelo encontrado no livro do GUSFIELD, nomes de variáveis que representam o padrão e o texto respectivamente
       int k;             //quantidade de diferênças
       int m;             //tamanho de alpha
       int n;             //tamanho de beta
@@ -158,7 +230,7 @@ class KdifferencePrime{
 
       list<Primer *> primers; //lista que guarda as ocorrências de primers
 
-      int *ocr;
+      int *ocr; //vetor que guarda as ocorrências
 
     public:
       KdifferencePrime(){
@@ -169,9 +241,18 @@ class KdifferencePrime{
       }
       ~KdifferencePrime(){};
       virtual void instanciar(){};
-      void processar();
+      virtual void processar();
       void mostrarOcorrencias();
+      void mostrarOcorrencias(bool);
       void setaParametros(Parametro *p);
+    private:
+      void mostrar(int j, int r){
+        cout<<setfill(' ');
+        cout<<setw(3)<<j<<".."<<setw(3)<<j + r;
+        string o = ocorrencia.substr(j, r);
+        cout<<"-Tamanho("<<setw(3)<<o.size()<<"): ";
+        cout<<o<<endl;
+      };
 };
 
 //função auxiliar recebe os parâmetros que o usuário digitou, valida e transforma os valores
@@ -245,40 +326,8 @@ Parametro *parseParametros(int argc, char** argv){
    return p;
 }
 
-long long int menorDeDois(long long int a,
-                          long long int b){
-   return a < b ? a : b;
-}
-static long long int maiorDeDois(long long int a,
-                          long long int b){
-   return a > b ? a : b;
-}
-
-//função auxiliar compara três inteiros e devolve o menor
-static long long int menorDeTres(unsigned long long int x,
-                                   unsigned long long int b,
-                                   unsigned long long int c){
-/*  if((x <= b) && (x <= c)) return x;
-  else if((b <= x) && (b <= c)) return b;
-  else return c; */
-  return menorDeDois(menorDeDois(x,b),c);
-}
-
-//não pode ser unsigned pois compara valores -1
-//retorna o maior entre três valores
-static long long int maiorDeTres(long long int a,
-                          long long int b,
-                          long long int c){
- /* if(a >= b && a >= c) return a;
-  else if(b >= a && b >= c) return b;
-  else return c; */
-
-  return maiorDeDois(maiorDeDois(a,b), c);
-}
-
 //LCE entre s[i] e t[j]
-static int directCompLCE(int _i,int _j,
-                                    char *a, char *t, int _m, int _n){
+static int directCompLCE(int _i,int _j, char *a, char *t, int _m, int _n){
     //deve ser passsado os índices reais e aqui será decido
     if(_i == 0 || _j == 0) return 0;
     _i--;
@@ -311,16 +360,20 @@ static int directCompLCE(int _i,int _j,
   return(contents.str());
 }
 
-void formataTempo(long long int valor){
+void formataTempo(time_t hora, bool inicio){
+   struct tm *timeinfo;
+
+   timeinfo = localtime(&hora);
+   char buffer[80];
+   if(inicio) strftime(buffer, 80, "Inicio: %d/%m/%y %X", timeinfo);
+   else       strftime(buffer, 80, "Fim   : %d/%m/%y %X", timeinfo);
+   cout<<buffer<<endl;
+}
+
+void formataSegundos(double segundos){
+  long int valor = (int) segundos;
   int mili = 0, sec = 0, minu = 0, dia = 0, hor = 0;
-  long long int _tempo = valor;
-  if(valor > 1000){//segundos
-      mili = valor % 1000;
-      valor = (valor - mili)/1000;
-  } else{
-    mili = valor;
-    valor = 0;
-  }
+  double _tempo = valor;
 
   if(valor > 60){//minutos
    sec = valor % 60;
@@ -347,44 +400,30 @@ void formataTempo(long long int valor){
   }
   if(valor > 0) dia = valor;
 
-  string tempo = "(" + to_string(_tempo) + " milisegundo(s)) - ";
+  string tempo = "";
   if(dia > 0)  tempo += to_string(dia)  + " dia(s) ";
   if(hor > 0)  tempo += to_string(hor) + " hora(s) ";
   if(minu > 0) tempo += to_string(minu) + " minuto(s) ";
   if(sec > 0)  tempo += to_string(sec)  + " segundo(s) ";
-  if(mili > 0) tempo += to_string(mili) + " milesimos(s)";
 
   cout<<"Tempo de execucao: "<< tempo <<endl;
 }
-/*
-void KdifferencePrime::mostrarOcorrencias(){
-    if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
-    else{
-        cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
-        if(primers.size() > 10){
-            fstream out;
-            string fileName = "dados/saida_a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k);
-            out.open(fileName, ios::out | ios::trunc);
-            for(Primer *p : primers){
-                //out<<p->escreverArquivoReduzido();
-                out<<p->escreverArquivoCompleto();
-            }
-            out.close();
-            cout<<"(Arquivo: " + fileName + ")"<<endl;
-        }else{
-            primers.sort(comparar);
-            for(Primer *p : primers){
-                p->escreverTela();
-            }
-        }
-    }
-} */
+
+void KdifferencePrime::mostrarOcorrencias(bool formaSimples){
+  int r;
+  for(int v = 0; v < m-k+1; v++){
+     r = ocr[v];
+     if(r > 0){
+         cout<<v<<";"<<r<<"-"<<ocorrencia.substr(v, r)<<endl;
+      }
+  }
+}
 
 void KdifferencePrime::mostrarOcorrencias(){
   int nOcr = 0; int r;
   for(int v = 0; v < m-k+1; v++){
      r = ocr[v];
-     if(r > -1){
+     if(r > 0){
          Primer *pr = new Primer(++nOcr, v, r, ocorrencia.substr(v, r));
          primers.insert(primers.end(), pr);
       }
@@ -395,11 +434,15 @@ void KdifferencePrime::mostrarOcorrencias(){
         cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
         if(primers.size() > 10){
             fstream out;
-            string fileName = "dados/saida_a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k);
+            string fileName = "saida/a"
+                           + to_string(m) + "_b"
+                           + to_string(n) + "_k"
+                           + to_string(k) + "_"
+                           + c->name();
             out.open(fileName, ios::out | ios::trunc);
             for(Primer *p : primers){
-                //out<<p->escreverArquivoReduzido();
-                out<<p->escreverArquivoCompleto();
+                out<<p->escreverArquivoReduzido();
+                //out<<p->escreverArquivoCompleto();
             }
             out.close();
             cout<<"(Arquivo: " + fileName + ")"<<endl;
@@ -413,10 +456,15 @@ void KdifferencePrime::mostrarOcorrencias(){
 }
 
 void KdifferencePrime::setaParametros(Parametro *p){
-    alpha = new char [p->alpha.length() + 1];
-    strcpy(alpha, p->alpha.c_str());
-    beta = new char [p->beta.length() + 1];
-    strcpy(beta, p->beta.c_str());
+
+    try{
+      alpha = new char [p->alpha.length() + 1];
+      strcpy(alpha, p->alpha.c_str());
+      beta = new char [p->beta.length() + 1];
+      strcpy(beta, p->beta.c_str());
+    } catch(bad_alloc& ba){
+      cout<<"Erro ao alocar memória: " << ba.what()<<endl;
+    }
     k = p->k;
     mostrarMatriz = p->mostrarMatriz;
     versao = p->versao;
@@ -424,7 +472,10 @@ void KdifferencePrime::setaParametros(Parametro *p){
     m = p->alpha.size();
     n = p->beta.size();
     ocorrencia = p->alpha;
-    ocr = new int[m-k+1];
+
+    int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
+    ocr = new int[maxOcr];   //aloca o máximo espaço para todas as possíveis ocorrências de primer
+    memset(ocr, -1, maxOcr); //seta todas as posições com valores -1 (não ocorrência)
 
     tempo = p->mostrarTempo;
 
@@ -438,7 +489,13 @@ void KdifferencePrime::processar(){
    //O(m), onde m é o tamanho de alpha
    for(j = 0; j < (m - k) + 1; j++){
        //guardo em um array todos as ocorrências r de primer para cada j
+       c->primerJ = j;
+       c->primerM = m;
        ocr[j] = c->executar(m - j);
+       if(mostrarMatriz && ocr[j] != -1){
+         mostrar(j, ocr[j]);
+         c->imprimirMatrizTela();
+       }
    }
 }
 
@@ -485,5 +542,15 @@ void KdifferenceInexactMatch234::imprimirMatrizTela(){
     }
     cout<<endl;
 }
+
+
+
+/*
+   construído o main apenas para testar as funções
+   int main(){
+     formataSegundos(59590);
+     return 0;
+   }
+*/
 
 #endif

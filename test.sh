@@ -9,6 +9,8 @@ programa="$programa$versao"
 echo $programa 
 
 $programa -a CAACAC -b CGTCCTGCC -k 3
+$programa -a CAACACCC -b CGTCCTGCC -k 3
+$programa -a CAACACC -b CCCGTGCCC -k 3
 $programa -a CGAAGCAAGC -b AAAAAAAAAAAAAAAA -k 6
 $programa -a ACGAAAAGCAAACCAA -b AAAAAAAAAAAAAAAAAAAA -k 6
 $programa -a ACGGCAG -b AACGAAAGG -k 2
