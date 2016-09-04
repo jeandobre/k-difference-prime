@@ -12,7 +12,7 @@
 typedef struct sparentheses
    { uint *data;  	// string
      bitmap bdata;   	// bitmap of string BitRank br;
-     uint n;    	// # of parentheses 
+     uint n;    	// # of parentheses
      uint sbits;    	// bits for near pointers
      hash sftable;	// table of far forward pointers
      hash sbtable;	// table of far backward pointers
@@ -45,10 +45,13 @@ uint sizeofParentheses(parentheses P);*/
 #define bitget1(e,p) ((e)[(p)/W] & (1lu<<((p)%W)))
 class Parentheses
 {
+public:
+    ulong pnear, pfar;
+
 private:
     ulong *bp;
     BitRank *br;
-    ulong n, near, far, pnear, pfar;
+    ulong n, near, far;
     unsigned sbits;
     Hash *sftable;
     Hash *sbtable;

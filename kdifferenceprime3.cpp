@@ -22,7 +22,7 @@
 #include <list>
 #include "classes.h"
 
-#include "cst_v_1_1/SSTree.h" //biblioteca arvore sufixo compressada
+#include "cst_v_1_1/SSTree.h" //biblioteca arvore sufixo comprimida
 #include "cst_v_1_1/Tools.h"
 
 using namespace std;
@@ -30,8 +30,9 @@ using namespace std;
 //declaração da classe que é utilizada no KdifferencePrime
 class KdifferenceInexactMatch3CST: public KdifferenceInexactMatch234{
   public:
-    KdifferenceInexactMatch3CST(int *k): KdifferenceInexactMatch234(a,t,k){};
-    int executar(int m);
+    KdifferenceInexactMatch3CST(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
+    string name() const {return "K3cst";}
+    inline long int LCE(int x, int y);
 };
 
 
@@ -41,52 +42,20 @@ class KdifferencePrime3: public KdifferencePrime{
       SSTree *sst; //Arvore de Sufixo comprimida (CST)
 
     public:
-      KdifferencePrime3(){
-         //construtor seta os valores default se o usuário não escolher nada
-         this->mostrarMatriz=false;
-      }
+
       ~KdifferencePrime3(){
          delete c;
          delete sst;
       }
       void instanciar(){
-        //implementação da arvore de sufixo compressada
-        c = new KdifferenceInexactMatch3CST(&k);
+        //implementação da arvore de sufixo comprimida
+        c = new KdifferenceInexactMatch3CST(alpha, beta, &k);
       };
 } prime;
 
-//método que executa o comportamento original do algoritmo
-int KdifferenceInexactMatch3CST::executar(int m){
-    this->m = m;
-    int d,e, row;
-
-    //inicialização da matriz
-    for(d = -(k+1); d <= (n+1); d++)
-        setL(d, -1);
-
-    int long long pivo; //variável auxiliar para troca de posições
-    bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
-    int linha = -1;         //variável qwue guarda a primeira linha de ocorrência de primer
-    for(e = 0; e < k && passou; e++){
-        pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
-        for(d = -e; d <= n && passou; d++){
-           row = maiorDeTres(getL(d-1),
-                             getL(d)   + 1,
-                             getL(d+1) + 1);
-           row = menorDeDois(row, m);
-
-           if(row + d < n)
-             row += prime.sst->lce(prime.j + row , prime.m + 1 + row + d);//LCE(0,m+1);
-
-           if(row == m){passou = false; continue;} //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
-           setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaço anterior
-           if (row > linha) linha = row;
-           pivo = row;
-        }
-        setL(n, row);
-    }
-    return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
-}
+long int KdifferenceInexactMatch3CST::LCE(int x, int y){
+    return prime.sst->lce_lookup(x, y);
+};
 
 int main(int argc, char** argv) {
 
@@ -132,13 +101,18 @@ int main(int argc, char** argv) {
    cout<<"K-difference-primer-3 executando..."<<endl;
    cout<<"Versao:"<<prime.versao<<endl;
 
-   inicio = clock();
+   time(&inicio);
+   if(prime.tempo) formataTempo(inicio, true);
    prime.processar();
-   fim = clock();
+   time(&fim);
+   if(prime.tempo) formataTempo(fim, false);
 
-   prime.mostrarOcorrencias();
-   long long int tempo_execucao = ((fim - inicio) / (CLOCKS_PER_SEC / 1000));
-   if(prime.tempo) formataTempo(tempo_execucao);
+   if(!prime.mostrarMatriz) prime.mostrarOcorrencias();
+
+   if(prime.tempo){
+     double seconds = difftime(fim, inicio);
+     formataSegundos(seconds);
+   }
 
    return 0;
 }

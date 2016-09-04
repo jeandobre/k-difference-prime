@@ -134,7 +134,7 @@ class SuffixArray{
    //implementação feita por Jean usando como base o artigo:
    //Tempo de execução: O(j - i) em que a diferença entre j e i pode ser n, ou seja, o tamanho da sequencia
    //logo, O(n)
-   int LCEdirectMin(int i, int j){
+   int LCEdirectMin(int i, int j) const{
       int low  = b[i];
       int high = b[j];
 
@@ -153,7 +153,7 @@ class SuffixArray{
    }
 	//}}}
 	//{{{ inner LCP computation with RMQ: O(1)
-	int minimum(int x, int y) {
+	int minimum(int x, int y){
 		x++;
 		int z = y - x, k = 0, e = 1, s; // y - x >= e = 2^k なる最大 k
 		s = ( (z & 0xffff0000) != 0 ) << 4; z >>= s; e <<= s; k |= s;

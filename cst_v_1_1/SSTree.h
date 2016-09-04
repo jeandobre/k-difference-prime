@@ -78,6 +78,12 @@ private:
     ReplacePattern *rpLeaf, *rpSibling;
     BitRank *br, *brLeaf, *brSibling;
     Parentheses *Pr;
+    //adicionado por Jean Alexandre para diminuir o tempo de consulta ao LCE
+    //int *invert_sa;
+    int *select_br;
+    int *_depth;
+    int *_findclose;
+    int *_enclose;
 
 public:
     /**
@@ -108,7 +114,6 @@ public:
     ulong lca(ulong, ulong);
     ulong lceLinear(uchar *, ulong, ulong);
     ulong lce(ulong, ulong);
-    ulong lce_novo(ulong i, ulong j);
     ulong sl(ulong);
     ulong inorder(ulong);
     ulong rightmost(ulong);
@@ -125,6 +130,13 @@ public:
     void PrintEdge(ulong);
     void CheckLCA(ulong);
     void PrintTree(ulong, int);
+
+    //adicionado por Jean
+    //métodos para ajudar na query LCE
+    ulong lca_lookup(ulong, ulong);
+    ulong lce_lookup(ulong i, ulong j);
+    void add_enclose(ulong w, int *_enclose);
+    void tree_lookup(ulong v, int *_enclose);
 };
 
 #endif

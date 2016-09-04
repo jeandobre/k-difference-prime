@@ -1,0 +1,301 @@
+//Biblioteca SA encontrada em:
+//http://www.geeksforgeeks.org/longest-common-extension-lce-set-2-reduction-rmq/
+
+// A C++ Program to find the length of longest common
+// extension using Direct Minimum Algorithm
+#include "classes.h"
+#include<bits/stdc++.h>
+#include<new>
+using namespace std;
+
+
+// Structure to represent a query of form (L,R)
+struct Query
+{
+    int L, R;
+};
+
+// Structure to store information of a suffix
+struct suffix
+{
+    int index;  // To store original index
+    int rank[2]; // To store ranks and next rank pair
+};
+
+// A utility function to get minimum of two numbers
+int minVal(int x, int y) { return (x < y)? x: y; }
+
+// A utility function to get minimum of two numbers
+int maxVal(int x, int y) { return (x > y)? x: y; }
+
+// A comparison function used by sort() to compare
+// two suffixes Compares two pairs, returns 1 if
+// first pair is smaller
+int cmp(struct suffix a, struct suffix b)
+{
+    return (a.rank[0] == b.rank[0])?
+                   (a.rank[1] < b.rank[1]):
+                   (a.rank[0] < b.rank[0]);
+}
+
+// This is the main function that takes a string 'txt'
+// of size n as an argument, builds and return the
+// suffix array for the given string
+vector<int> buildSuffixArray(string txt, int n)
+{
+    // A structure to store suffixes and their indexes
+    struct suffix suffixes[n];
+
+    // Store suffixes and their indexes in an array
+    // of structures.
+    // The structure is needed to sort the suffixes
+    // alphabatically and maintain their old indexes
+    // while sorting
+    for (int i = 0; i < n; i++)
+    {
+        suffixes[i].index = i;
+        suffixes[i].rank[0] = txt[i] - 'A';
+        suffixes[i].rank[1] =
+                 ((i+1) < n)? (txt[i + 1] - 'A'): -1;
+    }
+
+    // Sort the suffixes using the comparison function
+    // defined above.
+    sort(suffixes, suffixes+n, cmp);
+
+    // At his point, all suffixes are sorted according
+    // to first 2 characters.  Let us sort suffixes
+    // according to first 4/ characters, then first 8
+    // and so on
+
+    // This array is needed to get the index in suffixes[]
+    // from original index.  This mapping is needed to get
+    // next suffix.
+    int ind[n];
+
+    for (int k = 4; k < 2*n; k = k*2)
+    {
+        // Assigning rank and index values to first suffix
+        int rank = 0;
+        int prev_rank = suffixes[0].rank[0];
+        suffixes[0].rank[0] = rank;
+        ind[suffixes[0].index] = 0;
+
+        // Assigning rank to suffixes
+        for (int i = 1; i < n; i++)
+        {
+            // If first rank and next ranks are same as
+            // that of previous/ suffix in array, assign
+            // the same new rank to this suffix
+            if (suffixes[i].rank[0] == prev_rank &&
+                suffixes[i].rank[1] == suffixes[i-1].rank[1])
+            {
+                prev_rank = suffixes[i].rank[0];
+                suffixes[i].rank[0] = rank;
+            }
+            else // Otherwise increment rank and assign
+            {
+                prev_rank = suffixes[i].rank[0];
+                suffixes[i].rank[0] = ++rank;
+            }
+            ind[suffixes[i].index] = i;
+        }
+
+        // Assign next rank to every suffix
+        for (int i = 0; i < n; i++)
+        {
+            int nextindex = suffixes[i].index + k/2;
+            suffixes[i].rank[1] = (nextindex < n)?
+                           suffixes[ind[nextindex]].rank[0]: -1;
+        }
+
+        // Sort the suffixes according to first k characters
+        sort(suffixes, suffixes+n, cmp);
+    }
+
+    // Store indexes of all sorted suffixes in the suffix array
+    vector<int>suffixArr;
+    for (int i = 0; i < n; i++)
+        suffixArr.push_back(suffixes[i].index);
+
+    // Return the suffix array
+    return  suffixArr;
+}
+
+/* To construct and return LCP */
+vector<int> kasai(string txt, vector<int> suffixArr,
+                              vector<int> &invSuff)
+{
+    int n = suffixArr.size();
+
+    // To store LCP array
+    vector<int> lcp(n, 0);
+
+    // Fill values in invSuff[]
+    for (int i=0; i < n; i++)
+        invSuff[suffixArr[i]] = i;
+
+    // Initialize length of previous LCP
+    int k = 0;
+
+    // Process all suffixes one by one starting from
+    // first suffix in txt[]
+    for (int i=0; i<n; i++)
+    {
+        /* If the current suffix is at n-1, then we don’t
+           have next substring to consider. So lcp is not
+           defined for this substring, we put zero. */
+        if (invSuff[i] == n-1)
+        {
+            k = 0;
+            continue;
+        }
+
+        /* j contains index of the next substring to
+           be considered  to compare with the present
+           substring, i.e., next string in suffix array */
+        int j = suffixArr[invSuff[i]+1];
+
+        // Directly start matching from k'th index as
+        // at-least k-1 characters will match
+        while (i+k<n && j+k<n && txt[i+k]==txt[j+k])
+            k++;
+
+        lcp[invSuff[i]] = k; // lcp for the present suffix.
+
+        // Deleting the starting character from the string.
+        if (k>0)
+            k--;
+    }
+
+    // return the constructed lcp array
+    return lcp;
+}
+
+// A utility function to find longest common extension
+// from index - L and index - R
+int LCE(vector<int> &lcp, vector<int> &invSuff, int n,
+        int L, int R)
+{
+    // Handle the corner case
+    if (L == R)
+        return (n-L);
+
+    int low = minVal(invSuff[L], invSuff[R]);
+    int high = maxVal(invSuff[L], invSuff[R]);
+
+    int length = lcp[low];
+
+    //isso aki está tomando muito tempo
+    //tem que substituir por RMQ
+    for (int k=low+1; k<high; k++)
+    {
+        if (lcp[k] < length)
+            length = lcp[k];
+    }
+
+    return (length);
+}
+
+// A function to answer queries of longest common extension
+void LCEQueries(string str, int n, Query q[],
+                             int m)
+{
+    // Build a suffix array
+    vector<int>suffixArr = buildSuffixArray(str, str.length());
+
+    // An auxiliary array to store inverse of suffix array
+    // elements. For example if suffixArr[0] is 5, the
+    // invSuff[5] would store 0.  This is used to get next
+    // suffix string from suffix array.
+    vector<int> invSuff(n, 0);
+
+    // Build a lcp vector
+    vector<int>lcp = kasai(str, suffixArr, invSuff);
+
+
+    for (int i=0; i<m; i++)
+    {
+        int L = q[i].L;
+        int R = q[i].R;
+
+        printf ("LCE (%d, %d) = %d\n", L, R,
+                        LCE(lcp, invSuff, n, L, R));
+    }
+
+    return;
+}
+
+static int **lce;
+
+int LCE_lookup(vector<int> &lcp, vector<int> &invSuff, int n, int x, int y){
+  if(lce[x][y] == -1){
+    // lce[x][y] = 15;// LCE(lcp, invSuff, n, x, y);
+  }
+  //return lce[x][y];
+  return LCE(lcp, invSuff, n, x, y);
+}
+
+void testa_lce(vector<int> &lcp, vector<int> &invSuff, int &m, int &n){
+   int maior, menor;
+   maior = -1;
+   menor = m;
+   int v;
+   for(int x = 0; x < m; ++x)
+     for(int y = 0; y < n; ++y){
+        v = LCE_lookup(lcp, invSuff, m + n + 1, x, y);
+        if(v > maior) maior = v;
+        if(v < menor) menor = v;
+      }
+   cout<<"maior lce:"<<maior<<"\n";
+   cout<<"menor lce:"<<menor<<"\n";
+}
+
+
+int main(){
+
+    time_t inicio, fim;
+    time(&inicio);
+
+    string str = lerArquivo("dados/alfa_50000.txt");
+    int m = str.length();
+    str.append("#");
+    str.append(lerArquivo("dados/beta_50000.txt"));
+    int n = str.length();
+
+    vector<int>suffixArr = buildSuffixArray(str, n);
+    vector<int>invSuff(n, 0);
+    vector<int>lcp = kasai(str, suffixArr, invSuff);
+
+    n -= m - 1;
+    //cout<<m<<"-"<<n<<"\n";
+    str.clear();
+
+    lce = new int*[m];
+
+    for(int i = 0; i != m; ++i)
+      lce[i] = (int *) calloc(n, sizeof(int)); //colunas
+
+   memset(lce, -1, m * n * sizeof(lce[0][0]));
+   cout<<m * n * sizeof(lce[0][0]);
+   time(&fim);
+   cout<<"Inicializacao: "<<difftime(fim, inicio)<<"\n";
+   //1a etapa de testes cacheando
+   time(&inicio);
+ //  testa_lce(lcp, invSuff, m, n);
+   time(&fim);
+   cout<<"Teste 1: "<<difftime(fim, inicio)<<"\n";
+   //2a etapa de testes usando o cache
+   time(&inicio);
+  // testa_lce(lcp, invSuff, m, n);
+   time(&fim);
+   cout<<"Teste 2: "<<difftime(fim, inicio)<<"\n";
+   //3a etapa de testes
+   time(&inicio);
+  // testa_lce(lcp, invSuff, m, n);
+   time(&fim);
+   cout<<"Teste 3: "<<difftime(fim, inicio)<<"\n";
+
+   while(1);
+   return 0;
+}

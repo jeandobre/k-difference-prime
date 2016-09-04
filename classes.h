@@ -130,11 +130,14 @@ public:
 
        this->m = strlen(a);
        this->n = strlen(t);
+
+       primerJ = 0;
+       primerM = m;
     }
     ~KdifferenceInexactMatch(){};
     virtual string name() const {return "K";};
     virtual int executar(int m){return -1;};//executa o algoritmo kdifference Inexact Match e retorna a linha da ocorrência de prime
-    virtual int executar(int m, int j){return -1;};
+    //virtual int executar(int m, int j){return -1;};
     virtual void imprimirMatrizTela(){};//escrever a matriz na tela
 };
 
@@ -170,7 +173,6 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
        }catch(bad_alloc& ba){
           cout<<"Erro ao alocar memória: " << ba.what()<<endl;
        }
-
     }
 
     ~KdifferenceInexactMatch234(){
@@ -206,11 +208,11 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
        }
        return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
    }
-    void imprimirMatrizTela();
+   void imprimirMatrizTela();
 
-    virtual long int LCE(int x, int y){
+   virtual long int LCE(int x, int y){
       return 0;
-    };
+   }
 };
 
 class KdifferencePrime{
@@ -372,7 +374,7 @@ void formataTempo(time_t hora, bool inicio){
 
 void formataSegundos(double segundos){
   long int valor = (int) segundos;
-  int mili = 0, sec = 0, minu = 0, dia = 0, hor = 0;
+  int sec = 0, minu = 0, dia = 0, hor = 0;
   double _tempo = valor;
 
   if(valor > 60){//minutos
@@ -406,7 +408,11 @@ void formataSegundos(double segundos){
   if(minu > 0) tempo += to_string(minu) + " minuto(s) ";
   if(sec > 0)  tempo += to_string(sec)  + " segundo(s) ";
 
-  cout<<"Tempo de execucao: "<< tempo <<endl;
+  if(minu > 0){
+     tempo += "(" + to_string(segundos) + " segundos )";
+  }
+
+  cout<<"Tempo de execucao: "<< tempo  << endl;
 }
 
 void KdifferencePrime::mostrarOcorrencias(bool formaSimples){
@@ -487,15 +493,16 @@ void KdifferencePrime::setaParametros(Parametro *p){
 void KdifferencePrime::processar(){
    instanciar(); //essa chamada depende diretamente da implementação do kdifferenceInexactMatch que será utilizado
    //O(m), onde m é o tamanho de alpha
+   c->primerM = m;
    for(j = 0; j < (m - k) + 1; j++){
        //guardo em um array todos as ocorrências r de primer para cada j
        c->primerJ = j;
-       c->primerM = m;
        ocr[j] = c->executar(m - j);
        if(mostrarMatriz && ocr[j] != -1){
          mostrar(j, ocr[j]);
          c->imprimirMatrizTela();
        }
+      // if(ocr[j] > m) break; //então já chegou  fim de alfa
    }
 }
 

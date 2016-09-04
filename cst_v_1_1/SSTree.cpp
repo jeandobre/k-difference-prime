@@ -77,6 +77,7 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
         sa = new CSA(text, n, floorLog2n, 0, (string(filename)+".csa").c_str());
     else // No IO operation
         sa = new CSA(text, n, floorLog2n);
+
     #ifdef SSTREE_TIMER
         printf("CSA created in %.0f seconds.\n", Tools::GetTime());
 
@@ -211,6 +212,37 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
         printf("CRMQ created in %.0f seconds.\n", Tools::GetTime());
         fflush(stdout);
     #endif
+
+
+    /****
+    * adicionado por Jean para criar o vetor sa-1
+    * preparação para o LCE. A idéia é trocar alguns processamentos O(logn) por O(1)
+    ******////
+    ulong len = numberofnodes(0);
+    select_br =  new int[n+1];
+    _findclose = new int[len * 4];
+    _depth =     new int[len * 4];
+    _enclose  =  new int[len * 4];
+
+    ulong x, w;
+    for(int v = 0; v <= n; v++){
+       x = sa->inverse(v);
+       w = brLeaf->select(x + 1);
+       select_br[v] = w;
+       _findclose[w] = Pr->findclose(w);
+    }
+    tree_lookup(0, _enclose);
+}
+
+void SSTree::add_enclose(ulong w, int *_enclose){
+  _enclose[w] = Pr->enclose(w);
+}
+
+void SSTree::tree_lookup(ulong v, int *_enclose){
+  if (v != 0) adiciona(v, _enclose, _depth);
+  if(!(isleaf(v))) percorreArvore(v + 1, _enclose);
+  v = sibling(v);
+  if (v != 0) percorreArvore(v, _enclose);
 }
 
 /**
@@ -460,15 +492,30 @@ ulong SSTree::lce(ulong i, ulong j)
 
 /**
  * Returns the Longest common extension of text positions i and j.
+ * criado por Jean Alexandre na tentativa de diminuir o tempo de acesso
+ * complexidade LCE: v = O(1)  w = O(1) + LCA(v,w) + O(log2 n/log log n)
+ *                                        O(1) + O(1) + O(RMQ(u,v))
  */
-ulong SSTree::lce_novo(ulong i, ulong j)
-{
-    i = sa->inverse(i);
-    ulong v = brLeaf->select(i + 1);
-    j = sa->inverse(j);
-    ulong w = brLeaf->select(j + 1);
+ #define menor(v, w) (v < w) ? v : w;
+ #define maior(v, w) (v > w) ? v : w;
 
-    return nodeDepth(lca(v, w));
+ ulong SSTree::lca_lookup(ulong v, ulong w){
+    if (v == 0 || w == 0) return 0;
+    if (v == w || v == root()) return v;
+    if (w == root()) return root();
+    ulong u = menor(v,w);
+    ulong x = maior(v,w);
+    if (_findclose[u] > _findclose[x]) return u;
+    return _enclose[rmq->lookup(u, x) + 1];
+}
+
+ulong SSTree::lce_lookup(ulong i, ulong j){
+
+    ulong v = select_br[i];
+    ulong w = select_br[j];
+    int _lca = lca_lookup(v, w);
+    return depth(_lca); //faltou melhorar aki
+  //  return _depth[_lca];
 }
 
 /**

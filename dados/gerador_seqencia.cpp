@@ -25,9 +25,21 @@ void gerar(string arquivo, int tamanho){
   myfile.close();
 }
 
+void gerar(string arquivo, int tamanho, const char *a){
+  ofstream myfile;
+  myfile.open (arquivo);
+  for(int i = 1; i<= (tamanho); i++){
+     myfile << a;
+  }
+  myfile.close();
+}
+
 int main(){
-    //gerar("alpha_15000.txt", 15000);
-    gerar("beta_01000.txt",  1000);
+    int sizet = 100000;
+    gerar("alfa_100000.txt", sizet);
+    gerar("beta_100000.txt", sizet);
+    gerar("alfa_A100000.txt", sizet, "A");
+    gerar("beta_C100000.txt", sizet, "C");
     return 0;
 
 }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="hacked_strmat" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug Win32">
+				<Option output="hacked_strmat" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DWIN32" />
+					<Add option="-DSTATS" />
+					<Add option="-D_PETER_GLOBAL" />
+					<Add option="-DPETER_NO_DELETE" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="-DSTRMAT" />
+				</Compiler>
+			</Target>
+			<Target title="Release Win32">
+				<Option output="hacked_strmat" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-DWIN32" />
+					<Add option="-DSTATS" />
+					<Add option="-DPETER_GLOBAL" />
+					<Add option="-DPETER_NO_DELETE" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="-DSTRMAT" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Unit filename="README.markdown" />
+		<Unit filename="README_original" />
+		<Unit filename="doc/stree.doc" />
+		<Unit filename="peter_global.cpp" />
+		<Unit filename="peter_io.cpp" />
+		<Unit filename="peter_longest_common_extension.cpp" />
+		<Unit filename="peter_main.cpp" />
+		<Unit filename="stree_lca.cpp" />
+		<Unit filename="stree_strmat.cpp" />
+		<Unit filename="stree_ukkonen.cpp" />
+		<Unit filename="strmat_match.cpp" />
+		<Unit filename="strmat_print.cpp" />
+		<Unit filename="strmat_stubs2_peter.cpp" />
+		<Unit filename="strmat_util.cpp" />
+		<Unit filename="strmat_util.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

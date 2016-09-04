@@ -28,23 +28,18 @@
 
 using namespace std;
 
-//declaração da classe que é utilizada no KdifferencePrime
-class KdifferenceInexactMatch4;
-
 class KdifferenceInexactMatch4SA: public KdifferenceInexactMatch234{
   public:
     KdifferenceInexactMatch4SA(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
-   // int executar(int m);
     string name() const {return "K4dmin";};
-    long int LCE(int x, int y);
+    inline long int LCE(int x, int y);
 };
 
 class KdifferenceInexactMatch4RMQ: public KdifferenceInexactMatch234{
   public:
     KdifferenceInexactMatch4RMQ(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
-   // int executar(int m);
     string name() const {return "K4rmq";};
-    long int LCE(int x, int y);
+    inline long int LCE(int x, int y);
 };
 
 class KdifferencePrime4: public KdifferencePrime{
