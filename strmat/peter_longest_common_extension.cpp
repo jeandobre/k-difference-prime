@@ -44,14 +44,14 @@ static void compute_nodemap(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *nodem
 }
 */
 static int compute_depth(SUFFIX_TREE tree, STREE_NODE node){
-   if(node->edgelen > 1) return node->edgelen;
+   //if(node->edgelen > 1) return node->edgelen;
    return get_label_len(node);
 }
 
 static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *nodemap){
 
     int pos, leafnum, index, vr;
-    CHAR_TYPE *edgestr, buffer[34];
+  //  CHAR_TYPE *edgestr, buffer[34];
     STREE_NODE child;
     CHAR_TYPE *str;
 
@@ -62,9 +62,10 @@ static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *node
         nodemap[vr] = node;
         leafnum++;
     }
-   /* if(!node->isaleaf)
+/*
+    if(!node->isaleaf)
        for (STREE_INTLEAF leaf = node->leaves; leaf; leaf = leaf->next) {
-         cout<<leaf<<":"<<leaf->strid<<"-"<<leaf->pos<<endl;
+         //cout<<leaf<<":"<<leaf->strid<<"-"<<leaf->pos<<endl;
           vr = (leaf->strid == 1 ? 9 : 0) + leaf->pos;
           nodemap[vr] = (STREE_NODE) leaf;
        }*/
@@ -78,6 +79,14 @@ static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *node
             nodemap[vr] = child;
             leafnum++;
         }
+
+      /*  if(!child->isaleaf)
+          for (STREE_INTLEAF leaf = child->leaves; leaf; leaf = leaf->next) {
+            //cout<<leaf<<":"<<leaf->strid<<"-"<<leaf->pos<<endl;
+             vr = (leaf->strid == 1 ? 9 : 0) + leaf->pos;
+             nodemap[vr] = (STREE_NODE) leaf;
+          }*/
+
         child = stree_get_next(tree, child);
     }
 
@@ -197,8 +206,7 @@ int lookup(LCE *lce, int ofs1, int ofs2){
     return z->depth;
 }
 
-int get_label_len(STREE_NODE node)
-{
+int get_label_len(STREE_NODE node){
     int len = 0;
     while (node) {
         len += node->edgelen;

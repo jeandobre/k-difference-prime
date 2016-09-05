@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-//#include <conio.h>
+#include <unistd.h>
 #include <string>
 
 #include "strmat.h"
@@ -305,50 +305,41 @@ static void lce_test(int length, int max_char, int num_tests)
     const STRING **strings; // = make_test_strings(2, 2, length, max_char);
 
     strings[0] = new STRING;
-    char *cstring = (char *)my_calloc(10, sizeof(char));
-    sprintf(cstring, "CCCGGCCC");
-    CHAR_TYPE sequence[10];
-   // cout<<str_to_sequence(cstring, sequence, 9);
-    strings[0] = make_seqn("alpha", str_to_sequence(cstring, sequence, 9), 9, false);
+    char *st1 = "CCCGGCCC";
+    int m = strlen(st1);
+    CHAR_TYPE sq1[m + 1];
+    strings[0] = make_seqn("alpha", str_to_sequence(st1, sq1, m), m, false);
 
-    sprintf(cstring, "CCCGTGCCC");
-   // cout<<str_to_sequence(cstring, sequence, 10);
-    strings[1] = make_seqn("alpha", str_to_sequence(cstring, sequence, 10), 10, false);
+    strings[1] = new STRING;
+    char *st2 = "CCCGTGCCC";
+    int n = strlen(st2);
+    CHAR_TYPE sq2[n + 1];
+    strings[1] = make_seqn("alpha", str_to_sequence(st2, sq2, n), n, false);
 
-   // printf("lce_test(length=%d, max_char=%d)\n", length, max_char);
     LCE *lce_ctx = prepare_longest_common_extension(strings[0], strings[1], false);
-/*
-    int i = 0;int j = 14;
-    cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, i, j)<<endl;
-    i = 1;
-    cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, i, j)<<endl;
-    i = 2;
-    cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, i, j)<<endl;
-    i = 3;
-    cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, i, j)<<endl;
-    i = 4;
-    cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, i, j)<<endl;
-    i = 5;
-    cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, i, j)<<endl;
-    i = 6;
-    cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, i, j)<<endl;
-    i = 7;
-    cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, i, j)<<endl;
-*/
 
-    for(int j = 9; j <= 17; j++){
-        for(int i = 0; i <= 7; i++){
-          cout<<i<<"-"<<j<<": "<<lookup(lce_ctx, 0, 9);
+    int i = 0; int j = 6;
+    STREE_NODE *nd = lca_lookup(lce_ctx, i, j);
+    cout<<nd<<": "<<nd->id<<"\n";
+    j = 7;
+    cout<<i<<" "<<j<<":"<<lookup(lce_ctx, i, j)<<"\n";
+    j = 8;
+    cout<<i<<" "<<j<<":"<<lookup(lce_ctx, i, j)<<"\n";
+
+    /*m = 8;
+    n = 9;
+    for(int i = 0; i < m; i++){
+      for(int j = m+1; j <= m + n; j++){
+          cout<<lookup(lce_ctx, i, j)<<" ";
       }
-      cout<<endl;
-    }
+      cout<<"\n";
+    }*/
 
     longest_common_extension_free(lce_ctx);
  //   free_test_strings(2, strings);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
     int test_num = 8;
 
     switch(test_num) {
