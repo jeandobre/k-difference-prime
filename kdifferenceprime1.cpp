@@ -294,11 +294,12 @@ int main(int argc, char** argv) {
    time(&fim);
    if(prime.tempo) formataTempo(fim, "Fim   ");
 
-   prime.mostrarOcorrencias();
+   prime.mostrarOcorrencias(true);
 
    if(prime.tempo){
      double seconds = difftime(fim, inicio);
      formataSegundos(seconds);
+     mostrarMemoria();
    }
 
    return 1;

@@ -97,9 +97,9 @@ int main(int argc, char** argv) {
 
     fim = clock();
 
-   cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")"<<endl;
-   cout<<"K-difference-primer-3 executando..."<<endl;
-   cout<<"Versao:"<<prime.versao<<endl;
+   cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")\n";
+   cout<<"K-difference-primer-3 executando...\n";
+   cout<<"Versao:"<<prime.versao<<"\n";
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
@@ -112,6 +112,7 @@ int main(int argc, char** argv) {
    if(prime.tempo){
      double seconds = difftime(fim, inicio);
      formataSegundos(seconds);
+     mostrarMemoria();
    }
 
    return 0;

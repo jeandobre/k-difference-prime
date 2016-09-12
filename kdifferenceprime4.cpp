@@ -88,9 +88,9 @@ int main(int argc, char** argv) {
      return 0;
    }
 
-   if(prime.versao > 3 || prime.versao < 1){
+   if(prime.versao > 2 || prime.versao < 1){
      cout<<MSG_VERSAO_INCORRETA;
-     cout<<MSG_VERSAO_K4_VS1<<MSG_VERSAO_K4_VS2<<MSG_VERSAO_K4_VS3;
+     cout<<MSG_VERSAO_K4_VS1<<MSG_VERSAO_K4_VS2;
      return 0;
    }
 
@@ -100,14 +100,17 @@ int main(int argc, char** argv) {
    cout<<"Pre-processando array de sufixo...";
 
    inicio = clock();
+
    string texto = prime.alpha;
    texto.append("#").append(prime.beta);
 
    char *cstr = new char[texto.length() + 1];
    strcpy(cstr, texto.c_str());
+   texto.clear();
 
    prime.sa = new SuffixArray(cstr);
    prime.sa->builds();
+
 
    fim = clock();
 
@@ -126,6 +129,7 @@ int main(int argc, char** argv) {
    if(prime.tempo){
      double seconds = difftime(fim, inicio);
      formataSegundos(seconds);
+     mostrarMemoria();
    }
 
    return 0;

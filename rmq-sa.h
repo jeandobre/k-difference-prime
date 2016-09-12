@@ -67,7 +67,7 @@ class SuffixArray{
 	};
 	void buildSA() {
 		sa=new int[n+1];b=new int[n+1];
-		int g[n+1];
+		int *g = new int[n+1];
 		REP(i,n+1) sa[i] = i, g[i] = t[i];
 		b[0] = 0; b[n] = 0;
 
@@ -79,6 +79,7 @@ class SuffixArray{
 			REP(i, n+1) g[sa[i]] = b[i];
 		}
 		REP(i, n+1) b[sa[i]] = i;
+		delete g;
 	}
 	//}}}
 	//{{{ Naive matching O(m log n)

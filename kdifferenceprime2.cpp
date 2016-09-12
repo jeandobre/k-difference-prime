@@ -112,11 +112,33 @@ class KdifferenceInexactMatch2Optimizado: public KdifferenceInexactMatch{
     void imprimirMatrizTela();
 };
 
+class KdifferenceInexactMatch2Cacheado: public KdifferenceInexactMatch234{
+  public:
+    KdifferenceInexactMatch2Cacheado(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
+    string name() const {return "K2Cac";};
+    inline long int LCE(int x, int y);
+
+  private:
+    //LCE entre s[i] e t[j]
+    int directCompLCE(int _i, int _j){
+       int o = 0;
+       while(a[o + _i] == t[o + _j]) o++;
+
+       return o;
+    }
+};
+
+long int KdifferenceInexactMatch2Cacheado::LCE(int x, int y){
+    y -= (++primerM);//por conta do array de sufixo e árvore de sufixo o y começa com |alpha| + 1
+    return directCompLCE(x, y);
+};
+
 class KdifferencePrime2: public KdifferencePrime{
     public:
       void instanciar(){
-           if(versao == 1) c = new KdifferenceInexactMatch2Optimizado(alpha, beta, &k);
-           else            c = new KdifferenceInexactMatch2Original  (alpha, beta, &k);
+           if(versao == 1)      c = new KdifferenceInexactMatch2Optimizado(alpha, beta, &k);
+           else if(versao == 2) c = new KdifferenceInexactMatch2Original  (alpha, beta, &k);
+           else                 c = new KdifferenceInexactMatch2Cacheado  (alpha, beta, &k);
       };
 } prime;
 
@@ -268,9 +290,9 @@ int main(int argc, char** argv) {
      return 0;
    }
 
-   if(prime.versao > 2 || prime.versao < 1){
+   if(prime.versao > 3 || prime.versao < 1){
      cout<<MSG_VERSAO_INCORRETA;
-     cout<<MSG_VERSAO_K2_VS1<<MSG_VERSAO_K2_VS2;
+     cout<<MSG_VERSAO_K2_VS1<<MSG_VERSAO_K2_VS2<<MSG_VERSAO_K2_VS3;
      return 0;
    }
 
@@ -291,6 +313,7 @@ int main(int argc, char** argv) {
    if(prime.tempo){
      double seconds = difftime(fim, inicio);
      formataSegundos(seconds);
+     mostrarMemoria();
    }
 
    return 1;

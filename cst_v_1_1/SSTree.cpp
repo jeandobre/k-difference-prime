@@ -239,10 +239,10 @@ void SSTree::add_enclose(ulong w, int *_enclose){
 }
 
 void SSTree::tree_lookup(ulong v, int *_enclose){
-  if (v != 0) adiciona(v, _enclose, _depth);
-  if(!(isleaf(v))) percorreArvore(v + 1, _enclose);
+  if (v != 0) add_enclose(v, _enclose);
+  if(!(isleaf(v))) tree_lookup(v + 1, _enclose);
   v = sibling(v);
-  if (v != 0) percorreArvore(v, _enclose);
+  if (v != 0) tree_lookup(v, _enclose);
 }
 
 /**

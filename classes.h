@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <new>
+#include <sys/resource.h>
 
 //constantes definidas para uso de mensagens na tela
 #define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao"
@@ -25,15 +26,21 @@
 #define MSG_VERSAO_K1_VS3 "\t-vs3           versao original do algoritmo com m linhas para computar a matriz D.\n"
 #define MSG_VERSAO_K2_VS1 "\t-vs1 (default) versao que utiliza apenas uma coluna para computar a matriz Lde.\n"
 #define MSG_VERSAO_K2_VS2 "\t-vs2           versao original do algoritmo com e colunas para computar a matriz Lde.\n"
+#define MSG_VERSAO_K2_VS3 "\t-vs3           versao que utiliza funcao directcomp para computar LCE em tempo O(n).\n"
 #define MSG_VERSAO_K3_VS1 "\t-vs1 (default) versao que utiliza arvore de sufixo compressada e consulta LCE em tempo O(k).\n"
-#define MSG_VERSAO_K4_VS1 "\t-vs1           versao que utiliza array de sufixo compressada + lcp + DirectMin.\n"
-#define MSG_VERSAO_K4_VS2 "\t-vs2           versao que utiliza array de sufixo + lcp + DirectMin.\n"
-#define MSG_VERSAO_K4_VS3 "\t-vs3 (default) versao que utiliza array de sufixo + lcp + consulta RMQ ao LCE em tempo O(1).\n"
+#define MSG_VERSAO_K4_VS1 "\t-vs1 (default) versao que utiliza array de sufixo + lcp + DirectMin.\n"
+#define MSG_VERSAO_K4_VS2 "\t-vs2           versao que utiliza array de sufixo + lcp + consulta RMQ ao LCE em tempo O(1).\n"
 
 using namespace std;
 
 class KdifferenceInexactMatch;
 class KdifferencePrime;
+
+struct JRprime{
+   int j;
+   int Jmax;
+   int r;
+};
 
 string lerArquivo(const char *local);
 
@@ -117,6 +124,7 @@ class KdifferenceInexactMatch{
     int k;  //quantidade de diferênças
 
     int rowPrint;//linha máxima de impressao da matriz
+    JRprime *jr;  //retorno do novo algoritmo
 
   public:
     int primerM; //tamanho original de alfa, extremamente necessário p/ computar corretamente o LCE
@@ -137,7 +145,7 @@ public:
     ~KdifferenceInexactMatch(){};
     virtual string name() const {return "K";};
     virtual int executar(int m){return -1;};//executa o algoritmo kdifference Inexact Match e retorna a linha da ocorrência de prime
-    //virtual int executar(int m, int j){return -1;};
+    virtual int executar(int m, int j){return -1;};
     virtual void imprimirMatrizTela(){};//escrever a matriz na tela
 };
 
@@ -171,7 +179,7 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
          this->L = new int[getDimensaoD()];
 
        }catch(bad_alloc& ba){
-          cout<<"Erro ao alocar memória: " << ba.what()<<endl;
+          cout<<"Erro ao alocar matriz L: " << ba.what()<<endl;
        }
     }
 
@@ -231,7 +239,7 @@ class KdifferencePrime{
       KdifferenceInexactMatch *c;
 
       list<Primer *> primers; //lista que guarda as ocorrências de primers
-
+      JRprime *jr;
       int *ocr; //vetor que guarda as ocorrências
 
     public:
@@ -240,6 +248,7 @@ class KdifferencePrime{
          this->mostrarMatriz=false;
          this->versao=1; //apenas uma versão
          primers.clear();
+
       }
       ~KdifferencePrime(){};
       virtual void instanciar(){};
@@ -247,6 +256,7 @@ class KdifferencePrime{
       void mostrarOcorrencias();
       void mostrarOcorrencias(bool);
       void setaParametros(Parametro *p);
+      void gerarOcorrencias();
     private:
       void mostrar(int j, int r){
         cout<<setfill(' ');
@@ -267,6 +277,7 @@ Parametro *parseParametros(int argc, char** argv){
 
    int temA, temB, temK;
    temA = temB = temK = 0;
+   p->versao = 0;
 
    for(int z = 1; z < argc; z++){
       if(strcmp(argv[z], "-sm") == 0){
@@ -326,20 +337,6 @@ Parametro *parseParametros(int argc, char** argv){
    p->beta  = lerArquivo(p->beta.c_str());
 
    return p;
-}
-
-//LCE entre s[i] e t[j]
-static int directCompLCE(int _i,int _j, char *a, char *t, int _m, int _n){
-    //deve ser passsado os índices reais e aqui será decido
-    if(_i == 0 || _j == 0) return 0;
-    _i--;
-    _j--; //apenas por conta das strings
-    int o = 0;
-    //while(o+_i < _m && o+_j < _n && a->compare(o +_i, 1, *t, o +_j, 1) == 0)
-    while(o+_i < _m && o+_j < _n && a[o +_i] == t[o +_j])
-      o++;
-
-    return o;
 }
 
 //devemos abrir o arquivo em tempo de execução, ou seja, processar enquanto abre o arquivo,
@@ -415,9 +412,51 @@ void formataSegundos(double segundos){
   cout<<"Tempo de execucao: "<< tempo  << endl;
 }
 
-void KdifferencePrime::mostrarOcorrencias(bool formaSimples){
+ /*
+  * função criado usando uma estrutura pré-definida de dados
+  * que retorna o total de memória utilizado no processo. Baseado em:
+  * http://man7.org/linux/man-pages/man2/getrusage.2.html
+  * http://linux.die.net/man/2/getrusage
+  */
+void mostrarMemoria(){
+
+    struct rusage r_usage;
+    getrusage(RUSAGE_SELF,&r_usage);
+    printf("Uso de memoria   : %ld\n",r_usage.ru_maxrss);
+}
+
+
+/*
+ * método extremamente importante quando utilizado o algoritmo para diminuir o j
+ * deve ser utilizado antes de mostrar as ocorrências
+ */
+void KdifferencePrime::gerarOcorrencias(){
+  // modificado temporariamente apenas para
   int r;
   for(int v = 0; v < m-k+1; v++){
+     //printf("j: %d Jmax:%d r: %d\n", jr[v].j, jr[v].Jmax, jr[v].r);
+     ocr[v] = -1;
+     r = jr[v].r;
+     if(r != -1){             // se há uma ocorrência de primer
+
+        for(int w = jr[v].j;        //  deve ir da primeira posição
+                w < jr[v].j + jr[v].Jmax; //  até Jmax com a mesma ocorrência r de primer
+                /*&& (jr[v].r + w) <= m */ //enquanto não extrapolar o tamanho de alfa
+                w++){
+          // printf("==> %d, %d\n", v, w);
+          ocr[w] = r--;
+        }
+
+        v = jr[v].Jmax-1;
+
+      } else ocr[v] = -1;
+  }
+}
+
+void KdifferencePrime::mostrarOcorrencias(bool formaSimples){
+  int r, v;
+
+  for(v = 0; v < m-k+1; v++){
      r = ocr[v];
      if(r > 0){
          cout<<v<<";"<<r<<"-"<<ocorrencia.substr(v, r)<<endl;
@@ -429,7 +468,7 @@ void KdifferencePrime::mostrarOcorrencias(){
   int nOcr = 0; int r;
   for(int v = 0; v < m-k+1; v++){
      r = ocr[v];
-     if(r > 0){
+     if(r != -1){
          Primer *pr = new Primer(++nOcr, v, r, ocorrencia.substr(v, r));
          primers.insert(primers.end(), pr);
       }
@@ -469,7 +508,7 @@ void KdifferencePrime::setaParametros(Parametro *p){
       beta = new char [p->beta.length() + 1];
       strcpy(beta, p->beta.c_str());
     } catch(bad_alloc& ba){
-      cout<<"Erro ao alocar memória: " << ba.what()<<endl;
+      cout<<"Erro ao alocar memória de alpha e beta: " << ba.what()<<endl;
     }
     k = p->k;
     mostrarMatriz = p->mostrarMatriz;
@@ -478,12 +517,26 @@ void KdifferencePrime::setaParametros(Parametro *p){
     m = p->alpha.size();
     n = p->beta.size();
     ocorrencia = p->alpha;
-
-    int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
-    ocr = new int[maxOcr];   //aloca o máximo espaço para todas as possíveis ocorrências de primer
-    memset(ocr, -1, maxOcr); //seta todas as posições com valores -1 (não ocorrência)
-
+    try{
+      int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
+      ocr = new int[maxOcr];   //aloca o máximo espaço para todas as possíveis ocorrências de primer
+      memset(ocr, -1, maxOcr); //seta todas as posições com valores -1 (não ocorrência)
+    } catch(bad_alloc& ba){
+      cout<<"Erro ao alocar memória de ocorrências: " << ba.what()<<endl;
+    }
+    try{
+       jr = new JRprime[m];
+       for(j = 0; j < m; j++){
+          jr[j].j = j;
+          jr[j].Jmax = 1;
+          jr[j].r = -1;
+       }
+    } catch(bad_alloc& ba){
+      cout<<"Erro ao alocar memória JRprime: " << ba.what()<<endl;
+    }
     tempo = p->mostrarTempo;
+    p->alpha.clear();
+    p->beta.clear();
 
     delete p;
 }
@@ -502,7 +555,6 @@ void KdifferencePrime::processar(){
          mostrar(j, ocr[j]);
          c->imprimirMatrizTela();
        }
-      // if(ocr[j] > m) break; //então já chegou  fim de alfa
    }
 }
 
