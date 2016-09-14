@@ -287,18 +287,15 @@ Parametro *parseParametros(int argc, char** argv){
 
       //versão vs1 = Matriz Completa, vs2 = Melhorada 1 e vs3 Molhorada 2
       if(strcmp(argv[z], "-vs1") == 0){
-        //if(argc == 7) return 0;
         p->versao=1;
         continue;
       }
       if(strcmp(argv[z], "-vs2") == 0){
-        //if(argc == 7) return 0;
         p->versao=2;
         continue;
       }
 
       if(strcmp(argv[z], "-vs3") == 0){
-        //if(argc == 7) return 0;
         p->versao=3;
         continue;
       }
@@ -443,11 +440,11 @@ void KdifferencePrime::gerarOcorrencias(){
                 w < jr[v].j + jr[v].Jmax; //  até Jmax com a mesma ocorrência r de primer
                 /*&& (jr[v].r + w) <= m */ //enquanto não extrapolar o tamanho de alfa
                 w++){
-          // printf("==> %d, %d\n", v, w);
+           //printf("==> %d, %d\n", v, w);
           ocr[w] = r--;
         }
 
-        v = jr[v].Jmax-1;
+        v += jr[v].Jmax-1;
 
       } else ocr[v] = -1;
   }

@@ -227,9 +227,8 @@ int KdifferenceInexactMatch1Optimizado1::executar(int m){
 int KdifferenceInexactMatch1Optimizado2::executar(int m){
    this->m = m;
    this->rowPrint = m;
-   int l;
 
-   for(l = 0; l <= n; l++) /** necessário inicializar apenas a primeira linha */
+   for(int l = 0; l <= n; l++) /** necessário inicializar apenas a primeira linha */
 	  D[0][l] = 0;
 
    bool passou;     //flag para verificar se toda a linha tem valores >= k
@@ -240,8 +239,7 @@ int KdifferenceInexactMatch1Optimizado2::executar(int m){
    for(int i = 1; i <= m && linha == -1; i++){
      pivo = i; passou = true;
      tt = a[prime.j + i-1];
-	  for(l = 1; l <= n; l++){
-       //cmp = a.at(i-1) == t.at(l-1) ? 0 : 1;//essa comparação direta é muito mais rápida
+	  for(int l = 1; l <= n; l++){
        aux = menorDeTres(D[0][l] + 1,
                          pivo + 1,
                          D[0][l-1] + (tt == t[l-1] ? 0 : 1));
