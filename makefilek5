@@ -1,0 +1,15 @@
+CC = g++
+CPPFLAGS =  -Wall -O3 #-DWIN32 -DSTATS -D_PETER_GLOBAL -DPETER_NO_DELETE -D_DEBUG -D_CONSOLE -D_CRT_SECURE_NO_WARNINGS -DSTRMAT 
+LIB_DIR=strmat
+
+objects = kdifferenceprime5.o $(LIB_DIR)/peter_global.o $(LIB_DIR)/peter_longest_common_extension.o \
+  $(LIB_DIR)/stree_lca.o $(LIB_DIR)/stree_strmat.o $(LIB_DIR)/stree_ukkonen.o $(LIB_DIR)/strmat_match.o \
+  $(LIB_DIR)/strmat_print.o $(LIB_DIR)/strmat_stubs2_peter.o $(LIB_DIR)/strmat_util.o 
+
+all: k5 default
+
+k5:
+	$(CC)  -Wfatal-errors -Wall  -O3  -Wextra -std=c++11 -c kdifferenceprime5.cpp -o kdifferenceprime5.o 
+
+default: $(objects)
+	$(CC) -o kdifferenceprime5 $(objects) 
