@@ -305,35 +305,25 @@ static void lce_test(int length, int max_char, int num_tests)
     const STRING **strings; // = make_test_strings(2, 2, length, max_char);
 
     strings[0] = new STRING;
-    char *st1 = "CCCGGCCC";
+    char *st1 = "CAACAC";
     int m = strlen(st1);
-    CHAR_TYPE sq1[m + 1];
+    CHAR_TYPE sq1[++m];
     strings[0] = make_seqn("alpha", str_to_sequence(st1, sq1, m), m, false);
 
     strings[1] = new STRING;
-    char *st2 = "CCCGTGCCC";
+    char *st2 = "CGTCCTGCC$";
     int n = strlen(st2);
-    CHAR_TYPE sq2[n + 1];
+    CHAR_TYPE sq2[++n];
     strings[1] = make_seqn("alpha", str_to_sequence(st2, sq2, n), n, false);
 
     LCE *lce_ctx = prepare_longest_common_extension(strings[0], strings[1], false);
 
-    int i = 0; int j = 6;
-    STREE_NODE *nd = lca_lookup(lce_ctx, i, j);
-    cout<<nd<<": "<<nd->id<<"\n";
-    j = 7;
-    cout<<i<<" "<<j<<":"<<lookup(lce_ctx, i, j)<<"\n";
-    j = 8;
-    cout<<i<<" "<<j<<":"<<lookup(lce_ctx, i, j)<<"\n";
-
-    /*m = 8;
-    n = 9;
-    for(int i = 0; i < m; i++){
-      for(int j = m+1; j <= m + n; j++){
+    for(int i = 0; i < m-1; i++){
+      for(int j = m; j < m + n -2; j++){
           cout<<lookup(lce_ctx, i, j)<<" ";
       }
       cout<<"\n";
-    }*/
+    }
 
     longest_common_extension_free(lce_ctx);
  //   free_test_strings(2, strings);

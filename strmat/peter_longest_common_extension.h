@@ -19,7 +19,7 @@ struct LCE {
 int get_label_len(STREE_NODE node);
 int lookup(LCE *lce, int ofs1, int ofs2);
 static int compute_depth(SUFFIX_TREE tree, STREE_NODE node);
-static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *nodemap);
+static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *nodemap, int half);
 LCE *prepare_longest_common_extension(const STRING *s1, const STRING *s2, bool print_stats);
 
 void longest_common_extension_free(LCE *lce);

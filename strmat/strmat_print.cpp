@@ -177,13 +177,14 @@ void small_print_tree(SUFFIX_TREE tree, STREE_NODE node, int depth, int gen_stre
     memset(buf2, 0, sizeof(buf2));
 
     if (node == stree_get_root(tree)) {
-        printf("   Root %d:\n", stree_get_ident(tree, node));
+        printf("   Root %d:", stree_get_ident(tree, node));
+        cout<<node<<"\n";
         edgelen = 0;
     } else {
         printf("   Node %4d->%4d:  ",
             stree_get_ident(tree, stree_get_parent(tree, node)),
             stree_get_ident(tree, node));
-
+        cout<<node<<" ";
         edgestr = stree_get_edgestr(tree, node);
         edgelen = stree_get_edgelen(tree, node);
 

@@ -48,17 +48,17 @@ static int compute_depth(SUFFIX_TREE tree, STREE_NODE node){
    return get_label_len(node);
 }
 
-static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *nodemap){
+static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *nodemap, int half){
 
     int pos, leafnum, index, vr;
-  //  CHAR_TYPE *edgestr, buffer[34];
     STREE_NODE child;
     CHAR_TYPE *str;
 
     leafnum = 1;
+   // cout<<node<<":"<<node->id<<"-"<<node->edgelen<<endl;
     node->depth = compute_depth(tree, node);
     while (stree_get_leaf(tree, node, leafnum, &str, &pos, &index)) {
-        vr = (index == 2 ? 9 : 0) + pos;
+        vr = (index == 2 ? half : 0) + pos;
         nodemap[vr] = node;
         leafnum++;
     }
@@ -71,11 +71,12 @@ static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *node
        }*/
 
     child = stree_get_children(tree, node);
+   // cout<<"..."<<child<<":"<<child->id<<"-"<<child->edgelen<<endl;
     while (child != NULL) {
         leafnum = 1;
         child->depth = compute_depth(tree, child);
         while (stree_get_leaf(tree, child, leafnum, &str, &pos, &index)) {
-            vr = (index == 2 ? 9 : 0) + pos;
+            vr = (index == 2 ? half : 0) + pos;
             nodemap[vr] = child;
             leafnum++;
         }
@@ -94,7 +95,7 @@ static void compute_node_map(SUFFIX_TREE tree, STREE_NODE node, STREE_NODE *node
     while (child != NULL) {
         child->depth = compute_depth(tree, child);
         if (stree_get_num_children(tree, child) > 0) {
-            compute_node_map(tree, child, nodemap);
+            compute_node_map(tree, child, nodemap, half);
         }
         child = stree_get_next(tree, child);
     }
@@ -163,9 +164,14 @@ LCE *prepare_longest_common_extension(const STRING *s1, const STRING *s2, bool p
     lce->_lca = lca_prep(tree);
 
      // Build the map of suffix tree nodes.
-    lce->_nodemap = (STREE_NODE *)my_calloc(21, sizeof(STREE_NODE));
-    compute_node_map(tree, stree_get_root(tree), lce->_nodemap);
+    int tam = s1->length + s2->length;
+    lce->_nodemap = (STREE_NODE *)my_calloc(tam, sizeof(STREE_NODE));
+    compute_node_map(tree, stree_get_root(tree), lce->_nodemap, s1->length);
 
+   /* for(int i = 0; i < tam; i++){
+      STREE_NODE nm = lce->_nodemap[i];
+      if(nm) cout<<i<<" "<<nm<<":"<<nm->id<<"\n";
+    }*/
     return lce;
 }
 
@@ -203,6 +209,8 @@ int lookup(LCE *lce, int ofs1, int ofs2){
     if(x->id == y->id) return x->depth;
 
     STREE_NODE z = lca_lookup(lce->_lca, x,  y);
+    if(!z) return 0;
+
     return z->depth;
 }
 

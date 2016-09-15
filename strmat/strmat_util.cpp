@@ -81,7 +81,7 @@ STRING *make_seqn(const char *title, const CHAR_TYPE *cstring, int length, bool 
     char buffer[CHAR_BUFFER_LEN];
 
     if (print_flag) {
-        printf("make_seqn('%s', %d, %s)\n", title, length, get_char_array(cstring, length, buffer));
+      printf("make_seqn('%s', %d, %s)\n", title, length, get_char_array(cstring, length, buffer));
     }
 
     if ((sequence = (CHAR_TYPE *)my_calloc(length, sizeof(CHAR_TYPE))) == NULL) {

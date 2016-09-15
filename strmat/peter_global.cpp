@@ -21,13 +21,13 @@ static map<int, stree_node*> _node_dict;
 #if COMPOUND_CHILD
  map<_int64, int> _child_node_dict;
 #else
- static map<int, map<CHAR_TYPE, int>> _child_node_dict2;
+ static map<int, map<CHAR_TYPE, int> > _child_node_dict2;
 #endif
 
 void pglob_clear()
 {
     _node_dict.clear();
-    for (map<int, map<CHAR_TYPE, int>>::iterator it = _child_node_dict2.begin(); it != _child_node_dict2.end(); it++) {
+    for (map<int, map<CHAR_TYPE, int> >::iterator it = _child_node_dict2.begin(); it != _child_node_dict2.end(); it++) {
         it->second.clear();
     }
     _child_node_dict2.clear();
@@ -39,7 +39,7 @@ void pglob_init()
 
     _node_index = 0;
     _node_dict = map<int, stree_node*>();
-    _child_node_dict2 = map<int, map<CHAR_TYPE, int>>();
+    _child_node_dict2 = map<int, map<CHAR_TYPE, int> >();
 }
 
 int pglob_get_node_index()

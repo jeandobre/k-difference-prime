@@ -243,8 +243,10 @@ STREE_NODE lca_lookup(LCA_STRUCT *lca, STREE_NODE x, STREE_NODE y)
     STREE_NODE *L = lca->L;
 
     // Shift idents so that they go from 1..num_nodes.
-    unsigned int xid = (unsigned int)stree_get_ident(tree, x) + 1;
-    unsigned int yid = (unsigned int)stree_get_ident(tree, y) + 1;
+    //unsigned int xid = (unsigned int)stree_get_ident(tree, x) + 1;
+    //unsigned int yid = (unsigned int)stree_get_ident(tree, y) + 1;
+    unsigned int xid = (unsigned int) x->id + 1;
+    unsigned int yid = (unsigned int) y->id + 1;
 
    /*
     * Steps 1 and 2.
@@ -261,7 +263,7 @@ STREE_NODE lca_lookup(LCA_STRUCT *lca, STREE_NODE x, STREE_NODE y)
     unsigned int j = h( (A[xid] & A[yid]) & HIGH_BITS(h(b)) );
 //    printf("k=%d, b=%d, j =%d\n", k, b, j);
 
-    IF_STATS(lca->num_compares++);
+   // IF_STATS(lca->num_compares++);
 
     // Step 3.
     unsigned int l = h(A[xid]);
@@ -270,11 +272,7 @@ STREE_NODE lca_lookup(LCA_STRUCT *lca, STREE_NODE x, STREE_NODE y)
         xbar = x;
     } else {
         k = MSB(A[xid] & ~HIGH_BITS(j));
-        unsigned int mask = HIGH_BITS(k+1);
-        unsigned int Iw = (I[xid] & mask) | (1 << k);
-        STREE_NODE w = L[Iw];
-        //xbar = stree_get_parent(tree, L[(I[xid] & HIGH_BITS(k+1)) | (1 << k)]);
-        xbar = stree_get_parent(tree, w);
+        xbar = stree_get_parent(tree, L[(I[xid] & HIGH_BITS(k+1)) | (1 << k)]);
     }
     IF_STATS(lca->num_compares++);
 
@@ -286,13 +284,12 @@ STREE_NODE lca_lookup(LCA_STRUCT *lca, STREE_NODE x, STREE_NODE y)
         k = MSB(A[yid] & ~HIGH_BITS(j));
         ybar = stree_get_parent(tree, L[(I[yid] & HIGH_BITS(k+1)) | (1 << k)]);
     }
-    IF_STATS(lca->num_compares++);
+    //IF_STATS(lca->num_compares++);
 
     // Step 5.
-    IF_STATS(lca->num_compares++);
+  //  IF_STATS(lca->num_compares++);
 
     return (stree_get_ident(tree, xbar) < stree_get_ident(tree, ybar)) ? xbar : ybar;
-   //return NULL;
 }
 
 void lca_free(LCA_STRUCT *lca)
