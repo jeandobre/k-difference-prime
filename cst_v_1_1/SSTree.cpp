@@ -214,14 +214,14 @@ SSTree::SSTree(uchar *text, ulong n, bool deletetext, unsigned samplerate, io_ac
     #endif
 
 
-    /****
-    * adicionado por Jean para criar o vetor sa-1
-    * preparação para o LCE. A idéia é trocar alguns processamentos O(logn) por O(1)
-    ******////
+    /*
+     * adicionado por Jean para criar o vetor sa-1
+     * preparação para o LCE. A idéia é trocar alguns processamentos O(logn) por O(1)
+     */
     ulong len = numberofnodes(0);
     select_br =  new int[n+1];
     _findclose = new int[len * 4];
-    _depth =     new int[len * 4];
+    //_depth =     new int[len * 4];
     _enclose  =  new int[len * 4];
 
     ulong x, w;
