@@ -286,13 +286,13 @@ int main(int argc, char** argv) {
    time_t inicio, fim;
 
    time(&inicio);
-   if(prime.tempo) formataTempo(inicio, "Inicio");
+   if(prime.tempo) formataTempo(inicio, true);
    prime.processar();
 
    time(&fim);
-   if(prime.tempo) formataTempo(fim, "Fim   ");
+   if(prime.tempo) formataTempo(fim, false);
 
-   prime.mostrarOcorrencias(true);
+   if(!prime.mostrarMatriz) prime.mostrarOcorrencias();
 
    if(prime.tempo){
      double seconds = difftime(fim, inicio);
