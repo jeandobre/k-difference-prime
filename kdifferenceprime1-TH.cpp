@@ -49,50 +49,6 @@ class KdifferenceInexactMatch1: public KdifferenceInexactMatch{
     void imprimirMatrizTela() const;
 };
 
-//implementação original Matriz D[0..m, 0..n]
-class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
- public:
-   KdifferenceInexactMatch1Original(char *a, char *t, int *k): KdifferenceInexactMatch1(a,t,k) {
-       //alocação dinâmica de inteiros, necessário mais um que é a posição 0
-       this->D = new (nothrow) int*[m + 1];
-       for (int j = 0; j <= m; ++j)
-          this->D[j] = new (nothrow) int[n + 1];
-
-       this->rowPrint = m ; //m é a linha máxima de impressão na tela
-   }
-
-   ~KdifferenceInexactMatch1Original(){
-       //Ao destruir a classe desaloca toda memória que foi usada
-       for (int i = 0; i <= m; ++i)
-         delete [] D[i];
-       delete [] D;
-    }
-
-    int executar(int m, int j);
-};
-
-//implementação Matriz D[0..1, 0..n]
-class KdifferenceInexactMatch1Optimizado1: public KdifferenceInexactMatch1{
-  public:
-   KdifferenceInexactMatch1Optimizado1(char *a, char *t, int *k):KdifferenceInexactMatch1(a,t,k){
-
-       //alocação de 2 linhas de inteiros por n + 1
-       this->D = new (nothrow) int*[2];
-       this->D[0] = new (nothrow) int[n + 1];
-       this->D[1] = new (nothrow) int[n + 1];
-
-       this->rowPrint = 1;
-   }
-
-   ~KdifferenceInexactMatch1Optimizado1(){
-       delete [] D[0];
-       delete [] D[1];
-       delete [] D;
-    }
-    int executar(int m, int j);
-//    int executar(int m) override { return executar(m, int j); }
-};
-
 //implementação Matriz D[0, 0..n]
 class KdifferenceInexactMatch1Optimizado2: public KdifferenceInexactMatch1{
   public:
@@ -118,111 +74,10 @@ class KdifferencePrime1: public KdifferencePrime{
     public:
       void processar();
       void instanciar(){
-        if(versao == 1) //se o usuário escolheu a versão otimizada 2
           c = new KdifferenceInexactMatch1Optimizado2(alpha, beta, &k); //instancia a classe Otimizada
-        else if(versao == 2) //se o usuário escolheu a versão otimizada
-          c = new KdifferenceInexactMatch1Optimizado1(alpha, beta, &k); //instancia a classe Otimizada
-        else  //se o usuário escolheu a versão normal
-          c = new KdifferenceInexactMatch1Original(alpha, beta, &k);  //instancia a classe Original
       };
 
 } prime; // é necessário apenas uma instancia de prime, já declarada aqui
-
-void KdifferenceInexactMatch1::imprimirMatrizTela() const{
-
-      cout << setfill(' ');          //setar o tamanho de espaçamento de elementos na tela
-      cout<<endl<<"     ";               //espaçamento necessário para o cabeçalho
-
-      for(int i = 0; i <= n; i++)
-         cout<<setw(2)<<t[i] << " "; //imprimi o cabeçalho da matriz com 2 espaços
-
-      cout<<endl;
-
-       //percorre toda a matriz D
-      for(int i = 0; i <= rowPrint; i++){
-
-         if(i == 0) cout<<"  ";
-         else cout<<a[j + i - 1]<<" "; // Coluna cabeçalho lateral
-
-         for(int l = 0; l <= n; l++){
-            cout<<setw(2)<<D[i][l] << " "; //imprimi o valor da matriz
-         }
-         cout<<endl;
-      }
-}
-
-//método que executa o comportamento original do algoritmo
-int KdifferenceInexactMatch1Original::executar(int m, int j){
-      /**
-         desalocar a última linha da matriz D
-         quando um novo índice j de 'a' for passado. Isso garante que a primeira chamada do algoritmo
-         usa a maior quantidade de memória já alocada (m+1 x n+1) e a cada nova chamada
-         uma linha 'desnecessária' é removida
-       */
-
-       while(this->m > m)
-          delete [] D[this->m--];
-
-      this->m = m;
-      this->rowPrint = m;
-      this->j = j;
-
-      int i, l;
-
-      for(l = 0; l <= n; l++) /** for all l, 0 <= l <= n, D[0,l] <- 0 */
-        D[0][l] = 0;
-      for(i = 1; i <= m; i++) /** for all i, 1 <= i <= m, D[i,0] <- i */
-        D[i][0] = i;
-
-      bool passou; //flag para verificar se toda a linha tem valores >= k
-      int linha = -1;  //flag que marca a primeira linha em que a condição acima foi satisfeita
-      for(i = 1; i <= m && linha == -1; i++){ /** for i <- 1 to m */
-           passou = true; //começa com aceitando que a linha toda é valida
-
-         for(l = 1; l <= n; l++){ /** for l <- 1 to n */
-            /** relação de recorrência */
-            D[i][l] = menorDeTres(D[i-1][l] + 1,
-                                  D[i][l-1] + 1,
-                                  D[i-1][l-1] + (a[j + i-1] == t[l-1] ? 0 : 1));
-
-
-            if(passou && D[i][l] < k) passou = false; //se algum valor da linha é < k essa linha é descartada
-         }
-         if(passou && linha == -1) linha = i; //se a linha não foi descartada e ela é a primeira, guarda ela
-      }
-      return linha;
-}
-
-//método que executa o comportamento otimizado do algoritmo com 2 linhas
-int KdifferenceInexactMatch1Optimizado1::executar(int m, int j){
-      this->m = m;
-      this->j = j;
-      int l;
-
-      for(l = 0; l <= n; l++) /** necessário inicializar apenas a primeira linha */
-        D[0][l] = 0;
-
-      bool passou; //flag para verificar se toda a linha tem valores >= k
-      int linha = -1;  //flag que marca a primeira linha em que a condição acima foi satisfeita
-      for(int i = 1; i <= m && linha == -1; i++){
-        D[1][0] = i;
-        passou = true;
-       for(l = 1; l <= n; l++){
-           D[1][l] = menorDeTres(D[0][l]   + 1,
-                                 D[1][l-1] + 1,
-                                 D[0][l-1] + (a[j + i-1] == t[l-1] ? 0 : 1));
-
-           if(passou && D[1][l] < k) passou = false; //se algum valor da linha é < k essa linha é descartada
-           //aqui reorganiza a matriz para o próximo laço
-           D[0][l-1] = D[1][l-1];
-           D[1][l-1] = 0;
-        }
-        D[0][n] = D[1][n];
-        D[1][n] = 0;
-        if(passou) linha = i; //se a linha não foi descartada ela é a primeira
-      }
-      return linha;
-}
 
 //método que executa o comportamento otimizado do algoritmo
 int KdifferenceInexactMatch1Optimizado2::executar(int m, int j){
@@ -295,20 +150,22 @@ void *teste(void *p){
 //IMPORTANTE: não há execução sem a invocação deste método
 void KdifferencePrime1::processar(){
 
-   pthread_t threads[4];//abre 4 treads para executar todos os j
-   struct thread_data td[4];
-   int mod = (m / 4);
-   for(int rc = 0; rc < 4; rc++){
+   int numProc = 8;
+
+   pthread_t threads[numProc];//abre 4 treads para executar todos os j
+   struct thread_data td[numProc];
+   int mod = (m / numProc);
+   for(int rc = 0; rc < numProc; rc++){
       td[rc].id = rc;
       td[rc].x = 0 + (rc * 1 * mod);
-      td[rc].y = mod * (rc + 1) - (rc == 3 ? k : 0);
+      td[rc].y = mod * (rc + 1) - (rc == numProc-1 ? k : 0);
       td[rc].versao = versao;
       pthread_create(&threads[rc], NULL, teste, (void *)&td[rc]);
    }
 
   //junta todas as threads
   void *status;
-  for(int rc = 0; rc < 4; rc++)
+  for(int rc = 0; rc < numProc; rc++)
     pthread_join(threads[rc], &status);
 }
 
@@ -341,15 +198,21 @@ int main(int argc, char** argv) {
    cout<<"K-difference-primer-1 (Com threads) processando..."<<endl;
    cout<<"Versao do algoritmo: "<<prime.versao<<endl;
 
-   time_t inicio, fim;
+    time_t inicio, fim;
 
-   inicio = clock();
+   time(&inicio);
+   if(prime.tempo) formataTempo(inicio, "Inicio");
    prime.processar();
-   fim = clock();
+
+   time(&fim);
+   if(prime.tempo) formataTempo(fim, "Fim   ");
 
    prime.mostrarOcorrencias();
-   long long int tempo_execucao = ((fim - inicio) / (CLOCKS_PER_SEC / 1000));
-   if(prime.tempo) formataTempo(tempo_execucao);
+
+   if(prime.tempo){
+     double seconds = difftime(fim, inicio);
+     formataSegundos(seconds);
+   }
 
    return 1;
 }
