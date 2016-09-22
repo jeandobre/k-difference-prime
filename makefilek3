@@ -1,5 +1,5 @@
 CC = g++
-CPPFLAGS =  -Wall -ansi -pedantic -O3
+CPPFLAGS =  -Wall  -O3
 LIB_DIR=cst_v_1_1
 
 objects = kdifferenceprime3.o $(LIB_DIR)/SSTree.o $(LIB_DIR)/Tools.o $(LIB_DIR)/CSA.o $(LIB_DIR)/BitRank.o \
@@ -9,7 +9,7 @@ objects = kdifferenceprime3.o $(LIB_DIR)/SSTree.o $(LIB_DIR)/Tools.o $(LIB_DIR)/
 all: clean k3 default
 
 k3:
-	$(CC)  -Wfatal-errors -Wall  -O3  -Wextra -std=c++11 -c kdifferenceprime3.cpp -o kdifferenceprime3.o 
+	$(CC)  -march=sandybridge -m64 -Wfatal-errors -Wall  -O3  -Wextra -std=c++11 -c kdifferenceprime3.cpp -o kdifferenceprime3.o 
 
 default: $(objects)
 	$(CC) -o kdifferenceprime3 $(objects) 

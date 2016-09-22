@@ -471,8 +471,13 @@ void KdifferencePrime::mostrarOcorrencias(){
       }
   }
 
-  if(primers.size() == 0) cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
-  else{
+  if(primers.size() == 0){
+     cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
+     cout<<"alpha: "<<to_string(m)
+         <<", beta: "<<to_string(n)
+         <<",k: "<<to_string(k)
+         <<"("<<c->name()<<")\n";  
+}else{
         cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
         if(primers.size() > 10){
             fstream out;
