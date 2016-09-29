@@ -106,10 +106,12 @@ int main(int argc, char** argv) {
     int tamanhoN = prime.n+2;
     CHAR_TYPE *sq2 = new CHAR_TYPE[tamanhoN];
     char *beta = new char[tamanhoN];
-    beta = prime.beta + '$';
+    beta = prime.beta;
+    beta[tamanhoN-2] = '$';
+    beta[tamanhoN-1] = '\0';
     str2 = make_seqn("beta", str_to_sequence(beta, sq2, tamanhoN), tamanhoN, log);
 
-    prime.lce_ctx = prepare_longest_common_extension(str1, str2, log);
+    prime.lce_ctx = prepare_longest_common_extension(str1, str2, false);
     fim = clock();
 
    cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")\n";
