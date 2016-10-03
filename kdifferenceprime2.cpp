@@ -296,8 +296,10 @@ int main(int argc, char** argv) {
      return 0;
    }
 
-   cout<<"K-difference-primer-2 processando..."<<endl;
-   cout<<"Versao do algoritmo: "<<prime.versao<<endl;
+   cout<<"K-difference-primer-2 processando...\n";
+   cout<<"Versao do algoritmo: ";
+   !(p->escolheuVersao) ? cout<<"delfaut" : cout<<prime.versao;
+   cout<<endl;
 
    time_t inicio, fim;
 

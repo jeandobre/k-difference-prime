@@ -99,7 +99,9 @@ int main(int argc, char** argv) {
 
    cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")\n";
    cout<<"K-difference-primer-3 executando...\n";
-   cout<<"Versao:"<<prime.versao<<"\n";
+   cout<<"Versao do algoritmo: ";
+   !(p->escolheuVersao) ? cout<<"delfaut" : cout<<prime.versao;
+   cout<<endl;
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);

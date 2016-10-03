@@ -79,6 +79,7 @@ public:
    bool mostrarMatriz;
    bool mostrarTempo;
    int versao;
+   bool escolheuVersao;
 
    int total;
 
@@ -88,6 +89,7 @@ public:
      mostrarTempo = false;
      versao = 1;
      total = 0;
+     escolheuVersao = false;
    };
 };
 
@@ -285,18 +287,20 @@ Parametro *parseParametros(int argc, char** argv){
         continue;
       }
 
-      //versão vs1 = Matriz Completa, vs2 = Melhorada 1 e vs3 Molhorada 2
       if(strcmp(argv[z], "-vs1") == 0){
-        p->versao=1;
+        if(p->escolheuVersao) p->versao=0; else p->versao=1;
+        p->escolheuVersao = true;
         continue;
       }
       if(strcmp(argv[z], "-vs2") == 0){
-        p->versao=2;
+        if(p->escolheuVersao) p->versao=0; else p->versao=2;
+        p->escolheuVersao = true;
         continue;
       }
 
       if(strcmp(argv[z], "-vs3") == 0){
-        p->versao=3;
+        if(p->escolheuVersao) p->versao=0; else p->versao=3;
+        p->escolheuVersao = true;
         continue;
       }
 
@@ -332,6 +336,8 @@ Parametro *parseParametros(int argc, char** argv){
 
    p->alpha = lerArquivo(p->alpha.c_str());
    p->beta  = lerArquivo(p->beta.c_str());
+
+   if(!p->escolheuVersao) p->versao = 1;
 
    return p;
 }
@@ -476,30 +482,30 @@ void KdifferencePrime::mostrarOcorrencias(){
      cout<<"alpha: "<<to_string(m)
          <<", beta: "<<to_string(n)
          <<",k: "<<to_string(k)
-         <<"("<<c->name()<<")\n";  
-}else{
-        cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
-        if(primers.size() > 10){
-            fstream out;
-            string fileName = "saida/a"
-                           + to_string(m) + "_b"
-                           + to_string(n) + "_k"
-                           + to_string(k) + "_"
-                           + c->name();
-            out.open(fileName, ios::out | ios::trunc);
-            for(Primer *p : primers){
-                out<<p->escreverArquivoReduzido();
-                //out<<p->escreverArquivoCompleto();
-            }
-            out.close();
-            cout<<"(Arquivo: " + fileName + ")"<<endl;
-        }else{
-            primers.sort(comparar);
-            for(Primer *p : primers){
-                p->escreverTela();
-            }
-        }
-    }
+         <<"("<<c->name()<<")\n";
+  }else{
+     cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
+     if(primers.size() > 10){
+         fstream out;
+         string fileName = "saida/a"
+                        + to_string(m) + "_b"
+                        + to_string(n) + "_k"
+                        + to_string(k) + "_"
+                        + c->name();
+         out.open(fileName, ios::out | ios::trunc);
+         for(Primer *p : primers){
+            // out<<p->escreverArquivoReduzido();
+             out<<p->escreverArquivoCompleto();
+         }
+         out.close();
+         cout<<"(Arquivo: " + fileName + ")"<<endl;
+     }else{
+         primers.sort(comparar);
+         for(Primer *p : primers){
+             p->escreverTela();
+         }
+     }
+  }
 }
 
 void KdifferencePrime::setaParametros(Parametro *p){
@@ -575,7 +581,7 @@ string Primer::escreverArquivoCompleto(){
     retorno->append(";");
     retorno->append(to_string(j));
     retorno->append(";");
-    retorno->append(to_string(r));
+    retorno->append(to_string(j + r));
     retorno->append(";");
     retorno->append(sequencia);
     retorno->append(";");

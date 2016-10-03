@@ -114,9 +114,11 @@ int main(int argc, char** argv) {
 
    fim = clock();
 
-   cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")"<<endl;
-   cout<<"K-difference-primer-4 executando..."<<endl;
-   cout<<"Versao:"<<prime.versao<<endl;
+   cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")\n";
+   cout<<"K-difference-primer-4 executando...\n";
+   cout<<"Versao do algoritmo: ";
+   !(p->escolheuVersao) ? cout<<"delfaut" : cout<<prime.versao;
+   cout<<endl;
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
