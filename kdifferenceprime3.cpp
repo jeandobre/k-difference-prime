@@ -60,24 +60,27 @@ long int KdifferenceInexactMatch3CST::LCE(int x, int y){
 int main(int argc, char** argv) {
 
    if (argc < 7 || argc > 10) {
-	  cout<<endl<<ERR_ARGS<<endl;
+	  cout<<FRED(ERR_ARGS);
+	  cout<<USO;
 	  return 0;
    }
 
    Parametro *p = parseParametros(argc, argv);
    if(p->total != 3){
-      cout<<endl<<ERR_ARGS<<endl;
-	  return 0;
+      cout<<FRED(ERR_ARGS);
+      cout<<USO;
+	   return 0;
    }
+
    prime.setaParametros(p);
 
    if(prime.k > prime.m){
-     cout<<endl<<ERR_KMAIOR<<endl;
+     cout<<"\n"<<FRED(ERR_KMAIOR)<<prime.m<<"\n";
      return 0;
    }
 
    if(prime.versao != 1){
-     cout<<MSG_VERSAO_INCORRETA;
+     cout<<FRED(MSG_VERSAO_INCORRETA);
      cout<<MSG_VERSAO_K3_VS1;
      return 0;
    }
@@ -100,7 +103,8 @@ int main(int argc, char** argv) {
    cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")\n";
    cout<<"K-difference-primer-3 executando...\n";
    cout<<"Versao do algoritmo: ";
-   !(p->escolheuVersao) ? cout<<"delfaut" : cout<<prime.versao;
+   !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
+   if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
    cout<<endl;
 
    time(&inicio);
@@ -117,5 +121,5 @@ int main(int argc, char** argv) {
      mostrarMemoria();
    }
 
-   return 0;
+   return 1;
 }

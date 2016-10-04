@@ -57,8 +57,6 @@ class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
        this->D = new (nothrow) int*[m + 1];
        for (int j = 0; j <= m; ++j)
           this->D[j] = new (nothrow) int[n + 1];
-
-       this->rowPrint = m ; //m é a linha máxima de impressão na tela
    }
    ~KdifferenceInexactMatch1Original(){
        //Ao destruir a classe desaloca toda memória que foi usada
@@ -67,8 +65,9 @@ class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
        delete [] D;
     }
 
-    string name() const {return "K1v2";};
+    string name() const {return "K1v3";};
     int executar(int m);
+
 };
 
 //implementação Matriz D[0..1, 0..n]
@@ -81,7 +80,6 @@ class KdifferenceInexactMatch1Optimizado1: public KdifferenceInexactMatch1{
        this->D[0] = new (nothrow) int[n + 1];
        this->D[1] = new (nothrow) int[n + 1];
 
-       this->rowPrint = 1;
    }
 
    ~KdifferenceInexactMatch1Optimizado1(){
@@ -90,8 +88,11 @@ class KdifferenceInexactMatch1Optimizado1: public KdifferenceInexactMatch1{
        delete [] D;
     }
 
-    string name() const {return "K1v1";};
+    string name() const {return "K1v2";};
     int executar(int m);
+    int getRowPrint(){
+      return 1;
+    }
 };
 
 //implementação Matriz D[0, 0..n]
@@ -102,8 +103,6 @@ class KdifferenceInexactMatch1Optimizado2: public KdifferenceInexactMatch1{
        //alocação de 1 linha de inteiros por n + 1
        this->D = new (nothrow) int*[1];
        this->D[0] = new (nothrow) int[n + 1];
-
-       this->rowPrint = 0;
    }
 
    ~KdifferenceInexactMatch1Optimizado2(){
@@ -113,6 +112,9 @@ class KdifferenceInexactMatch1Optimizado2: public KdifferenceInexactMatch1{
 
    string name() const {return "K1v1";};
    int executar(int m);
+   int getRowPrint(){
+      return 0;
+    }
 };
 
 class KdifferencePrime1: public KdifferencePrime{
@@ -133,23 +135,25 @@ class KdifferencePrime1: public KdifferencePrime{
 void KdifferenceInexactMatch1::imprimirMatrizTela(){
 
    cout << setfill(' ');          //setar o tamanho de espaçamento de elementos na tela
-	cout<<endl<<"     ";               //espaçamento necessário para o cabeçalho
+	cout<<"\n     ";               //espaçamento necessário para o cabeçalho
 
 	for(int i = 0; i <= n; i++)
-	   cout<<setw(2)<<t[i] << " "; //imprimi o cabeçalho da matriz com 2 espaços
+	   cout<<KMAG<<setw(2)<<t[i] << " "; //imprimi o cabeçalho da matriz com 2 espaços
 
-	cout<<endl;
+	cout<<RST<<"\n";
 
     //percorre toda a matriz D
-	for(int i = 0; i <= rowPrint; i++){
+	for(int i = 0; i <= getRowPrint(); i++){
 
 		if(i == 0) cout<<"  ";
-		else cout<<a[prime.j + i - 1]<<" "; // Coluna cabeçalho lateral
-
+		else cout<<KGRN<<a[prime.j + i - 1]<<" "; // Coluna cabeçalho lateral
+      cout<<RST;
 		for(int l = 0; l <= n; l++){
-			cout<<setw(2)<<D[i][l] << " "; //imprimi o valor da matriz
+		   int va = D[i][l];
+		   if(va >= this->k && l > 0) cout<<KCYN; else cout<<RST;
+			cout<<setw(2)<<va<< " "; //imprimi o valor da matriz
 		}
-		cout<<endl;
+		cout<<RST<<endl;
 	}
 }
 
@@ -166,7 +170,6 @@ int KdifferenceInexactMatch1Original::executar(int m){
        delete [] D[this->m--];
 
    this->m = m;
-   this->rowPrint = m;
 
    int i, l;
 
@@ -195,7 +198,6 @@ int KdifferenceInexactMatch1Original::executar(int m){
 //método que executa o comportamento otimizado do algoritmo
 int KdifferenceInexactMatch1Optimizado1::executar(int m){
    this->m = m;
-   this->rowPrint = m;
    int l;
 
    for(l = 0; l <= n; l++) /** necessário inicializar apenas a primeira linha */
@@ -226,7 +228,6 @@ int KdifferenceInexactMatch1Optimizado1::executar(int m){
 //método que executa o comportamento otimizado do algoritmo
 int KdifferenceInexactMatch1Optimizado2::executar(int m){
    this->m = m;
-   this->rowPrint = m;
 
    for(int l = 0; l <= n; l++) /** necessário inicializar apenas a primeira linha */
 	  D[0][l] = 0;
@@ -256,32 +257,35 @@ int KdifferenceInexactMatch1Optimizado2::executar(int m){
 int main(int argc, char** argv) {
 
    if (argc < 7 || argc > 10) {
-	  cout<<endl<<ERR_ARGS<<endl;
+	  cout<<FRED(ERR_ARGS);
+	  cout<<USO;
 	  return 0;
    }
 
    Parametro *p = parseParametros(argc, argv);
    if(p->total != 3){
-      cout<<endl<<ERR_ARGS<<endl;
-	  return 0;
+      cout<<FRED(ERR_ARGS);
+      cout<<USO;
+	   return 0;
    }
 
    prime.setaParametros(p);
 
    if(prime.k > prime.m){
-     cout<<endl<<ERR_KMAIOR<<prime.m<<endl;
+     cout<<"\n"<<FRED(ERR_KMAIOR)<<prime.m<<"\n";
      return 0;
    }
 
    if(prime.versao > 3 || prime.versao < 1){
-     cout<<MSG_VERSAO_INCORRETA;
-     cout<<MSG_VERSAO_K1_VS1<<MSG_VERSAO_K1_VS2<<MSG_VERSAO_K1_VS3;
+     cout<<FRED(MSG_VERSAO_INCORRETA);
+     cout<<FCYN(MSG_VERSAO_K1_VS1)<<MSG_VERSAO_K1_VS2<<MSG_VERSAO_K1_VS3;
      return 0;
    }
 
    cout<<"K-difference-primer-1 processando...\n";
    cout<<"Versao do algoritmo: ";
-   !(p->escolheuVersao) ? cout<<"delfaut" : cout<<prime.versao;
+   !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
+   if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
    cout<<endl;
    time_t inicio, fim;
 

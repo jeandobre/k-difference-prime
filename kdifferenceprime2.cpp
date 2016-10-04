@@ -146,14 +146,14 @@ class KdifferencePrime2: public KdifferencePrime{
 void KdifferenceInexactMatch2Original::imprimirMatrizTela(){
    cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
 
-    cout<<endl<<setw(4)<<" "; //espaçamento necessário para o cabeçalho
-	for(int i = -1; i <= k; i++) cout<<setw(2)<<i<< " "; //imprimi o cabeçalho da matriz com 2 espaços
+    cout<<"\n"<<setw(4)<<" "; //espaçamento necessário para o cabeçalho
+	for(int i = -1; i <= k; i++) cout<<KMAG<<setw(2)<<i<< " "; //imprimi o cabeçalho da matriz com 2 espaços
 
 	int vr;
-    cout<<endl;
+    cout<<RST<<"\n";
     for(int i = -(k+1), x = 0; i <= n+1; i++, x++){
 
-        cout<<setw(3)<<i<<" ";
+        cout<<KGRN<<setw(3)<<i<<" "<<RST;
         for(int l = -1, y = 0; l <= k; l++, y++){
             vr = getL(i,l);
             if(vr < -(prime.k) || vr > prime.m){
@@ -225,13 +225,17 @@ int KdifferenceInexactMatch2Original::executar(int m){
 
 //método que imprimi a matriz na tela
 void KdifferenceInexactMatch2Optimizado::imprimirMatrizTela(){
-    cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
+   cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
 	int vr;
-    cout<<endl;
+    cout<<KGRN<<"\n  d:";
+
+    for(int d = -(k+1); d <= (n+1); d++){
+       cout<<setw(2)<<d<<" ";
+    }
+    cout<<KMAG<<"\nk-1:"<<RST;
     for(int d = -(k+1); d <= (n+1); d++){
         vr = getL(d);
-
-        cout<<setw(2)<<d<<setw(2)<<vr<<endl;
+        cout<<setw(2)<<vr<<" ";
     }
     cout<<endl;
 }
@@ -273,32 +277,35 @@ int KdifferenceInexactMatch2Optimizado::executar(int m){
 int main(int argc, char** argv) {
 
    if (argc < 7 || argc > 10) {
-	  cout<<endl<<ERR_ARGS<<endl;
+	  cout<<FRED(ERR_ARGS);
+	  cout<<USO;
 	  return 0;
    }
 
    Parametro *p = parseParametros(argc, argv);
    if(p->total != 3){
-      cout<<endl<<ERR_ARGS<<endl;
-	  return 0;
+      cout<<FRED(ERR_ARGS);
+      cout<<USO;
+	   return 0;
    }
 
    prime.setaParametros(p);
 
    if(prime.k > prime.m){
-     cout<<endl<<ERR_KMAIOR<<endl;
+     cout<<"\n"<<FRED(ERR_KMAIOR)<<prime.m<<"\n";
      return 0;
    }
 
    if(prime.versao > 3 || prime.versao < 1){
-     cout<<MSG_VERSAO_INCORRETA;
+     cout<<FRED(MSG_VERSAO_INCORRETA);
      cout<<MSG_VERSAO_K2_VS1<<MSG_VERSAO_K2_VS2<<MSG_VERSAO_K2_VS3;
      return 0;
    }
 
    cout<<"K-difference-primer-2 processando...\n";
    cout<<"Versao do algoritmo: ";
-   !(p->escolheuVersao) ? cout<<"delfaut" : cout<<prime.versao;
+   !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
+   if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
    cout<<endl;
 
    time_t inicio, fim;

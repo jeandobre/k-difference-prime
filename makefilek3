@@ -9,13 +9,14 @@ objects = kdifferenceprime3.o $(LIB_DIR)/SSTree.o $(LIB_DIR)/Tools.o $(LIB_DIR)/
 all: clean k3 default
 
 k3:
-	$(CC)  -march=sandybridge -m64 -Wfatal-errors -Wall  -O3  -Wextra -std=c++11 -c kdifferenceprime3.cpp -o kdifferenceprime3.o 
+	#$(CC)  -march=sandybridge -m64 -Wfatal-errors -Wall  -O3  -Wextra -std=c++11 -c kdifferenceprime3.cpp -o kdifferenceprime3.o
+	$(CC) -O3 -std=c++11 -c kdifferenceprime3.cpp -o kdifferenceprime3.o
 
 default: $(objects)
-	$(CC) -o kdifferenceprime3 $(objects) 
+	$(CC) -o kdifferenceprime3 $(objects)
 
 clean:
-	-rm -f core *.o  *~ kdifferenceprime3 
+	-rm -f core *.o  *~ kdifferenceprime3
 
 depend:
 	g++ -MM *.cpp > dependencies.mk

@@ -15,12 +15,14 @@
 #include <sys/resource.h>
 
 //constantes definidas para uso de mensagens na tela
-#define ERR_ARGS "Uso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao"
+#define ERR_ARGS "\nArgumentos errados!"
+#define USO "\nUso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao\n"
 #define ERR_KMAIOR "O parametro k deve estar em um intervalo entre 1 e "
 #define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
 #define MSG_N_OCCR "\nOcr "
+#define MSG_MATRIZ "Mostrando a matriz de programacao dinamica das 10 primerias ocorrencias de primer"
 
-#define MSG_VERSAO_INCORRETA "\nVersao incorreta de implementacao do algoritmo\nUso correto:\n"
+#define MSG_VERSAO_INCORRETA "\nVersao incorreta de implementacao do algoritmo\n"
 #define MSG_VERSAO_K1_VS1 "\t-vs1 (default) versao que utiliza apenas uma linha para computar a matriz D.\n"
 #define MSG_VERSAO_K1_VS2 "\t-vs2           versao que utiliza duas linhas para computar a matriz D.\n"
 #define MSG_VERSAO_K1_VS3 "\t-vs3           versao original do algoritmo com m linhas para computar a matriz D.\n"
@@ -30,6 +32,28 @@
 #define MSG_VERSAO_K3_VS1 "\t-vs1 (default) versao que utiliza arvore de sufixo compressada e consulta LCE em tempo O(k).\n"
 #define MSG_VERSAO_K4_VS1 "\t-vs1 (default) versao que utiliza array de sufixo + lcp + DirectMin.\n"
 #define MSG_VERSAO_K4_VS2 "\t-vs2           versao que utiliza array de sufixo + lcp + consulta RMQ ao LCE em tempo O(1).\n"
+
+
+/* FOREGROUND */
+#define RST  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+
+#define FRED(x) KRED x RST
+#define FGRN(x) KGRN x RST
+#define FYEL(x) KYEL x RST
+#define FBLU(x) KBLU x RST
+#define FMAG(x) KMAG x RST
+#define FCYN(x) KCYN x RST
+#define FWHT(x) KWHT x RST
+
+#define BOLD(x) "\x1B[1m" x RST
+#define UNDL(x) "\x1B[4m" x RST
 
 using namespace std;
 
@@ -100,6 +124,7 @@ public:
    int j;
    int r;
    string sequencia;
+//   cout matriz;
 
 public:
    Primer(int ocr, int j, int r, string sequencia){
@@ -125,13 +150,13 @@ class KdifferenceInexactMatch{
     int n;  //tamanho de t
     int k;  //quantidade de diferênças
 
-    int rowPrint;//linha máxima de impressao da matriz
     JRprime *jr;  //retorno do novo algoritmo
 
   public:
     int primerM; //tamanho original de alfa, extremamente necessário p/ computar corretamente o LCE
     int primerJ; //índice atual j de alfa
-
+//  private:
+  //  int rowPrint;//linha máxima de impressao da matriz
 public:
     KdifferenceInexactMatch(char *a, char *t, int *k){
        this->a = a;
@@ -149,6 +174,9 @@ public:
     virtual int executar(int m){return -1;};//executa o algoritmo kdifference Inexact Match e retorna a linha da ocorrência de prime
     virtual int executar(int m, int j){return -1;};
     virtual void imprimirMatrizTela(){};//escrever a matriz na tela
+    virtual int getRowPrint(){
+      return m;
+    }
 };
 
 class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
@@ -261,11 +289,11 @@ class KdifferencePrime{
       void gerarOcorrencias();
     private:
       void mostrar(int j, int r){
-        cout<<setfill(' ');
-        cout<<setw(3)<<j<<".."<<setw(3)<<j + r;
+        cout<< setfill(' ');
+        cout<<"\nj:"<<setw(2)<<j;
         string o = ocorrencia.substr(j, r);
-        cout<<"-Tamanho("<<setw(3)<<o.size()<<"): ";
-        cout<<o<<endl;
+        cout<<", tam.: "<<setw(2)<<o.size()<<KBLU<<"-> ";
+        cout<<KYEL<<o<<RST;
       };
 };
 
@@ -286,6 +314,8 @@ Parametro *parseParametros(int argc, char** argv){
         p->mostrarMatriz = true;
         continue;
       }
+
+//      if(strcmp(argv))
 
       if(strcmp(argv[z], "-vs1") == 0){
         if(p->escolheuVersao) p->versao=0; else p->versao=1;
@@ -311,20 +341,20 @@ Parametro *parseParametros(int argc, char** argv){
       }
 
       for(int w = 0; w < 6; w++){
-        if(!temA && argA[w].compare(argv[z]) == 0){
+        if(argA[w].compare(argv[z]) == 0){
             p->alpha = argv[z + 1];
-            temA = 1;
+            temA++;
             continue;
         }
-        else if(!temB && argB[w].compare(argv[z]) == 0){
+        else if(argB[w].compare(argv[z]) == 0){
             p->beta = argv[z + 1];
-            temB = 1;
+            temB++;
             continue;
         }
-        else if(w < 2 && !temK && argK[w].compare(argv[z]) == 0){
+        else if(w < 2 && argK[w].compare(argv[z]) == 0){
             try{
               p->k = atoi(argv[z + 1]);
-              if(p->k > 0) temK = 1;
+              if(p->k > 0) temK++;
               continue;
             }catch(int e){
              // return 0;
@@ -337,7 +367,8 @@ Parametro *parseParametros(int argc, char** argv){
    p->alpha = lerArquivo(p->alpha.c_str());
    p->beta  = lerArquivo(p->beta.c_str());
 
-   if(!p->escolheuVersao) p->versao = 1;
+ //  if(!p->escolheuVersao) p->versao = 1;
+ //  if(temA > 1 || temB > 1 || temK > 1) p->total
 
    return p;
 }
@@ -504,6 +535,7 @@ void KdifferencePrime::mostrarOcorrencias(){
          for(Primer *p : primers){
              p->escreverTela();
          }
+         cout<<endl;
      }
   }
 }
@@ -554,26 +586,25 @@ void KdifferencePrime::setaParametros(Parametro *p){
 void KdifferencePrime::processar(){
    instanciar(); //essa chamada depende diretamente da implementação do kdifferenceInexactMatch que será utilizado
    //O(m), onde m é o tamanho de alpha
+   int print = 0;
    c->primerM = m;
    for(j = 0; j < (m - k) + 1; j++){
        //guardo em um array todos as ocorrências r de primer para cada j
        c->primerJ = j;
        ocr[j] = c->executar(m - j);
-       if(mostrarMatriz && ocr[j] != -1){
+       if(print < 10 && mostrarMatriz && ocr[j] != -1){
          mostrar(j, ocr[j]);
          c->imprimirMatrizTela();
+         print++; //contador de matriz impressas na tela, apenas as primeiras 10 devem ser mostradas
        }
    }
 }
 
 void Primer::escreverTela() const{
-  cout<<setfill('0');
-  cout<<MSG_N_OCCR<<setw(3)<<ocr<<" em ";
-
   cout<< setfill(' ');
-  cout<<setw(3)<<j<<".."<<setw(3)<<j + r;
-  cout<<"-Tamanho("<<setw(3)<<sequencia.size()<<"): ";
-  cout<<sequencia<<endl;
+  cout<<"\nj:"<<setw(2)<<j;
+  cout<<", tam.: "<<setw(2)<<sequencia.size()<<KBLU<<" -> ";
+  cout<<KYEL<<sequencia<<RST;
 }
 
 string Primer::escreverArquivoCompleto(){
@@ -600,14 +631,19 @@ string Primer::escreverArquivoReduzido(){
 
 //método que imprimi a matriz na tela
 void KdifferenceInexactMatch234::imprimirMatrizTela(){
-    cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
-	int vr;
-    cout<<endl;
-    for(int d = -(k+1); d <= (n+1); d++){
-        vr = getL(d);
-        cout<<setw(2)<<vr<<endl;
-    }
-    cout<<endl;
+   cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
+   int vr;
+   cout<<KGRN<<"\n  d:";
+
+   for(int d = -(k+1); d <= (n+1); d++){
+    cout<<setw(2)<<d<<" ";
+   }
+   cout<<KMAG<<"\nk-1:"<<RST;
+   for(int d = -(k+1); d <= (n+1); d++){
+     vr = getL(d);
+     cout<<setw(2)<<vr<<" ";
+   }
+   cout<<endl;
 }
 
 
