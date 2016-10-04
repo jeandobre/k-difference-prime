@@ -256,17 +256,24 @@ int KdifferenceInexactMatch1Optimizado2::executar(int m){
 
 int main(int argc, char** argv) {
 
-   if (argc < 7 || argc > 10) {
+   if (argc < 7 || argc > 14) {
 	  cout<<FRED(ERR_ARGS);
 	  cout<<USO;
 	  return 0;
    }
 
    Parametro *p = parseParametros(argc, argv);
+   if(p->argumentoErrado) return 0;
+
    if(p->total != 3){
       cout<<FRED(ERR_ARGS);
       cout<<USO;
 	   return 0;
+   }
+
+   if(p->tipoSaida < 1 || p->tipoSaida > 4){
+     cout<<"\n"<<FRED(ERR_TSAIDA)<<"\n";
+     return 0;
    }
 
    prime.setaParametros(p);
@@ -286,7 +293,9 @@ int main(int argc, char** argv) {
    cout<<"Versao do algoritmo: ";
    !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
    if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
+   if(p->mostrarLog) cout<<KYEL<<"\nLog de infomacoes ativado.\n"<<RST;
    cout<<endl;
+
    time_t inicio, fim;
 
    time(&inicio);
@@ -296,7 +305,7 @@ int main(int argc, char** argv) {
    time(&fim);
    if(prime.tempo) formataTempo(fim, false);
 
-   if(!prime.mostrarMatriz) prime.mostrarOcorrencias();
+   if(!prime.mostrarMatriz) prime.mostrarOcorrencias(p);
 
    if(prime.tempo){
      double seconds = difftime(fim, inicio);

@@ -15,13 +15,15 @@
 #include <sys/resource.h>
 
 //constantes definidas para uso de mensagens na tela
-#define ERR_ARGS "\nArgumentos errados!"
-#define USO "\nUso correto:\n -a -alpha -pattern -padrao -p -P \t(String) \n -b -beta -text -texto -t -T \t\t(String) \n -k -K \t\t\t\t\t(int) maior que 0 e menor que m\n [-sm] \tmostrar a matriz\n [-vs%] \tversao do algoritmo (1,2 ou 3)\n [-st] \tmostrar o tempo de execucao\n"
-#define ERR_KMAIOR "O parametro k deve estar em um intervalo entre 1 e "
+#define ERR_ARGS "\nErro: Argumentos errados!"
+#define ERR_KMAIOR "Erro: O parametro k deve estar em um intervalo entre 1 e "
+#define ERR_SAVEFILE "Erro: Não foi possivel criar o arquivo de saida!"
+#define ERR_TSAIDA "Erro: Tipo de saida incorreto! (1=simples, 2=completo, 3=XML e 4=JSON)"
+
 #define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
 #define MSG_N_OCCR "\nOcr "
 #define MSG_MATRIZ "Mostrando a matriz de programacao dinamica das 10 primerias ocorrencias de primer"
-#define ERR_SAVEFILE "Erro: Não foi possivel criar o arquivo de saida!"
+#define USO "\nUso correto:\n -a -alpha -pattern -padrao -p -P \t(String)\n -b -beta -text -texto -t -T \t\t(String)\n -k -K \t\t\t\t\t(int) maior que 0 e menor que o tamanho de alfa\n [-sm] \t\tmostrar a matriz de programacao dinamica \t(Opcional, default=nao mostrar)\n [-vs%] \tversao do algoritmo (1,2 ou 3) \t\t(Opcional, default=1)\n [-st] \t\tmostrar o tempo de execucao e consumo de memoria \t(Opcional, default=nao mostrar)\n [-ts%] \tforma de saida do resultado (1=simples, 2=completo, 3=XML, 4=JSON) \t(Opcional, default=1)\n [-sf] \t\tlocal e nome do arquivo gerado como saida \t\t(Opcional, default=aM_bN_k_nomearquivo)\n [-log] \tmostrar log do status atual de processamento \n\n"
 
 #define MSG_VERSAO_INCORRETA "\nVersao incorreta de implementacao do algoritmo\n"
 #define MSG_VERSAO_K1_VS1 "\t-vs1 (default) versao que utiliza apenas uma linha para computar a matriz D.\n"
@@ -105,6 +107,10 @@ public:
    bool mostrarTempo;
    int versao;
    bool escolheuVersao;
+   bool argumentoErrado;
+   string saida;
+   int tipoSaida;
+   bool mostrarLog;
 
    int total;
 
@@ -112,9 +118,12 @@ public:
      k = 0;
      mostrarMatriz = false;
      mostrarTempo = false;
-     versao = 1;
+     versao = 0;
      total = 0;
      escolheuVersao = false;
+     argumentoErrado = false;
+     tipoSaida = 1; //saída simples (default)
+     mostrarLog=false;
    };
 };
 
@@ -137,6 +146,8 @@ public:
    void escreverTela() const;
    string escreverArquivoCompleto();
    string escreverArquivoReduzido();
+   string escreverArquivoJSON();
+   string escreverArquivoXML();
 };
 
 bool comparar(const Primer* a, const Primer* b){
@@ -284,7 +295,7 @@ class KdifferencePrime{
       ~KdifferencePrime(){};
       virtual void instanciar(){};
       virtual void processar();
-      void mostrarOcorrencias();
+      void mostrarOcorrencias(Parametro *p);
       void setaParametros(Parametro *p);
       void gerarOcorrencias();
     private:
@@ -303,72 +314,111 @@ Parametro *parseParametros(int argc, char** argv){
    string argB[6] = {"-b", "-beta", "-text", "-texto", "-t", "-T"};
    string argK[2] = {"-k", "-K"};
 
+   //string aceitos[9] = {"-sm", "-st", "-ts", "-sf","-vs1", "-vs2", "-vs3", "-h", "-help"};
+
    Parametro *p = new Parametro();
 
    int temA, temB, temK;
    temA = temB = temK = 0;
-   p->versao = 0;
 
-   for(int z = 1; z < argc; z++){
+   int z = 1;
+   while( z < argc ){
+      //cout<<argv[z]<<" ";
       if(strcmp(argv[z], "-sm") == 0){
         p->mostrarMatriz = true;
+        z++;
         continue;
       }
 
-//      if(strcmp(argv))
+      if(strcmp(argv[z], "-log") == 0){
+        p->mostrarLog = true;
+        z++;
+        continue;
+      }
+
+      if(strcmp(argv[z], "-ts") == 0){
+        try{
+          if(z + 1 < argc) p->tipoSaida = atoi(argv[z + 1]);
+          //1 = simples, 2 = completo, 3 = XML e 4 = JSON
+        }catch(int e){
+           p->tipoSaida = 1;
+        }
+        z+=2;
+        continue;
+      }
+
+      if(strcmp(argv[z], "-sf") == 0){
+         if(z + 1 < argc) p->saida = argv[z + 1];
+         z+=2;
+        continue;
+      }
 
       if(strcmp(argv[z], "-vs1") == 0){
         if(p->escolheuVersao) p->versao=0; else p->versao=1;
         p->escolheuVersao = true;
+        z++;
         continue;
       }
       if(strcmp(argv[z], "-vs2") == 0){
         if(p->escolheuVersao) p->versao=0; else p->versao=2;
         p->escolheuVersao = true;
+        z++;
         continue;
       }
 
       if(strcmp(argv[z], "-vs3") == 0){
         if(p->escolheuVersao) p->versao=0; else p->versao=3;
         p->escolheuVersao = true;
+        z++;
         continue;
       }
 
       if(strcmp(argv[z], "-st") == 0){
-        //if(argc == 7) return 0;
         p->mostrarTempo=true;
+        z++;
         continue;
       }
 
-      for(int w = 0; w < 6; w++){
+      bool achou = false;
+      for(int w = 0; w < 6 && !achou; w++){
         if(argA[w].compare(argv[z]) == 0){
-            p->alpha = argv[z + 1];
+            if(z + 1 < argc) p->alpha = argv[z + 1];
             temA++;
-            continue;
+            achou = true;
         }
         else if(argB[w].compare(argv[z]) == 0){
-            p->beta = argv[z + 1];
+            if(z + 1 < argc) p->beta = argv[z + 1];
             temB++;
-            continue;
+            achou = true;
         }
         else if(w < 2 && argK[w].compare(argv[z]) == 0){
+            achou = true;
             try{
-              p->k = atoi(argv[z + 1]);
+              if(z + 1 < argc) p->k = atoi(argv[z + 1]);
               if(p->k > 0) temK++;
-              continue;
             }catch(int e){
-             // return 0;
+              p->k = 0;
             }
         }
       }
+      if(achou){
+        z+=2;
+        continue;
+      };
+
+      //verificamos se há outro parâmetro errado vamos verificar se algum parâmetro passado está fora da lista
+      //se chegou até aqui
+      p->argumentoErrado=true;
+      cout<<FRED(ERR_ARGS)<<" "<<argv[z];
+      cout<<USO;
+      z++;
+      break;
    }
    p->total = temA + temB + temK;
 
    p->alpha = lerArquivo(p->alpha.c_str());
    p->beta  = lerArquivo(p->beta.c_str());
-
- //  if(!p->escolheuVersao) p->versao = 1;
- //  if(temA > 1 || temB > 1 || temK > 1) p->total
+   if(!p->escolheuVersao) p->versao = 1; //se não escolheu versão então seta default como 1
 
    return p;
 }
@@ -487,7 +537,8 @@ void KdifferencePrime::gerarOcorrencias(){
   }
 }
 
-void KdifferencePrime::mostrarOcorrencias(){
+void KdifferencePrime::mostrarOcorrencias(Parametro *par){
+
   int nOcr = 0; int r;
   for(int v = 0; v < m-k+1; v++){
      r = ocr[v];
@@ -505,20 +556,27 @@ void KdifferencePrime::mostrarOcorrencias(){
          <<" ("<<c->name()<<")\n";
   }else{
      cout<<KYEL<<"Encontrado "<<RST<<primers.size()<<KYEL<<" ocorrencia(s) de primers!"<<RST;
-     cout<<" Ocorrencias gravadas em ";
+
      if(primers.size() > 10){
-       string fileName = "saida/a"
-                        + to_string(m) + "_b"
-                        + to_string(n) + "_k"
-                        + to_string(k) + "_"
-                        + c->name();
+       cout<<" Ocorrencias gravadas em ";
+       string fileName;
+       if(par->saida.empty())
+          fileName = "saida/a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k) + "_" + c->name();
+       else
+          fileName = par->saida;
+
        try{
          fstream out;
 
          out.open(fileName, ios::out | ios::trunc);
+         if(par->tipoSaida == 1)       out<<"j|tamanho|sequencia\n";
+         else if(par->tipoSaida == 2)  out<<"ocorrencia|j|tamanho|sequencia|j+r\n";
+
          for(Primer *p : primers){
-            // out<<p->escreverArquivoReduzido();
-             out<<p->escreverArquivoCompleto();
+             if(par->tipoSaida == 1)      out<<p->escreverArquivoReduzido();
+             else if(par->tipoSaida == 2) out<<p->escreverArquivoCompleto();
+             else if(par->tipoSaida == 3) out<<p->escreverArquivoXML();
+             else if(par->tipoSaida == 4) out<<p->escreverArquivoJSON();
          }
          out.close();
 
@@ -528,8 +586,13 @@ void KdifferencePrime::mostrarOcorrencias(){
        cout<<fileName<<endl;
      }else{
          primers.sort(comparar);
+         if(par->tipoSaida == 1)       cout<<"\nj|tamanho|sequencia\n";
+         else if(par->tipoSaida == 2)  cout<<"\nocorrencia|j|tamanho|sequencia|j+r\n";
          for(Primer *p : primers){
-             p->escreverTela();
+             if(par->tipoSaida == 1)      cout<<p->escreverArquivoReduzido();
+             else if(par->tipoSaida == 2) cout<<p->escreverArquivoCompleto();
+             else if(par->tipoSaida == 3) cout<<p->escreverArquivoXML();
+             else if(par->tipoSaida == 4) cout<<p->escreverArquivoJSON();
          }
          cout<<endl;
      }
@@ -573,8 +636,6 @@ void KdifferencePrime::setaParametros(Parametro *p){
     tempo = p->mostrarTempo;
     p->alpha.clear();
     p->beta.clear();
-
-    delete p;
 }
 
 //método que processa o algoritmo principal chamado a partir do procedimento MAIN
@@ -604,24 +665,38 @@ void Primer::escreverTela() const{
 }
 
 string Primer::escreverArquivoCompleto(){
+    //ocorrencia;j;tamanho;sequencia;j+tamanho
     string *retorno = new string(to_string(ocr));
     retorno->append(";");
     retorno->append(to_string(j));
     retorno->append(";");
-    retorno->append(to_string(j + r));
+    retorno->append(to_string(r));
     retorno->append(";");
     retorno->append(sequencia);
     retorno->append(";");
-    retorno->append(to_string(sequencia.size()));
+    retorno->append(to_string(j+r));
     retorno->append("\n");
     return *retorno;
 }
 
 string Primer::escreverArquivoReduzido(){
+    //j;tamanho;sequencia
     string *retorno = new string(to_string(j));
     retorno->append(";");
-    retorno->append(to_string(j + r));
+    retorno->append(to_string(r));
+    retorno->append(";");
+    retorno->append(sequencia);
     retorno->append("\n");
+    return *retorno;
+}
+
+string Primer::escreverArquivoXML(){
+    string *retorno = new string(to_string(j));
+    return *retorno;
+}
+
+string Primer::escreverArquivoJSON(){
+    string *retorno = new string(to_string(j));
     return *retorno;
 }
 

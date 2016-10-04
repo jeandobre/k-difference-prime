@@ -65,17 +65,23 @@ long int KdifferenceInexactMatch5ST::LCE(int x, int y){
 
 int main(int argc, char** argv) {
 
-   if (argc < 7 || argc > 10) {
+   if (argc < 7 || argc > 14) {
 	  cout<<FRED(ERR_ARGS);
 	  cout<<USO;
 	  return 0;
    }
 
    Parametro *p = parseParametros(argc, argv);
+
    if(p->total != 3){
       cout<<FRED(ERR_ARGS);
       cout<<USO;
 	   return 0;
+   }
+
+   if(p->tipoSaida < 1 || p->tipoSaida > 4){
+     cout<<"\n"<<FRED(ERR_TSAIDA)<<"\n";
+     return 0;
    }
 
    prime.setaParametros(p);
@@ -91,10 +97,18 @@ int main(int argc, char** argv) {
      return 0;
    }
 
+   cout<<"K-difference-primer-5 executando...\n";
+   cout<<"Versao do algoritmo: ";
+   !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
+   if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
+   if(p->mostrarLog) cout<<KYEL<<"\nLog de infomacoes ativado.\n"<<RST;
+   cout<<endl;
+
    time_t inicio, fim;
 
     //pré-processamento da árvore de sufixo
-    cout<<"Pre-processando arvore de sufixo...";
+   if(p->mostrarLog) cout<<"Pre-processando arvore de sufixo...";
+
     inicio = clock();
     bool log = false;
     const STRING *str1, *str2;
@@ -102,7 +116,7 @@ int main(int argc, char** argv) {
     str1 = new STRING;
     int tamanhoM = prime.m+1;
     CHAR_TYPE *sq1 = new CHAR_TYPE[tamanhoM];
-    str1 = make_seqn("alpha", str_to_sequence(prime.alpha, sq1, tamanhoM), tamanhoM, log);
+    str1 = make_seqn("alpha", str_to_sequence(prime.alpha, sq1, tamanhoM), tamanhoM, p->mostrarLog);
 
     str2 = new STRING;
     int tamanhoN = prime.n+2;
@@ -111,17 +125,12 @@ int main(int argc, char** argv) {
     beta = prime.beta;
     beta[tamanhoN-2] = '$';
     beta[tamanhoN-1] = '\0';
-    str2 = make_seqn("beta", str_to_sequence(beta, sq2, tamanhoN), tamanhoN, log);
+    str2 = make_seqn("beta", str_to_sequence(beta, sq2, tamanhoN), tamanhoN, p->mostrarLog);
 
-    prime.lce_ctx = prepare_longest_common_extension(str1, str2, false);
+    prime.lce_ctx = prepare_longest_common_extension(str1, str2, p->mostrarLog);
     fim = clock();
 
-   cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")\n";
-   cout<<"K-difference-primer-5 executando...\n";
-   cout<<"Versao do algoritmo: ";
-   !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
-   if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
-   cout<<endl;
+   if(p->mostrarLog) cout<<"(Tempo: "<<((fim - inicio) / (CLOCKS_PER_SEC / 1000))<<")\n";
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
@@ -129,7 +138,7 @@ int main(int argc, char** argv) {
    time(&fim);
    if(prime.tempo) formataTempo(fim, false);
 
-   if(!prime.mostrarMatriz) prime.mostrarOcorrencias();
+   if(!prime.mostrarMatriz) prime.mostrarOcorrencias(p);
 
    if(prime.tempo){
      double seconds = difftime(fim, inicio);

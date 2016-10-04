@@ -6,7 +6,7 @@ read versao
 programa="./kdifferenceprime"
 programa="$programa$versao"
 
-echo $programa 
+echo $programa
 
 $programa -a CAACAC -b CGTCCTGCC -k 3
 $programa -a CAACACCC -b CGTCCTGCC -k 3
@@ -22,3 +22,12 @@ $programa -a CCC -b TTT -k 4
 $programa -a CCC -b TTT -k 0
 $programa -a ACGT -b TGCA -k 1
 $programa -a ACGT -b TGCA -k 2
+
+$programa -a ACGT -b TGCA -k 2 -vs0
+$programa -a ACGT -b TGCA -k 2 -sm
+$programa -a ACGT -b TGCA -k 2 -st
+$programa -a ACGT -b TGCA -k 2 -aaaaaa
+$programa -a ACGT -b TGCA -k 2 -a AACCG
+$programa -a ACGT -b TGCA -k 2 -ts 2
+$programa -a ACGT -b TGCA -k 2 -log
+
