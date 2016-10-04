@@ -21,6 +21,7 @@
 #define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
 #define MSG_N_OCCR "\nOcr "
 #define MSG_MATRIZ "Mostrando a matriz de programacao dinamica das 10 primerias ocorrencias de primer"
+#define ERR_SAVEFILE "Erro: Não foi possivel criar o arquivo de saida!"
 
 #define MSG_VERSAO_INCORRETA "\nVersao incorreta de implementacao do algoritmo\n"
 #define MSG_VERSAO_K1_VS1 "\t-vs1 (default) versao que utiliza apenas uma linha para computar a matriz D.\n"
@@ -284,7 +285,6 @@ class KdifferencePrime{
       virtual void instanciar(){};
       virtual void processar();
       void mostrarOcorrencias();
-      void mostrarOcorrencias(bool);
       void setaParametros(Parametro *p);
       void gerarOcorrencias();
     private:
@@ -487,17 +487,6 @@ void KdifferencePrime::gerarOcorrencias(){
   }
 }
 
-void KdifferencePrime::mostrarOcorrencias(bool formaSimples){
-  int r, v;
-
-  for(v = 0; v < m-k+1; v++){
-     r = ocr[v];
-     if(r > 0){
-         cout<<v<<";"<<r<<"-"<<ocorrencia.substr(v, r)<<endl;
-      }
-  }
-}
-
 void KdifferencePrime::mostrarOcorrencias(){
   int nOcr = 0; int r;
   for(int v = 0; v < m-k+1; v++){
@@ -509,27 +498,34 @@ void KdifferencePrime::mostrarOcorrencias(){
   }
 
   if(primers.size() == 0){
-     cout<<MSG_0_OCCR<<k<<" diferenca(s)"<<endl;
-     cout<<"alpha: "<<to_string(m)
-         <<", beta: "<<to_string(n)
+     cout<<KRED<<MSG_0_OCCR<<RST<<k<<KRED<<" diferenca(s)"<<RST<<"\n";
+     cout<<"alpha: "<<KCYN<<to_string(m)<<RST
+         <<", beta: "<<KMAG<<to_string(n)<<RST
          <<",k: "<<to_string(k)
-         <<"("<<c->name()<<")\n";
+         <<" ("<<c->name()<<")\n";
   }else{
-     cout<<"Encontrado "<<primers.size()<<" ocorrencia(s) de primers ";
+     cout<<KYEL<<"Encontrado "<<RST<<primers.size()<<KYEL<<" ocorrencia(s) de primers!"<<RST;
+     cout<<" Ocorrencias gravadas em ";
      if(primers.size() > 10){
-         fstream out;
-         string fileName = "saida/a"
+       string fileName = "saida/a"
                         + to_string(m) + "_b"
                         + to_string(n) + "_k"
                         + to_string(k) + "_"
                         + c->name();
+       try{
+         fstream out;
+
          out.open(fileName, ios::out | ios::trunc);
          for(Primer *p : primers){
             // out<<p->escreverArquivoReduzido();
              out<<p->escreverArquivoCompleto();
          }
          out.close();
-         cout<<"(Arquivo: " + fileName + ")"<<endl;
+
+       } catch(std::ifstream::failure e){
+         cout<<FRED(ERR_SAVEFILE);
+       }
+       cout<<fileName<<endl;
      }else{
          primers.sort(comparar);
          for(Primer *p : primers){
