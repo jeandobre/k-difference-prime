@@ -31,6 +31,7 @@
 #include <time.h>
 #include <list>
 #include "classes.h"
+#include <stdexcept>
 
 
 //O algoritmo foi adaptado para entregar o resultado do primer que é o inverso da programação original
@@ -256,27 +257,18 @@ int KdifferenceInexactMatch1Optimizado2::executar(int m){
 
 int main(int argc, char** argv) {
 
-   if (argc < 7 || argc > 14) {
-	  cout<<FRED(ERR_ARGS);
-	  cout<<USO;
-	  return 0;
-   }
-
    Parametro *p = parseParametros(argc, argv);
-   if(p->argumentoErrado) return 0;
-
-   if(p->total != 3){
-      cout<<FRED(ERR_ARGS);
-      cout<<USO;
-	   return 0;
-   }
-
-   if(p->tipoSaida < 1 || p->tipoSaida > 4){
-     cout<<"\n"<<FRED(ERR_TSAIDA)<<"\n";
-     return 0;
-   }
+   if(p == NULL) return 0;
 
    prime.setaParametros(p);
+
+   //se o usuário escolheu o J, devemos fazer algumas checagens:
+   //1 - o j é valido (entre 0 e m)
+   //2 - a distância é valida (entre 0 e j + distancia <= m)
+   if(p->Jsetado){
+     if(p->Jselecionado < 0 || p->Jselecionado > prime.m){ cout<<FRED(ERR_J)<<"\n"; return 0; }
+     else if(p->Jdistancia < 1 || (p->Jdistancia + p->Jselecionado) > prime.m){ cout<<FRED(ERR_DISTANCIA)<<"\n"; return 0; }
+   }
 
    if(prime.k > prime.m){
      cout<<"\n"<<FRED(ERR_KMAIOR)<<prime.m<<"\n";
@@ -294,13 +286,20 @@ int main(int argc, char** argv) {
    !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
    if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
    if(p->mostrarLog) cout<<KYEL<<"\nLog de infomacoes ativado.\n"<<RST;
+   if(p->Jsetado) {
+      if(p->Jdistancia > 1){
+       cout<<KCYN<<"\nProcessando os indices "<<RST<<p->Jselecionado;
+       cout<<KCYN<<" ate "<<RST<<(p->Jdistancia + p->Jselecionado) -1;
+      } else cout<<KCYN<<"\nProcessando o indice "<<RST<<p->Jselecionado;
+      cout<<KCYN<<" de alfa.\n"<<RST;
+   }
    cout<<endl;
 
    time_t inicio, fim;
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
-   prime.processar();
+   prime.processar(p->Jselecionado, p->Jdistancia);
 
    time(&fim);
    if(prime.tempo) formataTempo(fim, false);

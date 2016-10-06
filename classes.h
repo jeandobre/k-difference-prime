@@ -19,6 +19,8 @@
 #define ERR_KMAIOR "Erro: O parametro k deve estar em um intervalo entre 1 e "
 #define ERR_SAVEFILE "Erro: Não foi possivel criar o arquivo de saida!"
 #define ERR_TSAIDA "Erro: Tipo de saida incorreto! (1=simples, 2=completo, 3=XML e 4=JSON)"
+#define ERR_J "Erro: O intervalo de valores do indice j deve estar entre 0 e o tamanho de alfa!"
+#define ERR_DISTANCIA "Erro: A distancia de valores do indice j deve estar entre 1 e o tamanho de alfa!"
 
 #define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
 #define MSG_N_OCCR "\nOcr "
@@ -111,6 +113,9 @@ public:
    string saida;
    int tipoSaida;
    bool mostrarLog;
+   bool Jsetado;
+   int Jselecionado;
+   int Jdistancia;
 
    int total;
 
@@ -124,6 +129,9 @@ public:
      argumentoErrado = false;
      tipoSaida = 1; //saída simples (default)
      mostrarLog=false;
+     Jselecionado = -1; //setado para nao ser utilizado
+     Jdistancia = -1;
+     Jsetado = false;
    };
 };
 
@@ -294,7 +302,7 @@ class KdifferencePrime{
       }
       ~KdifferencePrime(){};
       virtual void instanciar(){};
-      virtual void processar();
+      virtual void processar(int beginJ, int endJ);
       void mostrarOcorrencias(Parametro *p);
       void setaParametros(Parametro *p);
       void gerarOcorrencias();
@@ -314,7 +322,11 @@ Parametro *parseParametros(int argc, char** argv){
    string argB[6] = {"-b", "-beta", "-text", "-texto", "-t", "-T"};
    string argK[2] = {"-k", "-K"};
 
-   //string aceitos[9] = {"-sm", "-st", "-ts", "-sf","-vs1", "-vs2", "-vs3", "-h", "-help"};
+   if (argc < 7 || argc > 17) {
+	  cout<<FRED(ERR_ARGS);
+	  cout<<USO;
+	  return NULL;
+   }
 
    Parametro *p = new Parametro();
 
@@ -322,8 +334,33 @@ Parametro *parseParametros(int argc, char** argv){
    temA = temB = temK = 0;
 
    int z = 1;
-   while( z < argc ){
+   p->argumentoErrado = false;
+   while( z < argc && !p->argumentoErrado ){
       //cout<<argv[z]<<" ";
+
+      if(strcmp(argv[z], "-j") == 0){
+        if(z + 1 < argc)
+           try{
+              p->Jselecionado = atoi(argv[z + 1]);
+           }catch(int e){}
+        else {
+           p->argumentoErrado = true;
+           continue;
+        }
+        if(z + 2 < argc)
+           try{
+             p->Jdistancia = atoi(argv[z + 2]);
+
+           }catch(int e){}
+        else {
+           p->argumentoErrado = true;
+           continue;
+        }
+        z+=3;
+        p->Jsetado = true; //importante, pois depois podemos verificar se os valores estão corretos
+        continue;
+      }
+
       if(strcmp(argv[z], "-sm") == 0){
         p->mostrarMatriz = true;
         z++;
@@ -337,11 +374,16 @@ Parametro *parseParametros(int argc, char** argv){
       }
 
       if(strcmp(argv[z], "-ts") == 0){
-        try{
-          if(z + 1 < argc) p->tipoSaida = atoi(argv[z + 1]);
-          //1 = simples, 2 = completo, 3 = XML e 4 = JSON
-        }catch(int e){
-           p->tipoSaida = 1;
+        if(z + 1 < argc){
+           try{
+              p->tipoSaida = atoi(argv[z + 1]);
+             //1 = simples, 2 = completo, 3 = XML e 4 = JSON
+           }catch(int e){
+              p->tipoSaida = 1;
+           }
+        } else{
+          p->argumentoErrado = true;
+          continue;
         }
         z+=2;
         continue;
@@ -409,16 +451,35 @@ Parametro *parseParametros(int argc, char** argv){
       //verificamos se há outro parâmetro errado vamos verificar se algum parâmetro passado está fora da lista
       //se chegou até aqui
       p->argumentoErrado=true;
+      break;
+   }
+
+   if(p->argumentoErrado){
       cout<<FRED(ERR_ARGS)<<" "<<argv[z];
       cout<<USO;
-      z++;
-      break;
+    return NULL;
    }
    p->total = temA + temB + temK;
 
    p->alpha = lerArquivo(p->alpha.c_str());
    p->beta  = lerArquivo(p->beta.c_str());
    if(!p->escolheuVersao) p->versao = 1; //se não escolheu versão então seta default como 1
+
+   if(p->total != 3){
+      cout<<FRED(ERR_ARGS);
+      cout<<USO;
+	   return NULL;
+   }
+
+   if(p->tipoSaida < 1 || p->tipoSaida > 4){
+     cout<<"\n"<<FRED(ERR_TSAIDA)<<"\n";
+     return NULL;
+   }
+
+   if(!p->Jsetado){
+     p->Jselecionado = 0;
+     p->Jdistancia = 0;
+   }
 
    return p;
 }
@@ -540,9 +601,12 @@ void KdifferencePrime::gerarOcorrencias(){
 void KdifferencePrime::mostrarOcorrencias(Parametro *par){
 
   int nOcr = 0; int r;
-  for(int v = 0; v < m-k+1; v++){
+ // int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
+ // if(par->Jsetado) maxOcr = par->Jdistancia;
+ int maxOcr = m;
+  for(int v = 0; v < maxOcr; v++){
      r = ocr[v];
-     if(r != -1){
+     if(r > 0 && r < m){
          Primer *pr = new Primer(++nOcr, v, r, ocorrencia.substr(v, r));
          primers.insert(primers.end(), pr);
       }
@@ -558,7 +622,7 @@ void KdifferencePrime::mostrarOcorrencias(Parametro *par){
      cout<<KYEL<<"Encontrado "<<RST<<primers.size()<<KYEL<<" ocorrencia(s) de primers!"<<RST;
 
      if(primers.size() > 10){
-       cout<<" Ocorrencias gravadas em ";
+       cout<<"\nOcorrencias gravadas em ";
        string fileName;
        if(par->saida.empty())
           fileName = "saida/a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k) + "_" + c->name();
@@ -617,13 +681,15 @@ void KdifferencePrime::setaParametros(Parametro *p){
     n = p->beta.size();
     ocorrencia = p->alpha;
     try{
-      int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
+     // int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
+     // if(p->Jsetado) maxOcr = p->Jdistancia+1;
+      int maxOcr = m;
       ocr = new int[maxOcr];   //aloca o máximo espaço para todas as possíveis ocorrências de primer
       memset(ocr, -1, maxOcr); //seta todas as posições com valores -1 (não ocorrência)
     } catch(bad_alloc& ba){
       cout<<"Erro ao alocar memória de ocorrências: " << ba.what()<<endl;
     }
-    try{
+  /*  try{
        jr = new JRprime[m];
        for(j = 0; j < m; j++){
           jr[j].j = j;
@@ -632,7 +698,7 @@ void KdifferencePrime::setaParametros(Parametro *p){
        }
     } catch(bad_alloc& ba){
       cout<<"Erro ao alocar memória JRprime: " << ba.what()<<endl;
-    }
+    }*/
     tempo = p->mostrarTempo;
     p->alpha.clear();
     p->beta.clear();
@@ -640,12 +706,17 @@ void KdifferencePrime::setaParametros(Parametro *p){
 
 //método que processa o algoritmo principal chamado a partir do procedimento MAIN
 //IMPORTANTE: não há execução sem a invocação deste método
-void KdifferencePrime::processar(){
+void KdifferencePrime::processar(int beginJ, int endJ){
+
    instanciar(); //essa chamada depende diretamente da implementação do kdifferenceInexactMatch que será utilizado
    //O(m), onde m é o tamanho de alpha
    int print = 0;
    c->primerM = m;
-   for(j = 0; j < (m - k) + 1; j++){
+
+   if(endJ == 0) endJ = (m - k) + 1;
+   else          endJ = beginJ + endJ;
+
+   for(j = beginJ; j < endJ; j++){
        //guardo em um array todos as ocorrências r de primer para cada j
        c->primerJ = j;
        ocr[j] = c->executar(m - j);
