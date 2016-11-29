@@ -7,7 +7,7 @@
  * Este projeto implementa a versão original do k-difference inexact *
  * match por meio da matriz D [m x n] com //TODO                     *
  *                                                                   *
-                                       *
+ *                                                                   *
  *                                                                   *
  * *******************************************************************/
 
@@ -22,6 +22,12 @@ struct retorno{
     int Jmax;
     int Imax;
     int diagonal;
+    int lce;
+};
+
+struct maiorLCEporLinha{
+   int lce;
+   int diagonal;
 };
 
 //LCE entre s[i] e t[j]
@@ -61,39 +67,58 @@ class KdifferencePrime1: public KdifferencePrime{
 
    public:
       retorno *Mlce;
+      maiorLCEporLinha *mPorLinha;
       void instanciar(){
          int mpl, vr, dgn;
          c = new KdifferenceInexactMatch1heuristica1(alpha, beta, &k);  //instancia a classe Original
+
+         this->mPorLinha = new maiorLCEporLinha [m];
+         //this->diagonal = new int [k + m + 1];
+         //encontrar o maior LCE por linha de alpha e guardar em lce
+         int l, dlg;
+         for(int i = 0; i != m; i++){
+            mpl = 0;
+            for(l = 0; l != n; l++){
+               vr = directCompLCE(alpha, beta, i, l, m, n);
+               if(vr >= mpl){
+                 mpl = vr;
+                 dlg = (l - i);
+               }
+            }
+            mPorLinha[i].lce = mpl;
+            mPorLinha[i].diagonal = dlg;
+            //cout<<i<<", lce: "<<mpl<<", dlg: "<<dlg<<"\n";
+         }
       }
 
       void processar(){
          this->Mlce = new retorno [m];
          instanciar(); //essa chamada depende diretamente da implementação do kdifferenceInexactMatch que será utilizado
 
-       // ideia ruim, por enquanto
-       j = 0;
-       rr = 0;
-       int Imax, Jmax;
-       while(j < (m - k) + 1){
+         // ideia ruim, por enquanto
+         //diff -U 0 file1 file2 | grep ^@ | wc -l (usado para comparar as diferenças entre arquivos)
+         j = 0;
+         rr = 0;
+         int Imax, Jmax;
+         while(j < (m - k) + 1){
           c->primerJ = j;
           Imax = c->executar(m - j, j);
           ocr[j] = Imax;
+          if(Imax == -1) break; //quando nao encontrou mais ocorrencias deve parar
           //cout<<Imax<<":";
           Jmax = Mlce[j].Jmax;
           //cout<<Jmax<<", ";
-          if(Jmax > 1){
-             for(int v = 1; v <= Jmax; v++){
-                if(v + Mlce[c->primerJ + v].Jmax <= Jmax)
-                   ocr[++j] = Imax - v; //então é possivel utilizar esse resultado
-                else break;
+          if(Jmax > 1){                           //se existe um jMax > 1 e a diagonal está entre -k e n - iMax
+             for(int v = 1; v <= Jmax; v++){      //então percorre todos os índices até jMax
+                ocr[++j] = Imax - v;
              }
           }
           j++;
           rr++;
-       }
-       int rp = m-k+1;
-       int vl = (rr * 100)/rp;
-       cout<<"Jotas processados: "<<rr<<" de "<<rp<<" possiveis. Ganho de "<<100 - vl<<"%."<<endl;
+         }
+         int rp = m-k+1;
+         int vl = (rr * 100)/rp;
+         cout<<"Jotas processados: "<<rr<<" de "<<rp<<" possiveis. Ganho de "<<100 - vl<<"%."<<endl;
    }
 } prime; // é necessário apenas uma instancia de prime, já declarada aqui
 
@@ -109,6 +134,7 @@ int KdifferenceInexactMatch1heuristica1::executar(int m, int j){
    int linha = -1;  //flag que marca a primeira linha em que a condição acima foi satisfeita
    int pivo, aux, jMax = -1;
    char tt;
+   int coluna = -1;
 
    for(int i = 1; i <= m && linha == -1; i++){
      pivo = i; passou = true;
@@ -120,14 +146,31 @@ int KdifferenceInexactMatch1heuristica1::executar(int m, int j){
 	    D[l-1] = pivo;
 	    pivo = aux;
 	    if(passou && pivo < k) passou = false;
-	    if(pivo == 0) jMax = i;
+	  /*  if(pivo == 0){
+	      jMax = i;
+	      coluna = l;
+	    } */
 	  }
 	  D[n] = aux;
      if(passou) linha = i; //se a linha não foi descartada ela é a primeira
    }
 
-   prime.Mlce[j].Jmax = jMax;
-   prime.Mlce[j].Imax = linha;
+   int diagonal = prime.mPorLinha[j].diagonal
+
+   //prime.Mlce[j].Imax = linha;
+   //prime.Mlce[j].diagonal = diagonal;
+   //prime.Mlce[j].Jmax = jMax;
+   if( passou ){
+      int jjMax = 1;
+
+      while( jjMax <= prime.mPorLinha[j].lce ){
+          if(prime.mPorLinha[j + jjMax].diagonal == ) jjMax++;
+          else break;
+      }
+       prime.Mlce[j].Jmax = jjMax;
+   } else{
+       prime.Mlce[j].Jmax = 1;
+   }
 
    return linha;
 }

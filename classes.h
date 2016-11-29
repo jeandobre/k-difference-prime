@@ -605,8 +605,9 @@ void KdifferencePrime::mostrarOcorrencias(Parametro *par){
  // if(par->Jsetado) maxOcr = par->Jdistancia;
  int maxOcr = m;
   for(int v = 0; v < maxOcr; v++){
+     //cout<<ocr[v]<<" ";
      r = ocr[v];
-     if(r > 0 && r < m){
+     if(r > 0 && r <= m){
          Primer *pr = new Primer(++nOcr, v, r, ocorrencia.substr(v, r));
          primers.insert(primers.end(), pr);
       }
@@ -723,8 +724,10 @@ void KdifferencePrime::processar(int beginJ, int endJ){
        if(print < 10 && mostrarMatriz && ocr[j] != -1){
          mostrar(j, ocr[j]);
          c->imprimirMatrizTela();
+
          print++; //contador de matriz impressas na tela, apenas as primeiras 10 devem ser mostradas
        }
+       if(ocr[j] == -1) break; //pode parar pois não vai mais haver ocorrências
    }
 }
 

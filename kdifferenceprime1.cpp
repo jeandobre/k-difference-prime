@@ -18,11 +18,6 @@
  * recorrência aconteça. Essa versão diminui muito o uso de memória  *
  * mas não de processamento.
  *
- * Atualizado em 09/03/2016 versão com opt-2 que deve computar a     *
- * matriz  D1..m + 1 pivo e impentantação de leitura arquivo FASTA   *
- * e agrupamento em forma de projeto, removendo as funções auxilares *
- * para uma biblioteca de uso geral e por último a implementação de  *
- * um vetor<string> para guardar os resultados indexando pelo sufixo *
  * *******************************************************************/
 
 #include <iostream>
@@ -48,6 +43,7 @@ class KdifferenceInexactMatch1: public KdifferenceInexactMatch{
 
     virtual void executar(){};
     void imprimirMatrizTela(); //permite o cacheamento pois não muda o comportamento
+    void imprimirMatrizArquivo();
 };
 
 //implementação original Matriz D[0..m, 0..n]
@@ -68,6 +64,9 @@ class KdifferenceInexactMatch1Original: public KdifferenceInexactMatch1{
 
     string name() const {return "K1v3";};
     int executar(int m);
+    int getRowPrint(){
+      return m;
+    }
 
 };
 
@@ -132,6 +131,30 @@ class KdifferencePrime1: public KdifferencePrime{
 
 } prime; // é necessário apenas uma instancia de prime, já declarada aqui
 
+
+void KdifferenceInexactMatch1::imprimirMatrizArquivo(){
+   fstream out;
+   out.open("saida/matriz.csv", ios::out | ios::trunc);
+   out<<";;";
+
+	for(int i = 0; i < n; i++)
+	   out<<t[i] << ";"; //imprimi o cabeçalho da matriz com 2 espaços
+
+	out<<"\n";
+    //percorre toda a matriz D
+	for(int i = 0; i <= getRowPrint(); i++){
+
+		if(i == 0) out<<";";
+		else out<<a[prime.j + i - 1]<<";"; // Coluna cabeçalho lateral
+		for(int l = 0; l <= n; l++){
+			out<<D[i][l]<< ";"; //imprimi o valor da matriz
+		}
+		out<<"\n";
+	}
+	//out<<endl;
+	out.close();
+}
+
 //método que imprimi a matriz na tela
 void KdifferenceInexactMatch1::imprimirMatrizTela(){
 
@@ -156,6 +179,8 @@ void KdifferenceInexactMatch1::imprimirMatrizTela(){
 		}
 		cout<<RST<<endl;
 	}
+
+	//imprimirMatrizArquivo();
 }
 
 //método que executa o comportamento original do algoritmo
