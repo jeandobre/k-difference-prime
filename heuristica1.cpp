@@ -4,10 +4,11 @@
  *  Ano: 2015/2016                                                   *
  *  FACOM: Mestrado em Ciência da Computação                         *
  *                                                                   *
- * Este projeto implementa a versão original do k-difference inexact *
- * match por meio da matriz D [m x n] com //TODO                     *
+ * Este projeto implementa a versão otimizada do k-difference inexact*
+ * match por meio da matriz D com apenas uma linha.                  *
  *                                                                   *
- *                                                                   *
+ * Foi adicionado ao algoritmo k difference primer uma verificação a *
+ * um vetor V que contém o maior LCE por linha de alfa.              *
  *                                                                   *
  * *******************************************************************/
 
@@ -95,6 +96,8 @@ class KdifferencePrime1: public KdifferencePrime{
           ocr[j] = r;
           if(r == -1) break; //quando nao encontrou mais ocorrencias deve parar
 
+          //aqui é efetuado a verificação se é possível pular as próximas posições de j
+          //utilizando o mesmo resultado computado e guardado em r.
           int v = 1;
           while(V[j+v] == V[j] + v)
             ocr[++j] = r - v++;
