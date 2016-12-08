@@ -17,7 +17,7 @@
 //constantes definidas para uso de mensagens na tela
 #define ERR_ARGS "\nErro: Argumentos errados!"
 #define ERR_KMAIOR "Erro: O parametro k deve estar em um intervalo entre 1 e "
-#define ERR_SAVEFILE "Erro: Não foi possivel criar o arquivo de saida!"
+#define ERR_SAVEFILE "Erro: NÃ£o foi possivel criar o arquivo de saida!"
 #define ERR_TSAIDA "Erro: Tipo de saida incorreto! (1=simples, 2=completo, 3=XML e 4=JSON)"
 #define ERR_J "Erro: O intervalo de valores do indice j deve estar entre 0 e o tamanho de alfa!"
 #define ERR_DISTANCIA "Erro: A distancia de valores do indice j deve estar entre 1 e o tamanho de alfa!"
@@ -83,7 +83,7 @@ static long long int maiorDeDois(long long int a,
    return a > b ? a : b;
 }
 
-//função auxiliar compara três inteiros e devolve o menor
+//funÃ§Ã£o auxiliar compara trÃªs inteiros e devolve o menor
 static long long int menorDeTres(unsigned long long int x,
                                    unsigned long long int b,
                                    unsigned long long int c){
@@ -91,8 +91,8 @@ static long long int menorDeTres(unsigned long long int x,
   return menorDeDois(menorDeDois(x,b),c);
 }
 
-//não pode ser unsigned pois compara valores -1
-//retorna o maior entre três valores
+//nÃ£o pode ser unsigned pois compara valores -1
+//retorna o maior entre trÃªs valores
 static long long int maiorDeTres(long long int a,
                           long long int b,
                           long long int c){
@@ -127,7 +127,7 @@ public:
      total = 0;
      escolheuVersao = false;
      argumentoErrado = false;
-     tipoSaida = 1; //saída simples (default)
+     tipoSaida = 1; //saÃ­da simples (default)
      mostrarLog=false;
      Jselecionado = -1; //setado para nao ser utilizado
      Jdistancia = -1;
@@ -164,19 +164,19 @@ bool comparar(const Primer* a, const Primer* b){
 
 class KdifferenceInexactMatch{
   protected:
-    char *a;  //padrão
+    char *a;  //padrÃ£o
     char *t;  //texto
     int m;  //tamanho de a
     int n;  //tamanho de t
-    int k;  //quantidade de diferênças
+    int k;  //quantidade de diferÃªnÃ§as
 
     JRprime *jr;  //retorno do novo algoritmo
 
   public:
-    int primerM; //tamanho original de alfa, extremamente necessário p/ computar corretamente o LCE
-    int primerJ; //índice atual j de alfa
+    int primerM; //tamanho original de alfa, extremamente necessÃ¡rio p/ computar corretamente o LCE
+    int primerJ; //Ã­ndice atual j de alfa
 //  private:
-  //  int rowPrint;//linha máxima de impressao da matriz
+  //  int rowPrint;//linha mÃ¡xima de impressao da matriz
 public:
     KdifferenceInexactMatch(char *a, char *t, int *k){
        this->a = a;
@@ -191,12 +191,15 @@ public:
     }
     ~KdifferenceInexactMatch(){};
     virtual string name() const {return "K";};
-    virtual int executar(int m){return -1;};//executa o algoritmo kdifference Inexact Match e retorna a linha da ocorrência de prime
+    virtual int executar(int m){return -1;};//executa o algoritmo kdifference Inexact Match e retorna a linha da ocorrÃªncia de prime
     virtual int executar(int m, int j){return -1;};
     virtual void imprimirMatrizTela(){};//escrever a matriz na tela
     virtual int getRowPrint(){
       return m;
     }
+
+    virtual int getMinLeft(int r, int j){};
+
 };
 
 class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
@@ -206,7 +209,7 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
 
   private:
       int dToMatriz(int d){
-      return d + k + 1; //converte índice d para índices reais
+      return d + k + 1; //converte Ã­ndice d para Ã­ndices reais
     }
 
   public:
@@ -219,12 +222,12 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
     }
 
     int getDimensaoD(){
-      return k + n + 3; //k, n+1, 1 da posição 0
+      return k + n + 3; //k, n+1, 1 da posiÃ§Ã£o 0
     }
 
   public:
     KdifferenceInexactMatch234(char *a, char *t, int *k): KdifferenceInexactMatch(a, t, k){
-       //alocação dinâmica de inteiros
+       //alocaÃ§Ã£o dinÃ¢mica de inteiros
        try{
          this->L = new int[getDimensaoD()];
 
@@ -234,7 +237,7 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
     }
 
     ~KdifferenceInexactMatch234(){
-       //Ao destruir a classe desaloca toda memória que foi usada
+       //Ao destruir a classe desaloca toda memÃ³ria que foi usada
        delete [] L;
     }
 
@@ -242,29 +245,29 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
        this->m = m;
        int d,e, row;
 
-       //inicialização da matriz
+       //inicializaÃ§Ã£o da matriz
        for(d = -(k+1); d <= (n+1); d++)
            setL(d, -1);
 
-       int long long pivo; //variável auxiliar para troca de posições
-       bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
-       int linha = -1;     //variável que guarda sempre o maior valor da coluna e
+       int long long pivo; //variÃ¡vel auxiliar para troca de posiÃ§Ãµes
+       bool passou = true; //flag para controlar o caso de alcanÃ§ar o fim de m antes de k diferenÃ§as
+       int linha = -1;     //variÃ¡vel que guarda sempre o maior valor da coluna e
        for(e = 0; e < k && passou; e++){
-           pivo = linha = -1;  //a cada nova coluna a variável linha é reiniciada
+           pivo = linha = -1;  //a cada nova coluna a variÃ¡vel linha Ã© reiniciada
            for(d = -e; d <= n && passou; d++){
               row = maiorDeTres(getL(d-1), getL(d) + 1, getL(d+1) + 1);
               row = menorDeDois(row, m);
               if(row + d < n)
                 row += LCE(primerJ + row, primerM + 1 + row + d); //LCE
-              //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
+              //se jÃ¡ alcancou 'm' e o erro Ã© menor que 'k' pode parar e ir para o prÃ³ximo 'j'
               if(row == m){passou = false; continue;}
-              setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaço anterior
+              setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaÃ§o anterior
               if (row > linha) linha = row;
               pivo = row;
            }
            setL(n, row);
        }
-       return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
+       return (passou ? ++linha : -1); //retorna a linha de ocorrÃªncia de primer ou -1 que indica nÃ£o ocorrÃªncia
    }
    void imprimirMatrizTela();
 
@@ -276,27 +279,27 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
 class KdifferencePrime{
 
     public:
-      char *alpha, *beta;//seguindo o modelo encontrado no livro do GUSFIELD, nomes de variáveis que representam o padrão e o texto respectivamente
-      int k;             //quantidade de diferênças
+      char *alpha, *beta;//seguindo o modelo encontrado no livro do GUSFIELD, nomes de variÃ¡veis que representam o padrÃ£o e o texto respectivamente
+      int k;             //quantidade de diferÃªnÃ§as
       int m;             //tamanho de alpha
       int n;             //tamanho de beta
       bool mostrarMatriz; //booleano 0,1 usado para imprime a matriz na tela
-      int versao;     //booleano 0, 1 usado para executar a versão otimizada do algoritmo
-      int j;             //índice de alpha necessário p/ posicionar corretamente na árvore de sufixo
+      int versao;     //booleano 0, 1 usado para executar a versÃ£o otimizada do algoritmo
+      int j;             //Ã­ndice de alpha necessÃ¡rio p/ posicionar corretamente na Ã¡rvore de sufixo
       string ocorrencia;
-      bool tempo; //booleano para mostrar o tempo de execução na tela se o usuário setar o parâmetro
+      bool tempo; //booleano para mostrar o tempo de execuÃ§Ã£o na tela se o usuÃ¡rio setar o parÃ¢metro
 
       KdifferenceInexactMatch *c;
 
-      list<Primer *> primers; //lista que guarda as ocorrências de primers
+      list<Primer *> primers; //lista que guarda as ocorrÃªncias de primers
       JRprime *jr;
-      int *ocr; //vetor que guarda as ocorrências
+      int *ocr; //vetor que guarda as ocorrÃªncias
 
     public:
       KdifferencePrime(){
-         //construtor seta os valores default se o usuário não escolher nada
+         //construtor seta os valores default se o usuÃ¡rio nÃ£o escolher nada
          this->mostrarMatriz=false;
-         this->versao=1; //apenas uma versão
+         this->versao=1; //apenas uma versÃ£o
          primers.clear();
 
       }
@@ -316,7 +319,7 @@ class KdifferencePrime{
       };
 };
 
-//função auxiliar recebe os parâmetros que o usuário digitou, valida e transforma os valores
+//funÃ§Ã£o auxiliar recebe os parÃ¢metros que o usuÃ¡rio digitou, valida e transforma os valores
 Parametro *parseParametros(int argc, char** argv){
    string argA[6] = {"-a", "-alpha", "-pattern", "-padrao", "-p", "-P"};
    string argB[6] = {"-b", "-beta", "-text", "-texto", "-t", "-T"};
@@ -357,7 +360,7 @@ Parametro *parseParametros(int argc, char** argv){
            continue;
         }
         z+=3;
-        p->Jsetado = true; //importante, pois depois podemos verificar se os valores estão corretos
+        p->Jsetado = true; //importante, pois depois podemos verificar se os valores estÃ£o corretos
         continue;
       }
 
@@ -448,8 +451,8 @@ Parametro *parseParametros(int argc, char** argv){
         continue;
       };
 
-      //verificamos se há outro parâmetro errado vamos verificar se algum parâmetro passado está fora da lista
-      //se chegou até aqui
+      //verificamos se hÃ¡ outro parÃ¢metro errado vamos verificar se algum parÃ¢metro passado estÃ¡ fora da lista
+      //se chegou atÃ© aqui
       p->argumentoErrado=true;
       break;
    }
@@ -463,7 +466,7 @@ Parametro *parseParametros(int argc, char** argv){
 
    p->alpha = lerArquivo(p->alpha.c_str());
    p->beta  = lerArquivo(p->beta.c_str());
-   if(!p->escolheuVersao) p->versao = 1; //se não escolheu versão então seta default como 1
+   if(!p->escolheuVersao) p->versao = 1; //se nÃ£o escolheu versÃ£o entÃ£o seta default como 1
 
    if(p->total != 3){
       cout<<FRED(ERR_ARGS);
@@ -484,7 +487,7 @@ Parametro *parseParametros(int argc, char** argv){
    return p;
 }
 
-//devemos abrir o arquivo em tempo de execução, ou seja, processar enquanto abre o arquivo,
+//devemos abrir o arquivo em tempo de execuÃ§Ã£o, ou seja, processar enquanto abre o arquivo,
  string lerArquivo(const char *local){
 
   ifstream arquivo(local, std::ifstream::in);
@@ -558,8 +561,8 @@ void formataSegundos(double segundos){
 }
 
  /*
-  * função criado usando uma estrutura pré-definida de dados
-  * que retorna o total de memória utilizado no processo. Baseado em:
+  * funÃ§Ã£o criado usando uma estrutura prÃ©-definida de dados
+  * que retorna o total de memÃ³ria utilizado no processo. Baseado em:
   * http://man7.org/linux/man-pages/man2/getrusage.2.html
   * http://linux.die.net/man/2/getrusage
   */
@@ -572,8 +575,8 @@ void mostrarMemoria(){
 
 
 /*
- * método extremamente importante quando utilizado o algoritmo para diminuir o j
- * deve ser utilizado antes de mostrar as ocorrências
+ * mÃ©todo extremamente importante quando utilizado o algoritmo para diminuir o j
+ * deve ser utilizado antes de mostrar as ocorrÃªncias
  */
 void KdifferencePrime::gerarOcorrencias(){
   // modificado temporariamente apenas para
@@ -582,11 +585,11 @@ void KdifferencePrime::gerarOcorrencias(){
      //printf("j: %d Jmax:%d r: %d\n", jr[v].j, jr[v].Jmax, jr[v].r);
      ocr[v] = -1;
      r = jr[v].r;
-     if(r != -1){             // se há uma ocorrência de primer
+     if(r != -1){             // se hÃ¡ uma ocorrÃªncia de primer
 
-        for(int w = jr[v].j;        //  deve ir da primeira posição
-                w < jr[v].j + jr[v].Jmax; //  até Jmax com a mesma ocorrência r de primer
-                /*&& (jr[v].r + w) <= m */ //enquanto não extrapolar o tamanho de alfa
+        for(int w = jr[v].j;        //  deve ir da primeira posiÃ§Ã£o
+                w < jr[v].j + jr[v].Jmax; //  atÃ© Jmax com a mesma ocorrÃªncia r de primer
+                /*&& (jr[v].r + w) <= m */ //enquanto nÃ£o extrapolar o tamanho de alfa
                 w++){
            //printf("==> %d, %d\n", v, w);
           ocr[w] = r--;
@@ -601,7 +604,7 @@ void KdifferencePrime::gerarOcorrencias(){
 void KdifferencePrime::mostrarOcorrencias(Parametro *par){
 
   int nOcr = 0; int r;
- // int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
+ // int maxOcr = abs(m-k+1); //calcula o total de ocorrÃªncias de primer possÃ­veis
  // if(par->Jsetado) maxOcr = par->Jdistancia;
  int maxOcr = m;
   for(int v = 0; v < maxOcr; v++){
@@ -672,7 +675,7 @@ void KdifferencePrime::setaParametros(Parametro *p){
       beta = new char [p->beta.length() + 1];
       strcpy(beta, p->beta.c_str());
     } catch(bad_alloc& ba){
-      cout<<"Erro ao alocar memória de alpha e beta: " << ba.what()<<endl;
+      cout<<"Erro ao alocar memÃ³ria de alpha e beta: " << ba.what()<<endl;
     }
     k = p->k;
     mostrarMatriz = p->mostrarMatriz;
@@ -682,13 +685,13 @@ void KdifferencePrime::setaParametros(Parametro *p){
     n = p->beta.size();
     ocorrencia = p->alpha;
     try{
-     // int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
+     // int maxOcr = abs(m-k+1); //calcula o total de ocorrÃªncias de primer possÃ­veis
      // if(p->Jsetado) maxOcr = p->Jdistancia+1;
       int maxOcr = m;
-      ocr = new int[maxOcr];   //aloca o máximo espaço para todas as possíveis ocorrências de primer
-      memset(ocr, -1, maxOcr); //seta todas as posições com valores -1 (não ocorrência)
+      ocr = new int[maxOcr];   //aloca o mÃ¡ximo espaÃ§o para todas as possÃ­veis ocorrÃªncias de primer
+      memset(ocr, -1, maxOcr); //seta todas as posiÃ§Ãµes com valores -1 (nÃ£o ocorrÃªncia)
     } catch(bad_alloc& ba){
-      cout<<"Erro ao alocar memória de ocorrências: " << ba.what()<<endl;
+      cout<<"Erro ao alocar memÃ³ria de ocorrÃªncias: " << ba.what()<<endl;
     }
   /*  try{
        jr = new JRprime[m];
@@ -698,19 +701,25 @@ void KdifferencePrime::setaParametros(Parametro *p){
           jr[j].r = -1;
        }
     } catch(bad_alloc& ba){
-      cout<<"Erro ao alocar memória JRprime: " << ba.what()<<endl;
+      cout<<"Erro ao alocar memÃ³ria JRprime: " << ba.what()<<endl;
     }*/
     tempo = p->mostrarTempo;
     p->alpha.clear();
     p->beta.clear();
 }
 
-//método que processa o algoritmo principal chamado a partir do procedimento MAIN
-//IMPORTANTE: não há execução sem a invocação deste método
+/***
+   mÃ©todo que processa o algoritmo principal chamado a partir do procedimento MAIN
+   IMPORTANTE: nÃ£o hÃ¡ execuÃ§Ã£o sem a invocaÃ§Ã£o deste mÃ©todo
+   optimizaÃ§Ãµes:
+     1 - pode iniciar o processamento de qualquer indice j (parÃ¢metro beginJ) default = 0
+     2 - pode parar o processamento em qualquer indice j (parÃ¢metro endJ) default = |alpha|
+     3 - ao encontrar uma ocorrÃªncia r de prime = -1, ou seja, sem ocorráº½ncia, para o processamento imediatamente
+*******/
 void KdifferencePrime::processar(int beginJ, int endJ){
 
-   instanciar(); //essa chamada depende diretamente da implementação do kdifferenceInexactMatch que será utilizado
-   //O(m), onde m é o tamanho de alpha
+   instanciar(); //essa chamada depende diretamente da implementaÃ§Ã£o do kdifferenceInexactMatch que serÃ¡ utilizado
+   //O(m), onde m Ã© o tamanho de alpha
    int print = 0;
    c->primerM = m;
 
@@ -718,7 +727,7 @@ void KdifferencePrime::processar(int beginJ, int endJ){
    else          endJ = beginJ + endJ;
 
    for(j = beginJ; j < endJ; j++){
-       //guardo em um array todos as ocorrências r de primer para cada j
+       //guardo em um array todos as ocorrÃªncias r de primer para cada j
        c->primerJ = j;
        ocr[j] = c->executar(m - j);
        if(print < 10 && mostrarMatriz && ocr[j] != -1){
@@ -727,7 +736,7 @@ void KdifferencePrime::processar(int beginJ, int endJ){
 
          print++; //contador de matriz impressas na tela, apenas as primeiras 10 devem ser mostradas
        }
-       if(ocr[j] == -1) break; //pode parar pois não vai mais haver ocorrências
+       if(ocr[j] == -1) break; //pode parar pois nÃ£o vai mais haver ocorrÃªncias
    }
 }
 
@@ -774,9 +783,9 @@ string Primer::escreverArquivoJSON(){
     return *retorno;
 }
 
-//método que imprimi a matriz na tela
+//mÃ©todo que imprimi a matriz na tela
 void KdifferenceInexactMatch234::imprimirMatrizTela(){
-   cout << setfill(' ');     //setar o tamanho de espaçamento de elementos na tela
+   cout << setfill(' ');     //setar o tamanho de espaÃ§amento de elementos na tela
    int vr;
    cout<<KGRN<<"\n  d:";
 
@@ -794,7 +803,7 @@ void KdifferenceInexactMatch234::imprimirMatrizTela(){
 
 
 /*
-   construído o main apenas para testar as funções
+   construÃ­do o main apenas para testar as funÃ§Ãµes
    int main(){
      formataSegundos(59590);
      return 0;
