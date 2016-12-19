@@ -606,12 +606,17 @@ void KdifferencePrime::mostrarOcorrencias(Parametro *par){
   int nOcr = 0; int r;
  // int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
  // if(par->Jsetado) maxOcr = par->Jdistancia;
+ string extra;
  int maxOcr = m;
   for(int v = 0; v < maxOcr; v++){
      //cout<<ocr[v]<<" ";
      r = ocr[v];
+     if(r < -1){
+       r *= -1;
+       extra = " *";
+     } else extra = "";
      if(r > 0 && r <= m){
-         Primer *pr = new Primer(++nOcr, v, r, ocorrencia.substr(v, r));
+         Primer *pr = new Primer(++nOcr, v, r, ocorrencia.substr(v, r) + extra);
          primers.insert(primers.end(), pr);
       }
   }

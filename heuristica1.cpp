@@ -78,7 +78,7 @@ class KdifferencePrime1: public KdifferencePrime{
             //mPorLinha[i].lce = mpl;
             //mPorLinha[i].diagonal = dlg;
             V[i] = dlg; //guarda a coluna do maior LCE
-           // cout<<i<<", lce: "<<mpl<<", coluna: "<<dlg<<"\n";
+            //cout<<i<<", lce: "<<mpl<<", coluna: "<<dlg<<"\n";
          }
       }
 
@@ -99,9 +99,12 @@ class KdifferencePrime1: public KdifferencePrime{
           //aqui é efetuado a verificação se é possível pular as próximas posições de j
           //utilizando o mesmo resultado computado e guardado em r.
           int v = 1;
-          while(V[j+v] == V[j] + v)
-            ocr[++j] = r - v++;
+          int jOriginal = j;
+          while(V[jOriginal+v] == V[jOriginal] + v){
+            ocr[++j] = (r - v++) * (-1);
+           // cout<<"j:"<<j<<"ocr:"<<ocr[j];
 
+          }
           j++;
 
          }
