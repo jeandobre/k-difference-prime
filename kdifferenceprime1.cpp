@@ -95,7 +95,12 @@ class KdifferenceInexactMatch1Optimizado1: public KdifferenceInexactMatch1{
     }
 };
 
-//implementação Matriz D[0, 0..n]
+/***
+  optimizações:
+  1 - matriz D[0, 0..n] na verdade é um vetor de n+1 posições
+  2 - ignora as diagonais menores que -k, ou seja, não computa os valores
+
+***/
 class KdifferenceInexactMatch1Optimizado2: public KdifferenceInexactMatch1{
   public:
    KdifferenceInexactMatch1Optimizado2(char *a, char *t, int *k):KdifferenceInexactMatch1(a,t,k){
@@ -208,11 +213,12 @@ int KdifferenceInexactMatch1Original::executar(int m){
    int linha = -1;  //flag que marca a primeira linha em que a condição acima foi satisfeita
 	for(i = 1; i <= m && linha == -1; i++){ /** for i <- 1 to m */
 	   passou = true;
+	   char &tt = a[prime.j + i-1];
 		for(l = 1; l <= n; l++){ /** for l <- 1 to n */
          /** relação de recorrência */
-			D[i][l] = menorDeTres(D[i-1][l] + 1,
-                               D[i][l-1] + 1,
-                               D[i-1][l-1] + (a[prime.j + i-1] == t[l-1] ? 0 : 1));
+			menorDeTres(D[i-1][l] + 1,
+                     D[i][l-1] + 1,
+                     D[i-1][l-1] + (tt == t[l-1] ? 0 : 1), D[i][l]);
 
 			if(passou && D[i][l] < k) passou = false; //se algum valor da linha é < k essa linha é descartada
 		}
@@ -231,13 +237,15 @@ int KdifferenceInexactMatch1Optimizado1::executar(int m){
 
    bool passou; //flag para verificar se toda a linha tem valores >= k
    int linha = -1;  //flag que marca a primeira linha em que a condição acima foi satisfeita
+
    for(int i = 1; i <= m && linha == -1; i++){
      D[1][0] = i;
      passou = true;
+     char &tt = a[prime.j + i-1];
 	 for(l = 1; l <= n; l++){
-        D[1][l] = menorDeTres(D[0][l]   + 1,
-                              D[1][l-1] + 1,
-                              D[0][l-1] + (a[prime.j + i-1] == t[l-1] ? 0 : 1));
+        menorDeTres(D[0][l]   + 1,
+                    D[1][l-1] + 1,
+                    D[0][l-1] + (tt == t[l-1] ? 0 : 1), D[1][l]);
 
         if(passou && D[1][l] < k) passou = false; //se algum valor da linha é < k essa linha é descartada
         //aqui reorganiza a matriz para o próximo laço
@@ -261,15 +269,17 @@ int KdifferenceInexactMatch1Optimizado2::executar(int m){
    bool passou;     //flag para verificar se toda a linha tem valores >= k
    int linha = -1;  //flag que marca a primeira linha em que a condição acima foi satisfeita
    int pivo,aux;
-   char tt;
+
 
    for(int i = 1; i <= m && linha == -1; i++){
-     pivo = i; passou = true;
-     tt = a[prime.j + i-1];
+     pivo = i;
+     passou = true;
+     char &tt = a[prime.j + i-1];
 	  for(int l = 1; l <= n; l++){
-       aux = menorDeTres(D[0][l] + 1,
-                         pivo + 1,
-                         D[0][l-1] + (tt == t[l-1] ? 0 : 1));
+       //aux =
+       menorDeTres(D[0][l] + 1,
+                   pivo + 1,
+                   D[0][l-1] + (tt == t[l-1] ? 0 : 1), aux);
 	    D[0][l-1] = pivo;
 	    pivo = aux;
 	    if(passou && pivo < k) passou = false;

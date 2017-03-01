@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
-   prime.processar();
+   prime.processar(p->Jselecionado, p->Jdistancia);
    time(&fim);
    if(prime.tempo) formataTempo(fim, false);
 

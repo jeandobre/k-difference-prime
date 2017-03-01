@@ -35,8 +35,8 @@
 #define MSG_VERSAO_K2_VS2 "\t-vs2           versao original do algoritmo com e colunas para computar a matriz Lde.\n"
 #define MSG_VERSAO_K2_VS3 "\t-vs3           versao que utiliza funcao directcomp para computar LCE em tempo O(n).\n"
 #define MSG_VERSAO_K3_VS1 "\t-vs1 (default) versao que utiliza arvore de sufixo compressada e consulta LCE em tempo O(k).\n"
-#define MSG_VERSAO_K4_VS1 "\t-vs1 (default) versao que utiliza array de sufixo + lcp + DirectMin.\n"
-#define MSG_VERSAO_K4_VS2 "\t-vs2           versao que utiliza array de sufixo + lcp + consulta RMQ ao LCE em tempo O(1).\n"
+#define MSG_VERSAO_K4_VS1 "\t-vs1 (default) versao que utiliza array de sufixo + lcp + consulta RMQ ao LCE em tempo O(1).\n"
+#define MSG_VERSAO_K4_VS2 "\t-vs2           versao que utiliza array de sufixo + lcp + DirectMin.\n"
 
 
 /* FOREGROUND */
@@ -74,30 +74,35 @@ struct JRprime{
 string lerArquivo(const char *local);
 
 
-long long int menorDeDois(long long int a,
+static long long int menorDeDois(long long int a,
                           long long int b){
    return a < b ? a : b;
 }
+
+
 static long long int maiorDeDois(long long int a,
                           long long int b){
    return a > b ? a : b;
 }
 
-//função auxiliar compara três inteiros e devolve o menor
-static long long int menorDeTres(unsigned long long int x,
-                                   unsigned long long int b,
-                                   unsigned long long int c){
+static void menorDeDois(int &a, int &b, int &aux){
+   aux = a < b ? a : b;
+}
 
-  return menorDeDois(menorDeDois(x,b),c);
+static void menorDeTres(unsigned int x,
+                        unsigned int b,
+                        unsigned int c, int &aux){
+
+  aux = menorDeDois(menorDeDois(x,b),c);
 }
 
 //não pode ser unsigned pois compara valores -1
 //retorna o maior entre três valores
-static long long int maiorDeTres(long long int a,
+static void maiorDeTres(long long int a,
                           long long int b,
-                          long long int c){
+                          long long int c, int &row){
 
-  return maiorDeDois(maiorDeDois(a,b), c);
+  row = maiorDeDois(maiorDeDois(a,b), c);
 }
 
 class Parametro{
@@ -255,7 +260,7 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
        for(e = 0; e < k && passou; e++){
            pivo = linha = -1;  //a cada nova coluna a variável linha é reiniciada
            for(d = -e; d <= n && passou; d++){
-              row = maiorDeTres(getL(d-1), getL(d) + 1, getL(d+1) + 1);
+              maiorDeTres(getL(d-1), getL(d) + 1, getL(d+1) + 1, row);
               row = menorDeDois(row, m);
               if(row + d < n)
                 row += LCE(primerJ + row, primerM + 1 + row + d); //LCE
@@ -630,7 +635,7 @@ void KdifferencePrime::mostrarOcorrencias(Parametro *par){
   }else{
      cout<<KYEL<<"Encontrado "<<RST<<primers.size()<<KYEL<<" ocorrencia(s) de primers!"<<RST;
 
-     if(primers.size() > 10){
+     if(primers.size() > 10 || !par->saida.empty()){
        cout<<"\nOcorrencias gravadas em ";
        string fileName;
        if(par->saida.empty())

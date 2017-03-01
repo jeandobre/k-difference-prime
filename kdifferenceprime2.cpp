@@ -188,9 +188,9 @@ int KdifferenceInexactMatch2Original::executar(int m){
     int linha = -1;
     for(e = 0; e <= k && passou; e++){
         for(d = -(e); d <= n; d++){
-           row = maiorDeTres(getL(d-1, e-1),
+           maiorDeTres(getL(d-1, e-1),
                              getL(d,   e-1) + 1,
-                             getL(d+1, e-1) + 1);
+                             getL(d+1, e-1) + 1, row);
            row = menorDeDois(row, m);
            //LCE
            while(row < m && row+d < n && a[prime.j + row] == t[row+d])
@@ -244,31 +244,32 @@ void KdifferenceInexactMatch2Optimizado::imprimirMatrizTela(){
 //pois nesta versão é utilizado um array no lugar da matriz Lde
 int KdifferenceInexactMatch2Optimizado::executar(int m){
     this->m = m;
-    int d,e, row;
+    int d,e, dn, row;
 
     //inicialização da matriz
-    for(d = -(k+1); d <= (n+1); d++)
-        setL(d, -1);
+    for(d = 0; d <= (n + k + 2); d++)
+        L[d] = -1;
 
     int long long pivo; //variável auxiliar para troca de posições
     bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
     int linha = -1;     //variável que guarda sempre o maior valor da coluna e
     for(e = 0; e < k && passou; e++){
         pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
-        for(d = -e; d <= n && passou; d++){
-           row = maiorDeTres(getL(d-1),
-                             getL(d) + 1,
-                             getL(d+1) + 1);
+        for(d = k - e; d <= (n + k + 1) && passou; d++){
+           dn = (d-k); //a diagonal correta e não a posição no vetor
+           maiorDeTres(L[d-1],
+                       L[d] + 1,
+                       L[d+1] + 1, row);
 
-           row = menorDeDois(row, m);
-           while(row < m && row+d < n && a[prime.j + row] == t[row+d]) row++; //LCE
+           menorDeDois(row, m, row);
+           while(row < m && row+dn < n && a[prime.j + row] == t[row+dn]) row++; //LCE
            //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
            if(row == m){passou = false; continue;}
-           setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaço anterior
+           L[d-1] = pivo; //atualiza a coluna e guardando o pivo no espaço anterior
            if (row > linha) linha = row;
            pivo = row;
         }
-       setL(n, row);
+        L[d] = row;
     }
 
     return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
@@ -276,26 +277,18 @@ int KdifferenceInexactMatch2Optimizado::executar(int m){
 
 int main(int argc, char** argv) {
 
-   if (argc < 7 || argc > 14) {
-	  cout<<FRED(ERR_ARGS);
-	  cout<<USO;
-	  return 0;
-   }
-
    Parametro *p = parseParametros(argc, argv);
-
-   if(p->total != 3){
-      cout<<FRED(ERR_ARGS);
-      cout<<USO;
-	   return 0;
-   }
-
-   if(p->tipoSaida < 1 || p->tipoSaida > 4){
-     cout<<"\n"<<FRED(ERR_TSAIDA)<<"\n";
-     return 0;
-   }
+   if(p == NULL) return 0;
 
    prime.setaParametros(p);
+
+   //se o usuário escolheu o J, devemos fazer algumas checagens:
+   //1 - o j é valido (entre 0 e m)
+   //2 - a distância é valida (entre 0 e j + distancia <= m)
+   if(p->Jsetado){
+     if(p->Jselecionado < 0 || p->Jselecionado > prime.m){ cout<<FRED(ERR_J)<<"\n"; return 0; }
+     else if(p->Jdistancia < 1 || (p->Jdistancia + p->Jselecionado) > prime.m){ cout<<FRED(ERR_DISTANCIA)<<"\n"; return 0; }
+   }
 
    if(prime.k > prime.m){
      cout<<"\n"<<FRED(ERR_KMAIOR)<<prime.m<<"\n";
@@ -319,7 +312,7 @@ int main(int argc, char** argv) {
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
-   prime.processar();
+   prime.processar(p->Jselecionado, p->Jdistancia);
 
    time(&fim);
    if(prime.tempo) formataTempo(fim, false);
