@@ -83,26 +83,18 @@ class KdifferenceInexactMatch2Optimizado: public KdifferenceInexactMatch{
  protected:
     int *L;   //Matriz L[-(k+1)..n+1]
 
-  private:
-    int dToMatriz(int d){
-      return d + k + 1; //converte índice d para índices reais da matriz fixa
+private:
+     int getDimensaoD(){
+      return k + n + 3; //k, n+1, 1 da posição 0
     }
-
-  public:
-    void setL(int d, int valor){
-      L[dToMatriz(d)] = valor; //L[d,e] = valor
-    }
-
-    int getL(int d){
-      return L[dToMatriz(d)]; // L[d,e]
-    }
-
-    int getDimensaoD(){
-      return k + n + 3; //-(k+1) -k..0 1..n (n+1)
-    }
-
+public:
     KdifferenceInexactMatch2Optimizado(char *a, char *t, int *k): KdifferenceInexactMatch(a,t,k){
-      this->L = new int[getDimensaoD()];
+      try{
+         this->L = new int[getDimensaoD()];
+
+       }catch(bad_alloc& ba){
+          cout<<"Erro ao alocar matriz L: " << ba.what()<<endl;
+       }
     };
     ~KdifferenceInexactMatch2Optimizado(){
        delete [] L;
@@ -187,34 +179,28 @@ int KdifferenceInexactMatch2Original::executar(int m){
     bool passou = true;
     int linha = -1;
     for(e = 0; e <= k && passou; e++){
-        for(d = -(e); d <= n; d++){
+        for(d = -(e); d <= n && passou; d++){
            maiorDeTres(getL(d-1, e-1),
                              getL(d,   e-1) + 1,
                              getL(d+1, e-1) + 1, row);
            row = menorDeDois(row, m);
            //LCE
-           while(row < m && row+d < n && a[prime.j + row] == t[row+d])
-             row++;
+           while(a[prime.j + row] == t[row+d] && row < m && row+d < n) row++;
 
            setL(d, e, row);
            //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
-           if(row == m && e < k){passou = false; continue;}
+           if(row == m && e == k-1) passou = false;
+            /*
+                se passou então existe uma coluna 'e' = k-1 com a maior índice
+                basta localizar na linha qual é o maior valor e incrementar 1
+                isso ocorre pois a matriz guarda o índice final do LCE, logo o inicio do LCE(k) é LCE(k-1)+1.
+                fazer uma comparação ao final é mais rápido que adicionar uma condição no algoritmo principal
+             */
+           if (row > linha) linha = row;
         }
     }
 
-    /*
-       se passou então existe uma coluna 'e' = k-1 com a maior índice
-       basta localizar na linha qual é o maior valor e incrementar 1
-       isso ocorre pois a matriz guarda o índice final do LCE, logo o inicio do LCE(k) é LCE(k-1)+1.
-       fazer uma comparação ao final é mais rápido que adicionar uma condição no algoritmo principal
-    */
-    if(passou){
-        row = -1;
-        for(d = -k; d <= n; d++){ //percorre toda a coluna k-1 procurando pelo maior valor
-            row = getL(d, k-1);
-            if (row > linha) linha = row;
-        }
-    }
+
     /*
        (a) Para todo i, l, D[i,l] - D[i-1,l-1] é ou Zero ou 1
        (b) d > n - m + k + 1 ou d < -k são descartáveis para solução deste problema
@@ -233,8 +219,8 @@ void KdifferenceInexactMatch2Optimizado::imprimirMatrizTela(){
        cout<<setw(2)<<d<<" ";
     }
     cout<<KMAG<<"\nk-1:"<<RST;
-    for(int d = -(k+1); d <= (n+1); d++){
-        vr = getL(d);
+    for(int d = 0; d < (n+k+3); d++){
+        vr = L[d];
         cout<<setw(2)<<vr<<" ";
     }
     cout<<endl;
@@ -247,26 +233,31 @@ int KdifferenceInexactMatch2Optimizado::executar(int m){
     int d,e, dn, row;
 
     //inicialização da matriz
-    for(d = 0; d <= (n + k + 2); d++)
+    for(d = 0; d < (n + k + 3); d++) //percorre toda matriz, da posição -(k+1) até n+1, totalizando (n+k+3) posições
         L[d] = -1;
 
     int long long pivo; //variável auxiliar para troca de posições
     bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
-    int linha = -1;     //variável que guarda sempre o maior valor da coluna e
+    int linha;     //variável que guarda sempre o maior valor da coluna e
     for(e = 0; e < k && passou; e++){
         pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
+        pivo = -1;
         for(d = k - e; d <= (n + k + 1) && passou; d++){
-           dn = (d-k); //a diagonal correta e não a posição no vetor
+           dn = (d-k);   //dn representa a diagonal e d a posição no vetor
+           //L[d-1] = row; //atualiza a coluna e guardando o pivo no espaço anterior
+
            maiorDeTres(L[d-1],
                        L[d] + 1,
                        L[d+1] + 1, row);
 
            menorDeDois(row, m, row);
-           while(row < m && row+dn < n && a[prime.j + row] == t[row+dn]) row++; //LCE
+
+           while(a[prime.j + row] == t[row+dn] && row < m && row+dn < n) row++; //LCE
+
            //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
            if(row == m){passou = false; continue;}
-           L[d-1] = pivo; //atualiza a coluna e guardando o pivo no espaço anterior
-           if (row > linha) linha = row;
+           L[d-1] = pivo;
+           if(row > linha) linha = row;
            pivo = row;
         }
         L[d] = row;

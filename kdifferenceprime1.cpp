@@ -270,7 +270,6 @@ int KdifferenceInexactMatch1Optimizado2::executar(int m){
    int linha = -1;  //flag que marca a primeira linha em que a condição acima foi satisfeita
    int pivo,aux;
 
-
    for(int i = 1; i <= m && linha == -1; i++){
      pivo = i;
      passou = true;
