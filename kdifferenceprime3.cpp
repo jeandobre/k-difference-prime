@@ -32,7 +32,7 @@ class KdifferenceInexactMatch3CST: public KdifferenceInexactMatch234{
   public:
     KdifferenceInexactMatch3CST(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
     string name() const {return "K3cst";}
-    inline long int LCE(int x, int y);
+    void LCE(int x, int y, int &aux);
 };
 
 
@@ -53,8 +53,8 @@ class KdifferencePrime3: public KdifferencePrime{
       };
 } prime;
 
-long int KdifferenceInexactMatch3CST::LCE(int x, int y){
-    return prime.sst->lce_lookup(x, y);
+void KdifferenceInexactMatch3CST::LCE(int x, int y, int &aux){
+    aux += prime.sst->lce_lookup(x, y);
 };
 
 int main(int argc, char** argv) {

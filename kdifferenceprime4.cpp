@@ -32,14 +32,14 @@ class KdifferenceInexactMatch4SA: public KdifferenceInexactMatch234{
   public:
     KdifferenceInexactMatch4SA(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
     string name() const {return "K4dmin";};
-    inline long int LCE(int x, int y);
+    void LCE(int x, int y, int &aux);
 };
 
 class KdifferenceInexactMatch4RMQ: public KdifferenceInexactMatch234{
   public:
     KdifferenceInexactMatch4RMQ(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
     string name() const {return "K4rmq";};
-    inline long int LCE(int x, int y);
+    void LCE(int x, int y, int &aux);
 };
 
 class KdifferencePrime4: public KdifferencePrime{
@@ -52,7 +52,7 @@ class KdifferencePrime4: public KdifferencePrime{
       }
 
       void instanciar(){
-        if(versao == 1) //arrays de sufixo e lcp com directMin
+        if(versao == 2) //arrays de sufixo e lcp com directMin
           c = new KdifferenceInexactMatch4SA(alpha, beta, &k);
         else //sa e lcp com RMQ em tempo O(1)
           c = new KdifferenceInexactMatch4RMQ(alpha, beta, &k);
@@ -60,12 +60,12 @@ class KdifferencePrime4: public KdifferencePrime{
 
 } prime;
 
-long int KdifferenceInexactMatch4SA::LCE(int x, int y){
-    return prime.sa->LCEdirectMin(x, y);
+void KdifferenceInexactMatch4SA::LCE(int x, int y, int &aux){
+    aux += prime.sa->LCEdirectMin(x, y);
 };
 
-long int KdifferenceInexactMatch4RMQ::LCE(int x, int y){
-    return prime.sa->LCEviaRMQ(x, y);
+void KdifferenceInexactMatch4RMQ::LCE(int x, int y, int &aux){
+    aux += prime.sa->LCEviaRMQ(x, y);
 };
 
 int main(int argc, char** argv) {
@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
-   prime.processar();
+   prime.processar(p->Jselecionado, p->Jdistancia);
    time(&fim);
    if(prime.tempo) formataTempo(fim, false);
 

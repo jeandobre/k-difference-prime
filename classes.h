@@ -212,20 +212,7 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
   private:
     int *L;   //Matriz L[-(k+1)..d]
 
-  private:
-      int dToMatriz(int d){
-      return d + k + 1; //converte índice d para índices reais
-    }
-
   public:
-    void setL(int d, int valor){
-      L[dToMatriz(d)] = valor; //L[d,e] = valor
-    }
-
-    int getL(int d){
-      return L[dToMatriz(d)]; // L[d,e]
-    }
-
     int getDimensaoD(){
       return k + n + 3; //k, n+1, 1 da posição 0
     }
@@ -248,36 +235,36 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
 
     int executar(int m){
        this->m = m;
-       int d,e, row;
+       int dn, d, e, row;
 
        //inicialização da matriz
-       for(d = -(k+1); d <= (n+1); d++)
-           setL(d, -1);
+       for(d = 0; d < (n + k + 3); d++) //percorre toda matriz, da posição -(k+1) até n+1, totalizando (n+k+3) posições
+           L[d] = -1;
 
        int long long pivo; //variável auxiliar para troca de posições
        bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
-       int linha = -1;     //variável que guarda sempre o maior valor da coluna e
+       int linha;     //variável que guarda sempre o maior valor da coluna e
        for(e = 0; e < k && passou; e++){
-           pivo = linha = -1;  //a cada nova coluna a variável linha é reiniciada
-           for(d = -e; d <= n && passou; d++){
-              maiorDeTres(getL(d-1), getL(d) + 1, getL(d+1) + 1, row);
-              row = menorDeDois(row, m);
-              if(row + d < n)
-                row += LCE(primerJ + row, primerM + 1 + row + d); //LCE
+        pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
+        for(d = k - e; d <= (n + k + 1) && passou; d++){
+           dn = (d-k);   //dn representa a diagonal e d a posição no vetor
+           maiorDeTres(L[d-1], L[d] + 1, L[d+1] + 1, row);
+           menorDeDois(row, m, row);
+           if(row + d < n) LCE(primerJ + row, primerM + 1 + row + d, row); //LCE
               //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
-              if(row == m){passou = false; continue;}
-              setL(d-1, pivo); //atualiza a coluna e guardando o pivo no espaço anterior
-              if (row > linha) linha = row;
-              pivo = row;
-           }
-           setL(n, row);
+           if(row == m){passou = false; continue;}
+           L[d-1] = pivo;
+           if(row > linha) linha = row;
+           pivo = row;
+        }
+        L[d] = row;
        }
        return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
    }
    void imprimirMatrizTela();
 
-   virtual long int LCE(int x, int y){
-      return 0;
+   virtual void LCE(int x, int y, int &aux){
+     aux = 0;
    }
 };
 
@@ -803,8 +790,8 @@ void KdifferenceInexactMatch234::imprimirMatrizTela(){
     cout<<setw(2)<<d<<" ";
    }
    cout<<KMAG<<"\nk-1:"<<RST;
-   for(int d = -(k+1); d <= (n+1); d++){
-     vr = getL(d);
+   for(int d = 0; d < (n+k+3); d++){
+     vr = L[d];
      cout<<setw(2)<<vr<<" ";
    }
    cout<<endl;

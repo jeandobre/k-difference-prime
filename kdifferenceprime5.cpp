@@ -38,7 +38,7 @@ class KdifferenceInexactMatch5ST: public KdifferenceInexactMatch234{
   public:
     KdifferenceInexactMatch5ST(char *a, char *t, int *k): KdifferenceInexactMatch234(a,t,k){};
     string name() const {return "K5st";}
-    inline long int LCE(int x, int y);
+    void LCE(int x, int y, int &aux);
 };
 
 
@@ -59,8 +59,8 @@ class KdifferencePrime5: public KdifferencePrime{
       };
 } prime;
 
-long int KdifferenceInexactMatch5ST::LCE(int x, int y){
-   return lookup(prime.lce_ctx, x, y);
+void KdifferenceInexactMatch5ST::LCE(int x, int y, int &aux){
+   aux += lookup(prime.lce_ctx, x, y);
 };
 
 int main(int argc, char** argv) {
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
 
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
-   prime.processar();
+   prime.processar(p->Jselecionado, p->Jdistancia);
    time(&fim);
    if(prime.tempo) formataTempo(fim, false);
 

@@ -241,7 +241,6 @@ int KdifferenceInexactMatch2Optimizado::executar(int m){
     int linha;     //variável que guarda sempre o maior valor da coluna e
     for(e = 0; e < k && passou; e++){
         pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
-        pivo = -1;
         for(d = k - e; d <= (n + k + 1) && passou; d++){
            dn = (d-k);   //dn representa a diagonal e d a posição no vetor
            //L[d-1] = row; //atualiza a coluna e guardando o pivo no espaço anterior
