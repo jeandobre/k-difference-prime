@@ -238,7 +238,7 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
        int dn, d, e, row;
 
        //inicialização da matriz
-       for(d = 0; d < (n + k + 3); d++) //percorre toda matriz, da posição -(k+1) até n+1, totalizando (n+k+3) posições
+       for(d = 0; d < getDimensaoD(); d++) //percorre toda matriz, da posição -(k+1) até n+1, totalizando (n+k+3) posições
            L[d] = -1;
 
        int long long pivo; //variável auxiliar para troca de posições
@@ -250,9 +250,9 @@ class KdifferenceInexactMatch234: public KdifferenceInexactMatch{
            dn = (d-k);   //dn representa a diagonal e d a posição no vetor
            maiorDeTres(L[d-1], L[d] + 1, L[d+1] + 1, row);
            menorDeDois(row, m, row);
-           if(row + d < n) LCE(primerJ + row, primerM + 1 + row + d, row); //LCE
+           if(row + dn < n) LCE(primerJ + row, primerM + 1 + row + dn, row); //LCE
               //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
-           if(row == m){passou = false; continue;}
+           passou = !(row == m);
            L[d-1] = pivo;
            if(row > linha) linha = row;
            pivo = row;
@@ -680,13 +680,19 @@ void KdifferencePrime::setaParametros(Parametro *p){
 
     m = p->alpha.size();
     n = p->beta.size();
+
+   // alpha[m-1] = '#';
+    //beta[n-1] = '$';
+
     ocorrencia = p->alpha;
     try{
      // int maxOcr = abs(m-k+1); //calcula o total de ocorrências de primer possíveis
      // if(p->Jsetado) maxOcr = p->Jdistancia+1;
       int maxOcr = m;
       ocr = new int[maxOcr];   //aloca o máximo espaço para todas as possíveis ocorrências de primer
-      memset(ocr, -1, maxOcr); //seta todas as posições com valores -1 (não ocorrência)
+      //memset(ocr, -1, maxOcr); //seta todas as posições com valores -1 (não ocorrência)
+      for(int v = 0; v < maxOcr; v++)
+         ocr[v] = -1;
     } catch(bad_alloc& ba){
       cout<<"Erro ao alocar memória de ocorrências: " << ba.what()<<endl;
     }
@@ -733,7 +739,7 @@ void KdifferencePrime::processar(int beginJ, int endJ){
 
          print++; //contador de matriz impressas na tela, apenas as primeiras 10 devem ser mostradas
        }
-       if(ocr[j] == -1) break; //pode parar pois não vai mais haver ocorrências
+       if(ocr[j] == -1) j = endJ+1; //pode parar pois não vai mais haver ocorrências
    }
 }
 

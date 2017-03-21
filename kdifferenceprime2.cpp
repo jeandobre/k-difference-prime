@@ -83,18 +83,22 @@ class KdifferenceInexactMatch2Optimizado: public KdifferenceInexactMatch{
  protected:
     int *L;   //Matriz L[-(k+1)..n+1]
 
-private:
+ private:
      int getDimensaoD(){
       return k + n + 3; //k, n+1, 1 da posição 0
     }
-public:
-    KdifferenceInexactMatch2Optimizado(char *a, char *t, int *k): KdifferenceInexactMatch(a,t,k){
-      try{
-         this->L = new int[getDimensaoD()];
+    inline int getPos(int val){ //retorna o valor correto da diagonal no vetor
+      return val + k + 1;
+     }
 
-       }catch(bad_alloc& ba){
-          cout<<"Erro ao alocar matriz L: " << ba.what()<<endl;
-       }
+ public:
+    KdifferenceInexactMatch2Optimizado(char *a, char *t, int *k): KdifferenceInexactMatch(a,t,k){
+       try{
+          this->L = new int[getDimensaoD()];
+
+          }catch(bad_alloc& ba){
+                cout<<"Erro ao alocar matriz L: " << ba.what()<<endl;
+          }
     };
     ~KdifferenceInexactMatch2Optimizado(){
        delete [] L;
@@ -230,36 +234,35 @@ void KdifferenceInexactMatch2Optimizado::imprimirMatrizTela(){
 //pois nesta versão é utilizado um array no lugar da matriz Lde
 int KdifferenceInexactMatch2Optimizado::executar(int m){
     this->m = m;
-    int d,e, dn, row;
+    int d,e, row;
 
     //inicialização da matriz
-    for(d = 0; d < (n + k + 3); d++) //percorre toda matriz, da posição -(k+1) até n+1, totalizando (n+k+3) posições
-        L[d] = -1;
+    for(d = -(k+1); d <= n+1; d++) //percorre toda matriz, da posição -(k+1) até n+1, totalizando (n+k+3) posições
+        L[getPos(d)] = -1;
 
     int long long pivo; //variável auxiliar para troca de posições
     bool passou = true; //flag para controlar o caso de alcançar o fim de m antes de k diferenças
     int linha;     //variável que guarda sempre o maior valor da coluna e
     for(e = 0; e < k && passou; e++){
         pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
-        for(d = k - e; d <= (n + k + 1) && passou; d++){
-           dn = (d-k);   //dn representa a diagonal e d a posição no vetor
-           //L[d-1] = row; //atualiza a coluna e guardando o pivo no espaço anterior
+        for(d = -(e); d <= n && passou; d++){
 
-           maiorDeTres(L[d-1],
-                       L[d] + 1,
-                       L[d+1] + 1, row);
+           maiorDeTres(L[getPos(d-1)],
+                       L[getPos(d)] + 1,
+                       L[getPos(d+1)] + 1, row);
+
 
            menorDeDois(row, m, row);
 
-           while(a[prime.j + row] == t[row+dn] && row < m && row+dn < n) row++; //LCE
-
+           //while(a[prime.j + row] == t[row+d] && row < m && row+d < n) row++; //LCE
+           while(a[prime.j + row] == t[row+d]) row++; //apenas um teste, parece que funciona assim mesmo
            //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
-           if(row == m){passou = false; continue;}
-           L[d-1] = pivo;
+           passou = !(row == m); //{passou = false; continue;}
+           L[getPos(d-1)] = pivo;
            if(row > linha) linha = row;
            pivo = row;
         }
-        L[d] = row;
+        L[getPos(d)] = row;
     }
 
     return (passou ? ++linha : -1); //retorna a linha de ocorrência de primer ou -1 que indica não ocorrência
@@ -271,6 +274,7 @@ int main(int argc, char** argv) {
    if(p == NULL) return 0;
 
    prime.setaParametros(p);
+
 
    //se o usuário escolheu o J, devemos fazer algumas checagens:
    //1 - o j é valido (entre 0 e m)
