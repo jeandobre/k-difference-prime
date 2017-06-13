@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 	   return 0;
    }
 
-   if(p->tipoSaida < 1 || p->tipoSaida > 4){
+   if(p->tipoSaida < 1 || p->tipoSaida > 5){
      cout<<"\n"<<FRED(ERR_TSAIDA)<<"\n";
      return 0;
    }

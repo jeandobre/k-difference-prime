@@ -18,14 +18,14 @@
 #define ERR_ARGS "\nErro: Argumentos errados!"
 #define ERR_KMAIOR "Erro: O parametro k deve estar em um intervalo entre 1 e "
 #define ERR_SAVEFILE "Erro: Não foi possivel criar o arquivo de saida!"
-#define ERR_TSAIDA "Erro: Tipo de saida incorreto! (1=simples, 2=completo, 3=XML e 4=JSON)"
+#define ERR_TSAIDA "Erro: Tipo de saida incorreto! (1=simples, 2=completo, 3=XML, 4=JSON e 5=resumido)"
 #define ERR_J "Erro: O intervalo de valores do indice j deve estar entre 0 e o tamanho de alfa!"
 #define ERR_DISTANCIA "Erro: A distancia de valores do indice j deve estar entre 1 e o tamanho de alfa!"
 
 #define MSG_0_OCCR "\nNao foi encontrado nenhuma ocorrencia com pelo menos "
 #define MSG_N_OCCR "\nOcr "
 #define MSG_MATRIZ "Mostrando a matriz de programacao dinamica das 10 primerias ocorrencias de primer"
-#define USO "\nUso correto:\n -a -alpha -pattern -padrao -p -P \t(String)\n -b -beta -text -texto -t -T \t\t(String)\n -k -K \t\t\t\t\t(int) maior que 0 e menor que o tamanho de alfa\n [-sm] \t\tmostrar a matriz de programacao dinamica \t(Opcional, default=nao mostrar)\n [-vs%] \tversao do algoritmo (1,2 ou 3) \t\t(Opcional, default=1)\n [-st] \t\tmostrar o tempo de execucao e consumo de memoria \t(Opcional, default=nao mostrar)\n [-ts%] \tforma de saida do resultado (1=simples, 2=completo, 3=XML, 4=JSON) \t(Opcional, default=1)\n [-sf] \t\tlocal e nome do arquivo gerado como saida \t\t(Opcional, default=aM_bN_k_nomearquivo)\n [-log] \tmostrar log do status atual de processamento \n\n"
+#define USO "\nUso correto:\n -a -alpha -pattern -padrao -p -P \t(String)\n -b -beta -text -texto -t -T \t\t(String)\n -k -K \t\t\t\t\t(int) maior que 0 e menor que o tamanho de alfa\n [-sm] \t\tmostrar a matriz de programacao dinamica \t(Opcional, default=nao mostrar)\n [-vs%] \tversao do algoritmo (1,2 ou 3) \t\t(Opcional, default=1)\n [-st] \t\tmostrar o tempo de execucao e consumo de memoria \t(Opcional, default=nao mostrar)\n [-ts%] \tforma de saida do resultado (1=simples, 2=completo, 3=XML, 4=JSON e 5=resumido) \t(Opcional, default=5)\n [-sf] \t\tlocal e nome do arquivo gerado como saida \t\t(Opcional, default=aM_bN_k_nomearquivo)\n [-log] \tmostrar log do status atual de processamento \n\n"
 
 #define MSG_VERSAO_INCORRETA "\nVersao incorreta de implementacao do algoritmo\n"
 #define MSG_VERSAO_K1_VS1 "\t-vs1 (default) versao que utiliza apenas uma linha para computar a matriz D.\n"
@@ -132,7 +132,7 @@ public:
      total = 0;
      escolheuVersao = false;
      argumentoErrado = false;
-     tipoSaida = 1; //saída simples (default)
+     tipoSaida = 5; //saída resumida (default)
      mostrarLog=false;
      Jselecionado = -1; //setado para nao ser utilizado
      Jdistancia = -1;
@@ -159,6 +159,7 @@ public:
    void escreverTela() const;
    string escreverArquivoCompleto();
    string escreverArquivoReduzido();
+   string escreverArquivoSimples();
    string escreverArquivoJSON();
    string escreverArquivoXML();
 };
@@ -372,9 +373,9 @@ Parametro *parseParametros(int argc, char** argv){
         if(z + 1 < argc){
            try{
               p->tipoSaida = atoi(argv[z + 1]);
-             //1 = simples, 2 = completo, 3 = XML e 4 = JSON
+             //1 = simples, 2 = completo, 3 = XML, 4 = JSON e 5 = resumido
            }catch(int e){
-              p->tipoSaida = 1;
+              p->tipoSaida = 5;
            }
         } else{
           p->argumentoErrado = true;
@@ -466,7 +467,7 @@ Parametro *parseParametros(int argc, char** argv){
 	   return NULL;
    }
 
-   if(p->tipoSaida < 1 || p->tipoSaida > 4){
+   if(p->tipoSaida < 1 || p->tipoSaida > 5){
      cout<<"\n"<<FRED(ERR_TSAIDA)<<"\n";
      return NULL;
    }
@@ -510,9 +511,9 @@ void formataTempo(time_t hora, bool inicio){
 }
 
 void formataSegundos(double segundos){
-  long int valor = (int) segundos;
-  int sec = 0, minu = 0, dia = 0, hor = 0;
-  double _tempo = valor;
+  long long int valor = (int) segundos;
+  int mili = 0, sec = 0, minu = 0, dia = 0, hor = 0;
+  //double _tempo = valor;
 
   if(valor > 60){//minutos
    sec = valor % 60;
@@ -540,10 +541,10 @@ void formataSegundos(double segundos){
   if(valor > 0) dia = valor;
 
   string tempo = "";
-  if(dia > 0)  tempo += to_string(dia)  + " dia(s) ";
-  if(hor > 0)  tempo += to_string(hor) + " hora(s) ";
+  if(dia  > 0) tempo += to_string(dia)  + " dia(s) ";
+  if(hor  > 0) tempo += to_string(hor)  + " hora(s) ";
   if(minu > 0) tempo += to_string(minu) + " minuto(s) ";
-  if(sec > 0)  tempo += to_string(sec)  + " segundo(s) ";
+  if(sec  > 0) tempo += to_string(sec)  + " segundo(s) ";
 
   if(minu > 0){
      tempo += "(" + to_string(segundos) + " segundos )";
@@ -620,47 +621,40 @@ void KdifferencePrime::mostrarOcorrencias(Parametro *par){
          <<",k: "<<to_string(k)
          <<" ("<<c->name()<<")\n";
   }else{
-     cout<<KYEL<<"Encontrado "<<RST<<primers.size()<<KYEL<<" ocorrencia(s) de primers!"<<RST;
+     cout<<KYEL<<"Encontrado "<<RST<<primers.size()<<KYEL<<" ocorrencia(s)!"<<RST;
 
-     if(primers.size() > 10 || !par->saida.empty()){
-       cout<<"\nOcorrencias gravadas em ";
-       string fileName;
-       if(par->saida.empty())
-          fileName = "saida/a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k) + "_" + c->name();
-       else
-          fileName = par->saida;
+     cout<<"\nOcorrencias gravadas em ";
+     string fileName;
+     
+     if(par->saida.empty()){
+	  fileName = "saida/a" + to_string(m) + "_b" + to_string(n) + "_k" + to_string(k) + "_" + c->name();
+          if(par->Jsetado){
+             fileName = fileName + "_j" + to_string(par->Jselecionado) + "_" + to_string(par->Jdistancia);   
+          }
+     } else
+	  fileName = par->saida;
 
-       try{
-         fstream out;
+     try{
+	 fstream out;
 
-         out.open(fileName, ios::out | ios::trunc);
-         if(par->tipoSaida == 1)       out<<"j|tamanho|sequencia\n";
-         else if(par->tipoSaida == 2)  out<<"ocorrencia|j|tamanho|sequencia|j+r\n";
+	 out.open(fileName, ios::out | ios::trunc);
+	 if(par->tipoSaida == 1)       out<<"j|tamanho|sequencia\n";
+	 else if(par->tipoSaida == 2)  out<<"ocorrencia|j|tamanho|sequencia|j+r\n";
+         else if(par->tipoSaida == 5)  out<<"j|tamanho\n";
 
-         for(Primer *p : primers){
-             if(par->tipoSaida == 1)      out<<p->escreverArquivoReduzido();
-             else if(par->tipoSaida == 2) out<<p->escreverArquivoCompleto();
-             else if(par->tipoSaida == 3) out<<p->escreverArquivoXML();
-             else if(par->tipoSaida == 4) out<<p->escreverArquivoJSON();
-         }
-         out.close();
+	 for(Primer *p : primers){
+	     if(par->tipoSaida == 1)      out<<p->escreverArquivoReduzido();
+	     else if(par->tipoSaida == 2) out<<p->escreverArquivoCompleto();
+	     else if(par->tipoSaida == 3) out<<p->escreverArquivoXML();
+	     else if(par->tipoSaida == 4) out<<p->escreverArquivoJSON();
+             else if(par->tipoSaida == 5) out<<p->escreverArquivoSimples();
+	 }
+	 out.close();
 
-       } catch(std::ifstream::failure e){
-         cout<<FRED(ERR_SAVEFILE);
-       }
-       cout<<fileName<<endl;
-     }else{
-         primers.sort(comparar);
-         if(par->tipoSaida == 1)       cout<<"\nj|tamanho|sequencia\n";
-         else if(par->tipoSaida == 2)  cout<<"\nocorrencia|j|tamanho|sequencia|j+r\n";
-         for(Primer *p : primers){
-             if(par->tipoSaida == 1)      cout<<p->escreverArquivoReduzido();
-             else if(par->tipoSaida == 2) cout<<p->escreverArquivoCompleto();
-             else if(par->tipoSaida == 3) cout<<p->escreverArquivoXML();
-             else if(par->tipoSaida == 4) cout<<p->escreverArquivoJSON();
-         }
-         cout<<endl;
+     } catch(std::ifstream::failure e){
+	 cout<<FRED(ERR_SAVEFILE);
      }
+     cout<<fileName<<endl;
   }
 }
 
@@ -772,6 +766,15 @@ string Primer::escreverArquivoReduzido(){
     retorno->append(to_string(r));
     retorno->append(";");
     retorno->append(sequencia);
+    retorno->append("\n");
+    return *retorno;
+}
+
+string Primer::escreverArquivoSimples(){
+    //j;tamanho
+    string *retorno = new string(to_string(j));
+    retorno->append(";");
+    retorno->append(to_string(r));
     retorno->append("\n");
     return *retorno;
 }

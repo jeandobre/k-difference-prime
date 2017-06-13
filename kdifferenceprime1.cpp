@@ -27,6 +27,7 @@
 #include <list>
 #include "classes.h"
 #include <stdexcept>
+//#include <sys\time.h>
 
 
 //O algoritmo foi adaptado para entregar o resultado do primer que é o inverso da programação original
@@ -317,7 +318,7 @@ int main(int argc, char** argv) {
 
    cout<<"K-difference-primer-1 processando...\n";
    cout<<"Versao do algoritmo: ";
-   !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
+   !(p->escolheuVersao) ? cout<<FCYN("default") : cout<<prime.versao;
    if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
    if(p->mostrarLog) cout<<KYEL<<"\nLog de infomacoes ativado.\n"<<RST;
    if(p->Jsetado) {
@@ -330,19 +331,21 @@ int main(int argc, char** argv) {
    cout<<endl;
 
    time_t inicio, fim;
-
    time(&inicio);
    if(prime.tempo) formataTempo(inicio, true);
+   
    prime.processar(p->Jselecionado, p->Jdistancia);
 
-   time(&fim);
+   time(&fim);   
    if(prime.tempo) formataTempo(fim, false);
 
    if(!prime.mostrarMatriz) prime.mostrarOcorrencias(p);
 
    if(prime.tempo){
+    
      double seconds = difftime(fim, inicio);
      formataSegundos(seconds);
+     
      mostrarMemoria();
    }
 

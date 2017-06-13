@@ -245,6 +245,8 @@ int KdifferenceInexactMatch2Optimizado::executar(int m){
     int linha;     //variável que guarda sempre o maior valor da coluna e
     for(e = 0; e < k && passou; e++){
         pivo = linha = -1; //a cada nova coluna a variável linha é reiniciada
+        L[getPos(-e-1)] = e;
+        L[getPos(-e-2)] = e;
         for(d = -(e); d <= n && passou; d++){
 
            maiorDeTres(L[getPos(d-1)],
@@ -254,8 +256,8 @@ int KdifferenceInexactMatch2Optimizado::executar(int m){
 
            menorDeDois(row, m, row);
 
-           //while(a[prime.j + row] == t[row+d] && row < m && row+d < n) row++; //LCE
-           while(a[prime.j + row] == t[row+d]) row++; //apenas um teste, parece que funciona assim mesmo
+           while(a[prime.j + row] == t[row+d] && row < m && row+d < n) row++; //LCE
+           //while(a[prime.j + row] == t[row+d]) row++; //apenas um teste, parece que funciona assim mesmo
            //se já alcancou 'm' e o erro é menor que 'k' pode parar e ir para o próximo 'j'
            passou = !(row == m); //{passou = false; continue;}
            L[getPos(d-1)] = pivo;
@@ -297,15 +299,23 @@ int main(int argc, char** argv) {
 
    cout<<"K-difference-primer-2 processando...\n";
    cout<<"Versao do algoritmo: ";
-   !(p->escolheuVersao) ? cout<<FCYN("delfaut") : cout<<prime.versao;
+   !(p->escolheuVersao) ? cout<<FCYN("default") : cout<<prime.versao;
    if(prime.mostrarMatriz) cout<<"\n"<<FMAG(MSG_MATRIZ);
    if(p->mostrarLog) cout<<KYEL<<"\nLog de infomacoes ativado.\n"<<RST;
+   if(p->Jsetado) {
+      if(p->Jdistancia > 1){
+       cout<<KCYN<<"\nProcessando os indices "<<RST<<p->Jselecionado;
+       cout<<KCYN<<" ate "<<RST<<(p->Jdistancia + p->Jselecionado) -1;
+      } else cout<<KCYN<<"\nProcessando o indice "<<RST<<p->Jselecionado;
+      cout<<KCYN<<" de alfa.\n"<<RST;
+   }
    cout<<endl;
 
    time_t inicio, fim;
 
-   time(&inicio);
+   time(&inicio);   
    if(prime.tempo) formataTempo(inicio, true);
+
    prime.processar(p->Jselecionado, p->Jdistancia);
 
    time(&fim);
@@ -314,8 +324,10 @@ int main(int argc, char** argv) {
    if(!prime.mostrarMatriz) prime.mostrarOcorrencias(p);
 
    if(prime.tempo){
+
      double seconds = difftime(fim, inicio);
      formataSegundos(seconds);
+     
      mostrarMemoria();
    }
 
